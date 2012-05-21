@@ -1,0 +1,5 @@
+nurikabe: generation of puzzles
+
+for the solver: yes, recursive descent is the way to go, however, this particular puzzle that I posted doesn’t require any recursive (backtracking) calls, it can be solved by iterative methods (repeatedly applying a set of solving methods). In fact, all my puzzles can be solved iteratively, otherwise, if you use backtracking, that is considered guessing. Therefore, you need to work on your solving strategies and implement and apply more of them.
+
+For generation of Nurikabe puzzles, first of all you need a (very) fast iterative solver. Then, generate a random but valid maximum Nurikabe “maze”. By “maximum” I mean that you can’t add any more black cells. Mark the existing white cells with numbers randomly (there will almost always be only 1s and 2s for a “maximum” maze). Check if those numbers constitute a valid puzzle (they will almost always do). And finally, repeatedly remove one random black cell at a time, thus increasing one of the white “islands” (or joining two of them). Randomly place the number for this white island until you get a valid puzzle. If you can’t get a valid puzzle, replace the black cell and keep going.

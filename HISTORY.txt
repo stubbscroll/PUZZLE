@@ -1,0 +1,28 @@
+v0.0 - 2011-07-18
+
+- first release (not announced), contains 5 puzzles (nurikabe, akari, heyawake,
+  hitori and picross).
+
+TODO next version
+
+- added more games: hashiwokakero, masyu and slitherlink.
+- quick fix so that the graphics work under gnu/linux. bytes per pixel was
+  changed from 1 to 4, and this is the only mode supported.
+- fixed black screen when resizing windows in verify mode.
+
+the program will only reach v1.0 when the following is in place
+
+- menu system with puzzle selector and score tracking.
+- automatic scanning of puzzles (on first time run), user-triggable scan for
+  new puzzles
+- every feature should run on windows and gnu/linux, and hopefully on mac
+  (which i cannot test)
+
+further version numbers will be the harmonic numbers H_2, H_3 etc. the number
+of digits after the decimal point will be the least possible such that only
+one harmonic number exists in the interval [v-0.5*d, v+0.5*d] where v is the
+version number and d is the number of digits after the decimal point in the
+version number. in addition, the version should be correctly rounded to the
+required number of digits after the decimal point. for instance v1 is illegal
+as both and 1.5 fits in [0.5, 1.5]. The first few legal version numbers are
+v1.0, v1.5, v1.8 and v2.1.

@@ -1,0 +1,1 @@
+gcc -O3 -mtune=pentium4 -Wall -ansi -pedantic -o puzzle.exe puzzle.c graphic.c nurikabe.c akari.c heyawake.c hitori.c picross.c slither.c masyu.c hashi.c yajilin.c sdlfont.c -lmingw32 -lsdlmain -lsdl -Wl,--subsystem,windows

@@ -1,0 +1,45 @@
+list of files:
+
+SOURCE CODE
+
+puzzle.c         main program
+puzzle.h         header file for entire project
+graphic.c        common routines for all puzzles (mostly graphics)
+sdlfont.c        my own simple font library
+sdlfont.h        header file for my font library
+akari.c	         code for akari puzzle
+heyawake.c
+hitori.c
+nurikabe.c
+picross.c
+slither.c
+
+grab.c           program which fetches puzzles from websites
+
+make.bat         build the program under windows with mingw
+makeg.bat        build the puzzle grabber under windows with mingw
+Makefile         build the program under *n?x
+
+DATA FILES
+
+font.bmp         font file used by the program
+puzzles\aka*.txt 
+puzzles\hey*.txt 
+puzzles\hit*.txt 
+puzzles\nur*.txt puzzle definition files for nurikabe
+puzzles\pic*.txt 
+puzzles\sli*.txt 
+
+TEXT FILES
+
+BUGS.txt         list of currently known bugs
+CHANGES.txt      list of changes between different versions
+COPYING.txt      license
+FILES.txt        this file
+format.txt       description of puzzle file format
+HEUR.txt         list of solving strategies (heuristics) used by the program
+PUZZLE.txt       list of all puzzles
+README.txt       the readme file
+STATUS.txt       status of the automatic solver
+TODO PUZZLE.txt  list of puzzles to be incorporated
+TODO.txt         list of things to do

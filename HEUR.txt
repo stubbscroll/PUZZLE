@@ -1,0 +1,371 @@
+list of heuristics used
+-: implemented
+*: not implemented (yet)
+
+KEY
+
+level 1: trivial, immediate: can spot this by looking at one
+         cell and its immediate neighbourhood
+level 2: easy, almost immediate: can spot this with doing a
+         minimum of search through slightly more distant
+         cells.
+level 3: intermediate: need to consider a larger area,
+         possibly the entire board. heuristics with runtime
+         Theta(n^4) will NOT go here.
+level 4: more powerful search needed, might need to search
+         through the entire board multiple times, runtime
+         can be exponential.
+level 5: advanced stuff. runtime: 2^(runtime from level 4)
+
+NURIKABE (NP-complete)
+
+level 1 (trivial, immediate)
+
+- surround cells containing 1 with walls.
+- for 2x2 blocks containing 3 walls, set the 4th to be island.
+- if a cell is adjacent to two numbers, it must be wall.
+- if an unfilled cell is surrounded by wall, it must be wall.
+- if there is an island of the same size as its number, all
+  unfilled neighbouring cells must be wall.
+* if an unfilled cell is surrounded by island, it must be
+  island (not needed so far).
+
+level 2 (easy, almost immediate)
+
+- if a cell is adjacent to two different islands (they both
+  contain a number), it must be wall.
+- if a wall region can only grow to one cell and not all walls
+  have been placed, the one cell must be wall.
+- if an island can only grow to one cell (and it's not done),
+  then the cell must be island.
+- if there is an enclosure containing a number and the
+  enclosure is of the same size, all enclosed cells must be
+  island.
+
+level 3
+
+- if an island is one less than its size and one cell is
+  adjacent to all cells the island can grow to, that one
+  cell must be wall.
+- if a cell on the board cannot be reached by any island,
+  it must be wall.
+- if there is a cell where an island must pass in order to
+  grow enough, it must be island ("island articulation point").
+- if there is an island which, when grown maximally, reaches
+  exactly its size, then let it do so.
+- if there is an enclosed area with two several blank cells,
+  and exactly one must be blocked: if there is a blank cell
+  such that making it black connects the existing blocked at least
+  as strong as the other moves, then that cell must be blocked.
+  also, for each blank in the enclosed area, every 2x2 area around it
+  cannot have blanks outside the enclosing, as placing blocked in these
+  squares will interfere with the connections. please note that it is
+  impossible to have a tie here, as that indicates non-unique solutions.
+  however, a tie can occur in level 5 because of a bad move, do don't
+  cast a fatal error. NB, i'm not convinced of the correctness. currently
+  i get no illegal states using this heuristic on my test suite.
+
+level 4
+
+- if there is a cell where a wall must pass in order to
+  connect all walls, it must be wall ("wall articulation
+  point").
+- if an island can grow into a cell and cause another island
+  to not be able to grow sufficiently, that cell must be wall.
+- if there is a cell where a wall on it would cause another
+  island to not be able to grow sufficiently, that cell must
+  be island.
+- find an enclosing with one numbered cell such that there
+  cells adjacent to the border, and all cells next to the
+  border are unfilled. also, if the numbered cell was a wall,
+  it must not split the enclosing into multiple regions.
+  find the boundary between unfilled/empty and walls.
+  generate two sets: all id's of walls adjacent to the left
+  boundary, and all id's of walls adjacent to the right
+  boundary. if the intersection of the two id sets is empty,
+  then all the border cells should be wall!
+- match unnumbered islands! first off, give each number its
+  unique id. from each island, do a bfs (which is allowed
+  to pass through unnumbered islands). each time an
+  unnumbered island is "hit", add the numbered island id
+  to the unnumbered island's personal set of id's of
+  numbered islands able to reach it (the island can be
+  reached if size(numbered)+path+size(unnumbered)<=number.
+  then, if there is an unfilled cell such that it borders
+  to two islands with an empty intersection of island ids,
+  then the cell must be wall.
+  also, if it is legal to reach an unnumbered island in only
+  one way via one cell, that cell must be empty.
+* take intersection of all ways to put an island (including
+  surrounding walls). if it is possible to find two disjoint
+  growings of an island, then the intersection of island is
+  empty (the intersection of walls might still be nonempty).
+  the leaf of the backtracking should check if the final
+  shape (including walls) doesn't violate basic rules (2x2
+  wall, isolated enclosure with wall and unnumbered island,
+  neighbouring islands closed with wrong number)
+* if there is an unnumbered blank which can only be legally
+  connected to one numbered tile: try all ways of connecting
+  these and take the intersection. see above.
+* if there is an unnumbered blank which can only be legally
+  connected to one numbered tile: set the island id for this
+  blank, and run the other island growth heuristic.
+* for a group of (connected?) cells of size n>=2: assume in
+  turn all 2^n combinations. do a non-deep check for illegal
+  scenarios: 2x2 walls, disconnected walls, enclosed islands
+  with wrong size, 0 or 2 numbers. if the subgroup of
+  noncontradicting fillings has a cell filled in the same
+  way across all fillings, then it must be filled in like
+  that.
+
+level 5
+
+- for a cell: assume that it is blank, then fill in greedily.
+  then, assume it's wall, fill in greedily. for each cell that
+  were filled in similarly for both, then the cell should be
+  filled in like this. in addition, if any of the assumptions
+  cause a contradiction, the cell must be filled in the other
+  way.
+- for an island, try all ways to grow the island. for each way, assume that it
+  is the correct way, then solve greedily. take the intersection of all legal
+  resulting states. if a cell is filled in the same way for all these, then the
+  cell must be filled in like that. NB, this heuristic is expected to be both
+  rather powerful and extremely slow.
+* each 2x2 cell must contain at least one blank. for a given 2x2 area
+  containing no blank, assume in turn that each square is blank, and
+  solve greedily. if all except one possibility leads to a contradiction, and
+  there exist cells that are filled in the same way for each reached legal
+  state, then that cell must be filled in like that. only run this heuristic
+  on 2x2 areas containing no blanks and at most 2 blocked.
+* if an unnumbered island can belong to n numbered islands:
+  for each of the n islands, assume that the unnumbered island
+  belongs to it, then solve greedily. if all but one leads
+  to contradiction, then the unnumbered island belongs to the
+  non-contradictory one. afterwards, run suitable unnumbered
+  connection heuristic.
+* for a group of (connected?) cells of size n>=2: assume in
+  turn all 2^n combinations of filling in these cells. if a
+  subset causes contradictions: check if the complementary
+  subset of noncontradictory fillings have one cell filled
+  in the same way. then, fill it in. also, if, for the non-
+  contradictory subset, some cell gets filled in the same
+  way for every combination, then it must be filled in like
+  that.
+* given an unnumbered island: identify all islands being
+  able to reach it. take intersection of all ways for all
+  islands to reach the island (might be too expensive).
+
+level ? (unformalized heuristics)
+
+* try to grow two or more islands simultaneously and take
+  intersection?
+* find a general area where only one island can grow in
+  order to prevent 2x2 wall. use this in conjunction with
+  intersection.
+* try all ways to connect two walls. if only one way is
+  legal, apply it.
+* advanced reasoning on walls: check if a blank prevents a
+  wall spanning tree (based on the number of allowed walls)
+* given an isolated unnumbered island: identify all islands
+  able to reach it. then check if there is an island such
+  that all the other islands (when connecting to the
+  isolated island) causes the island to not be able to grow
+  to its desired size. then, the isolated island belongs to
+  this island, and we can run intersection on the island
+  and the isolated island. (?)
+
+unsolved situations
+
+AKARI (NP-complete)
+
+level 1 (trivial, immediate)
+
+- if a wall already has its n lights, or it will have n lights
+  after lighting up all adjacent free cells, fill in all
+  free neighbours with empty and light, respectively.
+
+level 2 (easy, almost immediate)
+
+- if a light diagonally adjacent to a wall causes that wall
+  to not being able to fulfill its number of required adjacent
+  lights: that cell must be empty.
+- if there is an unlit empty cell and only one unfilled cell
+  which can reach it, that cell must be light.
+- if an unfilled cell can't see any other unfilled cells,
+  it must contain bulb.
+
+level 3 (intermediate)
+
+* if putting a bulb on a cell makes it impossible to light up
+  some cell on the board, that cell must be empty.
+  (level 5 contradiction also accomplishes this, only slower)
+* check if there exists two walls each having two possible light sites,
+  forcing all other cells in two lanes to be empty
+
+level 4
+
+level 5 (advanced)
+
+- for a cell: assume that it has bulb, then fill in greedily.
+  then, assume it's empty, fill in greedily. for each cell that
+  were filled in similarly for both, then the cell should be
+  filled in like this. in addition, if any of the assumptions
+  cause a contradiction, the cell must be filled in the other
+  way.
+
+HEYAWAKE (NP-complete)
+
+level 1 (trivial, immediate)
+
+- if a numbered region has enough walls, then the rest of the
+  cells must be empty.
+- if a numbered region has number of walls + unfilled equal to
+  its number, then the rest of the cells must be wall.
+- mark unfilled cells next to a wall as empty
+- identify combinations of rectangle shapes, numbers and whether
+  they are near a wall (n*m-i, n*m rectangle with number i)
+  - 2x2-2 in a corner
+  - 2x2-2 
+  - 3x2-3 with the 3 side at the edge
+  - 3x3-5
+  - 3x3-4, mark empty
+  - nx2-n (n>2), mark n-2 empty in neighbouring regions
+  - (n*2+1)x1
+
+level 2 (almost immediate)
+
+- if making a cell empty causes a strip of empty passing through
+  >=2 borders, then the cell must be wall.
+- if an empty cell is surrounded by three walls, the fourth must
+  be empty.
+
+level 3 (intermediate)
+
+- try all combinations of filling in a numbered region. only
+  check if for adjacent walls and surrounded 1x1 within the
+  region. across all non-rejected combinations, take the
+  intersection of these (ie, only fill in cells filled in
+  the same way for all combinations). only attempt this
+  heuristic if (regsize choose regnum) is below a certain
+  number.
+* check all pairs of regions to find:
+  * neighbouring 3x3-4 and 3x3-4: fill in as #  |  #
+                                              # | #
+                                             #  |  #
+
+level 4
+
+- if placing a wall in a cell causes two regions to be
+  disconnected, then the cell must be empty ("empty
+  articulation point")
+
+level 5
+
+* for a cell: assume that it is blocked, then fill in greedily.
+  then, assume it is blank, fill in greedily. for each cell that
+  were filled in similarly for both, then the cell should be
+  filled in like this. in addition, if any of the assumptions
+  cause a contradiction, then the cell must be filled in the
+  other way.
+* try all combinations of filling in a numbered region. reject
+  all combinations causing disconnection, strip crossing >=2
+  borders and adjacent walls. fill in the intersection of
+  all these combinations. NB, do not run this heuristic if
+  regsize choose regnum is larger than some constant.
+
+HITORI
+
+PICROSS (NP-complete)
+
+level 5
+
+* try all legal combinations of filling in a row or column,
+  then do greedy. then fill in the intersection of all these
+  combinations.
+
+SLITHERLINK (NP-complete)
+
+see http://en.wikipedia.org/wiki/Slitherlink for a bucketload
+of rules. make a general pattern searcher or something like
+that.
+
+level 1
+
+- around 0, mark all edges as empty
+- if a number has enough edges, the rest must be empty
+- if a number has edges + unfilled == number, the rest must be
+  edge
+- a dot with 3 empty must have empty as its fourth neighbour
+- a dot with two edges must have 2 empty
+- a dot with 1 edge and 2 empty must have another edge
+- 2 adjacent 3's: separate with edge, and x above/below middle
+  edge
+- 3 having one edge going into one of its 4 dots: fill in two
+  edges around the 3 not adjacent to the incoming one
+- 3 having one corner with 2 empty, the remaining around this
+  corner should be edge
+- diagonally adjacent 3's: "enclose" them
+- adjacent 3 and 1 near border: put edge between 3 and border
+- 2 in corner: two edges go away from 2 along border
+- 1 having a corner with two outer edges empty: the other edges
+  for this corner must be empty
+
+level 2
+* a diagonal 3 2 2 ... 2 3 must have the outside edges of 3
+  filled with edge
+- jordan curve theorem
+
+level 3
+
+level 4
+
+- if placing an edge makes an illegal loop, it must be empty
+
+level 5
+
+- for one edge: assume edge, and assume empty. fill in
+  greedily and do the usual stuff
+
+MASYU
+
+level 1
+level 2
+level 3
+level 4
+
+- if there is an enclosing with 4 loose ends, two occurrences of two
+  adjacent cells AB and CD, where both are adjacent to two spaces
+  and there are no dots in the enclosing: then the connection should
+  be AC BD or AD BC.
+
+level 5
+
+HASHIWOKAKERO (np-complete)
+
+level 1
+
+- if there is only one way to fill in the remaining edges near a node, do it.
+- if a node has n available edges and its number is 2n-1 or higher, it must
+  have at least one edge in each direction.
+
+level 2
+
+- if a 2 has only two ways and one of the ways is towards 1 or 2, then the
+  other way must have an edge.
+- if a 1 has only one way to a non-1, then there must be an edge towards it.
+- if not putting an edge makes it impossible to fulfill the node, then the edge
+  must be there.
+
+level 3
+
+- if a node has one edge left, and each move except one causes an illegal
+  position (more specifically: disconnected subgraphs) then do the only legal
+  move
+* try all ways of distributing edges. apply the intersection (minimum) of all
+  legal ways.
+
+level 5
+
+- try all ways of distributing edges around a node, then solve greedily. then
+  take the min of all ways to put edges and apply it.
+

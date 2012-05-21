@@ -1,0 +1,130 @@
+STUFF TO BE ADDED, IN DECREASING ORDER OF MOST DESIRED
+
+- BUGFIX in messagebox, add callback to a redraw routine
+- scoring
+- menu system with score tracking and puzzle selector
+- add yajilin
+
+COMPLETE LIST OF STUFF TO BE ADDED
+
+- general:
+  - make a menu system for selecting puzzles. it should cache, and only
+    reload upon the user issuing a refresh command. in addition, add score 
+    tracking. in the menu, display whether the puzzle is solved, along with
+    the best time and lowest amount of mouse clicks. the puzzle cache and the
+    scores should be stored in a text file. file format: one puzzle per line.
+    filename, puzzle name, author, difficulty (int), size, best time, best
+    score (number of clicks).
+  - in accordance with the above, add a visible timer and mouse clicks. while
+    doing that, also add some info about the puzzle, as the credits,
+    difficulty and puzzle name.
+  - nice resizing of numbers
+  - print error message (at least into log.txt or error.txt) when something
+    bad happens
+  - processmousedown() is hideous, improve it
+  - allow resizing when messagebox is shown, use callback to update or
+    something like that
+  - make fancy controls:
+    - hold mouse button and mark all unfilled cells
+  - automatic puzzle generation
+  - serious refactoring: remove all common code between games
+
+- nurikabe
+  - make fancy controls:
+    - enclose finalized island
+    - fill enclosed region with island
+  - improve solver, get those last puzzles!
+
+- picross
+  - make better legalrow,legalcolumn routines: given clues and partially
+    filled in cells, is it possible to finish correctly? use dp
+
+- hitori
+  - improve solver (it's not very good right now)
+
+- masyu
+  - improve solver (it's not very good right now)
+
+- hashiwokakero
+  - add end-of-game detection
+  - add V function for viewing connected sections
+  - add solver!
+
+- add games:
+  - yajilin http://www.janko.at/Raetsel/Yajilin/index.htm
+    - distinguish between drag moves and click moves. also handle the case of a
+      click move in a cell containing edges (these edges will be destroyed).
+    - need some hefty data structures to hold both edges and boxes. same with
+      undo system.
+  - numberlink (arukone) http://www.janko.at/Raetsel/Arukone/index.htm
+    - normal edge dragging, easily stolen from masyu
+  - gokigen naname http://www.janko.at/Raetsel/Gokigen/index.htm
+    - tri-state as nurikabe: unfilled, backslash, slash
+  - minesweeper http://www.janko.at/Raetsel/Minesweeper/index.htm
+    - warning, grid can contain "x" (cell cannot have mine and cannot be marked)
+    - tri-state, unfilled, blank, bomb
+  - kuromasu http://www.janko.at/Raetsel/Kuromasu/index.htm
+  - shikaku http://www.janko.at/Raetsel/Sikaku/index.htm
+    - i don't have any good idea yet on how to implement the controls. maybe do
+      edge dragging of some kind. look to other games and see how they did it.
+  - fillomino
+    - suggested controls: drag number from numbered cell to non-numbered cell to
+      populate cell with new value. weakness with this: impossible to directly
+      the value of non-adjacent cells. also, click in cell (another button) to
+      remove number. use thickness-routines from heyawake.
+  - ripple effect (hakyuu) http://www.janko.at/Raetsel/Hakyuu/index.htm
+    - how to do controls?
+  - dominos http://www.janko.at/Raetsel/Dominos/index.htm
+  - battleships, bimaru http://www.janko.at/Raetsel/Battleships/index.htm
+  - kakuro
+  - sudoku (generalised size)
+  - probably some more games
+
+- add variations of games
+  - !irakAkari! http://www.janko.at/Raetsel/Varianten/001.a.htm
+    (should be easy to modify existing akari to support this)
+
+GENERAL GOAL
+
+make a client for playing nurikabe, heyawake, akari, slitherlink, yajilin, hashiwokakero, masyu
+and possibly other fun puzzles. use sdl (maybe opengl) for graphics.
+
+features:
+- automatic puzzle generation
+- read puzzles from files supplied by user
+- in-game hint function which uses a fabolous solver written by myself
+  - the hint system has several levels: 
+    - only show trivial hints (like surrounding the 1 in nurikabe,
+      forced placement of light in akari, one possible way to fill in
+      a rectangle independently of surrounding)
+    - medium hints (like o | ? | o in heyawake, fill the ?)
+    - deep hints (stuff requiring backtracking or advanced reasoning)
+  - the solver should be able to solve every puzzle, ever
+- in-game intervention of player moves: warn about wrong moves
+  (can be turned off, or warn about trivial mistakes only, or warn also about
+  deeper mistakes)
+
+framework:
+- make a general graphics engine with the following helper functionality:
+  - given a screen resolution and grid size, scale appropriately
+  - støtt følgende mouse events:
+    - klikk i celle
+    - dra fra celle til nabocelle
+    - klikk på ikon over (som check, try, etc)
+    - klikk på en kant mellom to celler (slitherlink)
+  - støtt tastaturstyring:
+    - cursor: flytt rundt
+    - space: endre cell
+    - shift+cursor: legge til/fjerne kant
+    - cursormode for slitherlink: naviger langs kanter
+  - støtte for full undo, som for hvert trekk lagrer hvilke grafiske endringer som
+    skjer (dvs endret innhold i rute, endring i kanter som trekkes
+
+documentation:
+- for each game, write a nice article (html page?) showing:
+  - the rules (with screenshots)
+  - the heuristics used by the solver (demonstrated with screenshots),
+    containing.
+    - when to apply the heuristic
+    - how to apply it (what cells to fill with what)
+    - which rule we violate by filling out the cells in a wrong way
