@@ -27,8 +27,23 @@ static int md[MAXS][MAXS];
 */
 static int m[MAXS][MAXS][3];
 static char touched[MAXS][MAXS];  /*  1 if cell is changed and need to be redrawn */
-/*  on arrow cells, number of blocks past its arrow */
+/* on arrow cells, number of blocks past its arrow until next arrow!
+   desired number is difference between current arrow and next arrow */
+/* colouring:
+   0: black: less blocks than indicated number
+   1: yellow: correct number of blocks, blank cells exist (missing lines)
+	 2: green: correct number of blocks, no blank cells
+	 3: red: more blocks than indicated number
+	 a cell is blank if it has no square and less than two edges.
+	 st[][] is guaranteed to correctly reflect the board at all times!
+*/
 static int st[MAXS][MAXS];
+
+/* for each cell, keep a list of all arrows pointing to it */
+static int ptrx[MAXS][MAXS][MAXS];
+static int ptry[MAXS][MAXS][MAXS];
+static int ptrn[MAXS][MAXS];
+static int ptrnum[MAXS][MAXS];
 
 /*  move queue for hint system */
 #define MAXMQ MAXS*MAXS*4
@@ -45,6 +60,25 @@ static int convchar(char c) {
   else if(c>='A' && c<='Z') return c-'A'+36;
   error("invalid character %c in level definition.",c);
   return 0;
+}
+
+static void genptr(int atx,int aty,int dx,int dy) {
+	int cellx=atx,celly=aty,type=md[cellx][celly];
+	atx+=dx;
+	aty+=dy;
+	while(atx>=0 && atx<x && aty>=0 && aty<y) {
+		if(mn[atx][aty]>-1 && md[atx][aty]==type) {
+			ptrnum[cellx][celly]=mn[cellx][celly]-mn[atx][aty];
+			return;
+		}
+		if(mn[atx][aty]<0) {
+			ptrx[atx][aty][ptrn[atx][aty]]=cellx;
+			ptry[atx][aty][ptrn[atx][aty]++]=celly;
+		}
+		atx+=dx;
+		aty+=dy;
+	}
+	ptrnum[cellx][celly]=mn[cellx][celly];
 }
 
 static void loadpuzzle(char *path) {
@@ -81,7 +115,15 @@ static void loadpuzzle(char *path) {
   for(i=0;i<x;i++) for(j=0;j<y;j++) {
     st[i][j]=touched[i][j]=0;
     m[i][j][0]=m[i][j][1]=m[i][j][2]=0;
+		ptrn[i][j]=0;
   }
+	/* for each cell, generate list of arrows */
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(mn[i][j]>-1) {
+		if(md[i][j]==3) genptr(i,j,0,-1);
+		else if(md[i][j]==1) genptr(i,j,0,1);
+		else if(md[i][j]==2) genptr(i,j,-1,0);
+		else if(!md[i][j]) genptr(i,j,1,0);
+	}
 }
 
 static int hasneighbouringblocked(int u,int v) {
@@ -95,10 +137,11 @@ static int hasneighbouringblocked(int u,int v) {
 
 static void updateedge(int u,int v,Uint32 col) {
   int x1=thick+(width-thick-edgethick)/2,y1=thick+(height-thick-edgethick)/2,x2=x1+edgethick,y2=y1+edgethick;
-  if(u && m[u-1][v][0]) drawrectangle32(startx+u*width,starty+v*height+y1,startx+u*width+x2-1,starty+v*height+y2-1,col);
-  if(v && m[u][v-1][1]) drawrectangle32(startx+u*width+x1,starty+v*height,startx+u*width+x2-1,starty+v*width+y2-1,col);
-  if(m[u][v][0]) drawrectangle32(startx+u*width+x1,starty+v*height+y1,startx+(u+1)*width-1,starty+v*height+y2-1,col);
-  if(m[u][v][1]) drawrectangle32(startx+u*width+x1,starty+v*height+y1,startx+u*width+x2-1,starty+(v+1)*height-1,col);
+	int isleft=u && m[u-1][v][0],isup=v && m[u][v-1][1],isright=m[u][v][0],isdown=m[u][v][1];
+  if(isleft) drawrectangle32(startx+u*width+thick,starty+v*height+y1,startx+u*width+x2-1,starty+v*height+y2-1,col);
+  if(isup) drawrectangle32(startx+u*width+x1,starty+v*height+thick,startx+u*width+x2-1,starty+v*width+y2-1,col);
+  if(isright) drawrectangle32(startx+u*width+x1,starty+v*height+y1,startx+(u+1)*width-1,starty+v*height+y2-1,col);
+  if(isdown) drawrectangle32(startx+u*width+x1,starty+v*height+y1,startx+u*width+x2-1,starty+(v+1)*height-1,col);
 }
 
 /*  draw number and arrow */
@@ -147,14 +190,15 @@ static void updatecellcol(int u,int v,Uint32 edgecol,Uint32 blankcol2) {
     /*  upper edge */
     drawrectangle32(startx+u*width,starty+v*height,startx+(u+1)*width-1,starty+v*height+thick-1,BLACK32);
   }
-  drawrectangle32(startx+u*width+thick,starty+v*height+thick,startx+(u+1)*width-1,starty+(v+1)*height-1,blankcol2);
   if(mn[u][v]>-1) {
     bkcol=blankcol;
-    if(st[u][v]==mn[u][v]) bkcol=okcol;
-    else if(st[u][v]>mn[u][v]) bkcol=errorcol;
+		if(st[u][v]==1) bkcol=almostokcol;
+		else if(st[u][v]==2) bkcol=okcol;
+		else if(st[u][v]==3) bkcol=errorcol;
+		drawrectangle32(startx+u*width+thick,starty+v*height+thick,startx+(u+1)*width-1,starty+(v+1)*height-1,bkcol);
     drawarrownumber(u,v,mn[u][v],md[u][v],BLACK32,bkcol);
-/*    drawnumbercell32(u,v,mn[u][v],BLACK32,BLACK32,bkcol);*/
   } else {
+		drawrectangle32(startx+u*width+thick,starty+v*height+thick,startx+(u+1)*width-1,starty+(v+1)*height-1,blankcol);
     /*  non-number cell: draw either blocked or edges */
     if(m[u][v][2]) drawsolidcell32(u,v,hasneighbouringblocked(u,v)?errorcol:filledcol);
     else updateedge(u,v,edgecol);
@@ -194,14 +238,62 @@ static void updatetoscreen(int visible) {
   if(visible) partialredraw();
 }
 
-/*  TODO change st[][] and keep track of each arrow */
+/* update background colour for arrow cell */
+static void updatearrow(int cellx,int celly) {
+	int newcol,count=0,empty=0,dirs,type=md[cellx][celly];
+	int dx=0,dy=0,atx=cellx,aty=celly;
+	if(!type) dx=1;
+	else if(type==1) dy=1;
+	else if(type==2) dx=-1;
+	else if(type==3) dy=-1;
+	atx+=dx; aty+=dy;
+	while(atx>=0 && atx<x && aty>=0 && aty<y) {
+		if(mn[atx][aty]>-1 && md[atx][aty]==type) break;
+		if(mn[atx][aty]<0) {
+			if(m[atx][aty][2]) count++;
+			else if(!empty) {
+				/* count number of edges */
+				dirs=0;
+				if(m[atx][aty][0]) dirs++; /* right */
+				if(m[atx][aty][1]) dirs++; /* down */
+				if(atx && m[atx-1][aty][0]) dirs++; /* left */
+				if(aty && m[atx][aty-1][1]) dirs++; /* up */
+				if(dirs<2) empty=1,logprintf("  [emptyness because of %d %d (%d %d %d %d)]\n",atx,aty,
+					m[atx][aty][0],m[atx][aty][1],m[atx-1][aty][0],m[atx][aty-1][1]);
+			}
+		}
+		atx+=dx;
+		aty+=dy;
+	}
+	logprintf("arrow at %d %d needs %d, found %d empty %d\n",cellx,celly,ptrnum[cellx][celly],count,empty);
+	if(count<ptrnum[cellx][celly]) newcol=0;
+	else if(count>ptrnum[cellx][celly]) newcol=3;
+	else newcol=empty?1:2;
+	if(st[cellx][celly]!=newcol) {
+		st[cellx][celly]=newcol;
+		touched[cellx][celly]=1;
+	}
+}
+
+/* also check if arrows change colour */
 static void applymove(int cellx,int celly,int celld,int val) {
+	int i,atx,aty;
   m[cellx][celly][celld]=val;
   touched[cellx][celly]=1;
   if(celld==1) touched[cellx][celly+1]=1;
   else if(!celld) touched[cellx+1][celly]=1;
-  /*  scan in all 4 directions */
-  
+	/* recheck all arrows affected by this cell */
+	for(i=0;i<ptrn[cellx][celly];i++)
+		updatearrow(ptrx[cellx][celly][i],ptry[cellx][celly][i]);
+	/* if edge: check other cell */
+	if(celld<2) {
+		atx=cellx;
+		aty=celly;
+		if(celld) aty++;
+		else atx++;
+		for(i=0;i<ptrn[atx][aty];i++)
+			updatearrow(ptrx[atx][aty][i],ptry[atx][aty][i]);
+	}
 }
 
 static void undo(int visible) {
@@ -269,6 +361,12 @@ static void processmousemotion() {
   }
 }
 
+/* hint:
+   level 4: for each interval (line between two successive arrows),
+	 try all combinations of blocks (don't check extremely large cases)
+	 level 5: same as above, but recurse
+*/
+
 static void processkeydown(int key) {
   int res;
   if(key==undokey) undo(1);
@@ -280,6 +378,7 @@ static void autosolver(char *s) {
   logprintf("%s: ",s);
 /*  while(hint()>0) executemovequeue();
   res=verifyboard();*/
+	res=0;
   end=gettime()-start;
   if(end<0) end=0;
   logprintf("[%.3fs] ",end);
@@ -289,9 +388,10 @@ static void autosolver(char *s) {
 }
 
 void yajilin(char *path,int solve) {
-  int event;
+  int event,i,j;
   loadpuzzle(path);
   initbfs();
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(mn[i][j]>-1) updatearrow(i,j);
   drawgrid();
   if(solve) { autosolver(path); return; }
   do {
