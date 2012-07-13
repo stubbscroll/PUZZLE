@@ -415,24 +415,27 @@ void grabandsavepuzzle(char *s,char *firstline,char *p3,char *puzzle,char *diffi
 void processchamp() {
   const char *champmatch="<tr><td>Vol.",*findpuzzle="alt=\"Try ",*findpuzzle2="class=\"puzzle\">";
   const char *findauthor="</span></p></td><td>",*finddifficulty="<p><span>",*finddata="swf?loadUrl=";
-  char *p=buffer,p3[4],puzzle[100],*q,term,author[100],diff[100],s[100],url[100],t[1000];
+	const char *endofrow="</tr>";
+  char p3[4],puzzle[100],*q,*q2,*r,term,author[100],diff[100],s[100],url[100],t[1000];
+	static char pp[BUF],*p=pp;
   int id,i,j;
+	strcpy(pp,buffer);
   puts("start grabbing championship puzzles!");
   num=0;
   while((p=strstr(p,champmatch))) {
     p=q=p+strlen(champmatch);
+		r=strstr(p,endofrow);
     id=strtol(q,NULL,10);
-    if(taken[id]) continue;
-    taken[id]=1;
-    if((q=strstr(p,findpuzzle))) {
-      q+=strlen(findpuzzle);
-      term=' ';
-    } else {
-      q=strstr(p,findpuzzle2);
-      if(!q) return;
+		q=strstr(p,findpuzzle);
+		q2=strstr(p,findpuzzle2);
+		if(q && q<r) {
+			q+=strlen(findpuzzle);
+			term=' ';
+		} else {
+      q=q2;
       q+=strlen(findpuzzle2);
       term='<';
-    }
+		}
     for(i=0;i<3;i++) p3[i]=tolower(q[i]);
     for(i=0;q[i]!=term;i++) puzzle[i]=tolower(q[i]);
     puzzle[i]=p3[3]=0;
@@ -511,6 +514,7 @@ int supportedjanko(char *s) {
   if(!strcmp(s,"sli")) return 1;
   if(!strcmp(s,"mas")) return 1;
   if(!strcmp(s,"has")) return 1;
+  if(!strcmp(s,"yaj")) return 1;
   return 0;
 }
 
@@ -526,7 +530,8 @@ void find3(char *s,char *t) {
   else if(!strcmp(s,"nonogramme")) {
     strcpy(t,"pic");
     strcpy(s,"picross");
-  } else printf("[%s] not found\n",s);
+  } else if(!strcmp(s,"yajilin")) strcpy(t,"yaj");
+  else printf("[%s] not found\n",s);
 }
 
 void sleepms(int ms) {
@@ -565,6 +570,17 @@ char *numcode(int val) {
   else if(val<10) s[0]=val+48;
   else if(val<36) s[0]=val-10+'a';
   else if(val<62) s[0]=val-36+'A';
+  else sprintf(s,"{%d}",val);
+  return s;
+}
+
+char *yajcode(int val) {
+  static char s[1024];
+  s[1]=0;
+  if(val<10) s[0]=val+48;
+  else if(val<31) s[0]=val-10+'a';
+  else if(val<35) s[0]=val-10+'b';
+  else if(val<61) s[0]=val-35+'A';
   else sprintf(s,"{%d}",val);
   return s;
 }
@@ -720,6 +736,34 @@ void parsejankopic(FILE *f,char *p3,int x,int y) {
   }
 }
 
+void parsejankoyaj(FILE *f,char *p3,int x,int y) {
+  char find[256],*p=buffer,dir=' ';
+  int i,j,v;
+  for(i=1;i<=y;i++) {
+    sprintf(find,"name=\"p%d\" value=\"",i);
+    p=strstr(p,find);
+    if(!p) { printf("error parsing masyu %s\n",find); exit(1); }
+    p+=strlen(find);
+    for(j=0;j<x;j++) {
+      if(*p=='-') fprintf(f,".."),p+=2;
+			else if(isdigit(*p)) {
+				v=0;
+				while(isdigit(*p)) v=v*10+*p-48,p++;
+				if(*p=='n') dir='^';
+				else if(*p=='s') dir='v';
+				else if(*p=='w') dir='<';
+				else if(*p=='e') dir='>';
+				p+=2;
+				fprintf(f,"%s%c",yajcode(v),dir);
+			} else {
+				p+=2;
+				fprintf(f,"xx");
+			}
+    }
+    fprintf(f,"\n");
+  }
+}
+
 char *heycode(int val) {
   static char s[1024];
   s[1]=0;
@@ -805,6 +849,7 @@ void parsejankopuzzle(FILE *f,char *p3,int x,int y) {
   else if(!strcmp(p3,"sli")) parsejankosli(f,p3,x,y);
   else if(!strcmp(p3,"mas")) parsejankomas(f,p3,x,y);
   else if(!strcmp(p3,"has")) parsejankohas(f,p3,x,y);
+  else if(!strcmp(p3,"yaj")) parsejankoyaj(f,p3,x,y);
   else return;
   num++;
 }
