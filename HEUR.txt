@@ -17,6 +17,154 @@ level 4: more powerful search needed, might need to search
          can be exponential.
 level 5: advanced stuff. runtime: 2^(runtime from level 4)
 
+AKARI (NP-complete)
+
+level 1 (trivial, immediate)
+
+- if a wall already has its n lights, or it will have n lights
+  after lighting up all adjacent free cells, fill in all
+  free neighbours with empty and light, respectively.
+
+level 2 (easy, almost immediate)
+
+- if a light diagonally adjacent to a wall causes that wall
+  to not being able to fulfill its number of required adjacent
+  lights: that cell must be empty.
+- if there is an unlit empty cell and only one unfilled cell
+  which can reach it, that cell must be light.
+- if an unfilled cell can't see any other unfilled cells,
+  it must contain bulb.
+
+level 3 (intermediate)
+
+* if putting a bulb on a cell makes it impossible to light up
+  some cell on the board, that cell must be empty.
+  (level 5 contradiction also accomplishes this, only slower)
+* check if there exists two walls each having two possible light sites,
+  forcing all other cells in two lanes to be empty
+
+level 4
+
+level 5 (advanced)
+
+- for a cell: assume that it has bulb, then fill in greedily.
+  then, assume it's empty, fill in greedily. for each cell that
+  were filled in similarly for both, then the cell should be
+  filled in like this. in addition, if any of the assumptions
+  cause a contradiction, the cell must be filled in the other
+  way.
+
+HASHIWOKAKERO (np-complete)
+
+level 1
+
+- if there is only one way to fill in the remaining edges near a node, do it.
+- if a node has n available edges and its number is 2n-1 or higher, it must
+  have at least one edge in each direction.
+
+level 2
+
+- if a 2 has only two ways and one of the ways is towards 1 or 2, then the
+  other way must have an edge.
+- if a 1 has only one way to a non-1, then there must be an edge towards it.
+- if not putting an edge makes it impossible to fulfill the node, then the edge
+  must be there.
+
+level 3
+
+- if a node has one edge left, and each move except one causes an illegal
+  position (more specifically: disconnected subgraphs) then do the only legal
+  move
+* try all ways of distributing edges. apply the intersection (minimum) of all
+  legal ways.
+
+level 5
+
+- try all ways of distributing edges around a node, then solve greedily. then
+  take the min of all ways to put edges and apply it.
+
+HEYAWAKE (NP-complete)
+
+level 1 (trivial, immediate)
+
+- if a numbered region has enough walls, then the rest of the
+  cells must be empty.
+- if a numbered region has number of walls + unfilled equal to
+  its number, then the rest of the cells must be wall.
+- mark unfilled cells next to a wall as empty
+- identify combinations of rectangle shapes, numbers and whether
+  they are near a wall (n*m-i, n*m rectangle with number i)
+  - 2x2-2 in a corner
+  - 2x2-2 
+  - 3x2-3 with the 3 side at the edge
+  - 3x3-5
+  - 3x3-4, mark empty
+  - nx2-n (n>2), mark n-2 empty in neighbouring regions
+  - (n*2+1)x1
+
+level 2 (almost immediate)
+
+- if making a cell empty causes a strip of empty passing through
+  >=2 borders, then the cell must be wall.
+- if an empty cell is surrounded by three walls, the fourth must
+  be empty.
+
+level 3 (intermediate)
+
+- try all combinations of filling in a numbered region. only
+  check if for adjacent walls and surrounded 1x1 within the
+  region. across all non-rejected combinations, take the
+  intersection of these (ie, only fill in cells filled in
+  the same way for all combinations). only attempt this
+  heuristic if (regsize choose regnum) is below a certain
+  number.
+* check all pairs of regions to find:
+  * neighbouring 3x3-4 and 3x3-4: fill in as #  |  #
+                                              # | #
+                                             #  |  #
+
+level 4
+
+- if placing a wall in a cell causes two regions to be
+  disconnected, then the cell must be empty ("empty
+  articulation point")
+
+level 5
+
+* for a cell: assume that it is blocked, then fill in greedily.
+  then, assume it is blank, fill in greedily. for each cell that
+  were filled in similarly for both, then the cell should be
+  filled in like this. in addition, if any of the assumptions
+  cause a contradiction, then the cell must be filled in the
+  other way.
+* try all combinations of filling in a numbered region. reject
+  all combinations causing disconnection, strip crossing >=2
+  borders and adjacent walls. fill in the intersection of
+  all these combinations. NB, do not run this heuristic if
+  regsize choose regnum is larger than some constant.
+
+HITORI
+
+level 1
+level 2
+level 3
+level 4
+level 5
+
+MASYU
+
+level 1
+level 2
+level 3
+level 4
+
+- if there is an enclosing with 4 loose ends, two occurrences of two
+  adjacent cells AB and CD, where both are adjacent to two spaces
+  and there are no dots in the enclosing: then the connection should
+  be AC BD or AD BC.
+
+level 5
+
 NURIKABE (NP-complete)
 
 level 1 (trivial, immediate)
@@ -176,105 +324,6 @@ level ? (unformalized heuristics)
 
 unsolved situations
 
-AKARI (NP-complete)
-
-level 1 (trivial, immediate)
-
-- if a wall already has its n lights, or it will have n lights
-  after lighting up all adjacent free cells, fill in all
-  free neighbours with empty and light, respectively.
-
-level 2 (easy, almost immediate)
-
-- if a light diagonally adjacent to a wall causes that wall
-  to not being able to fulfill its number of required adjacent
-  lights: that cell must be empty.
-- if there is an unlit empty cell and only one unfilled cell
-  which can reach it, that cell must be light.
-- if an unfilled cell can't see any other unfilled cells,
-  it must contain bulb.
-
-level 3 (intermediate)
-
-* if putting a bulb on a cell makes it impossible to light up
-  some cell on the board, that cell must be empty.
-  (level 5 contradiction also accomplishes this, only slower)
-* check if there exists two walls each having two possible light sites,
-  forcing all other cells in two lanes to be empty
-
-level 4
-
-level 5 (advanced)
-
-- for a cell: assume that it has bulb, then fill in greedily.
-  then, assume it's empty, fill in greedily. for each cell that
-  were filled in similarly for both, then the cell should be
-  filled in like this. in addition, if any of the assumptions
-  cause a contradiction, the cell must be filled in the other
-  way.
-
-HEYAWAKE (NP-complete)
-
-level 1 (trivial, immediate)
-
-- if a numbered region has enough walls, then the rest of the
-  cells must be empty.
-- if a numbered region has number of walls + unfilled equal to
-  its number, then the rest of the cells must be wall.
-- mark unfilled cells next to a wall as empty
-- identify combinations of rectangle shapes, numbers and whether
-  they are near a wall (n*m-i, n*m rectangle with number i)
-  - 2x2-2 in a corner
-  - 2x2-2 
-  - 3x2-3 with the 3 side at the edge
-  - 3x3-5
-  - 3x3-4, mark empty
-  - nx2-n (n>2), mark n-2 empty in neighbouring regions
-  - (n*2+1)x1
-
-level 2 (almost immediate)
-
-- if making a cell empty causes a strip of empty passing through
-  >=2 borders, then the cell must be wall.
-- if an empty cell is surrounded by three walls, the fourth must
-  be empty.
-
-level 3 (intermediate)
-
-- try all combinations of filling in a numbered region. only
-  check if for adjacent walls and surrounded 1x1 within the
-  region. across all non-rejected combinations, take the
-  intersection of these (ie, only fill in cells filled in
-  the same way for all combinations). only attempt this
-  heuristic if (regsize choose regnum) is below a certain
-  number.
-* check all pairs of regions to find:
-  * neighbouring 3x3-4 and 3x3-4: fill in as #  |  #
-                                              # | #
-                                             #  |  #
-
-level 4
-
-- if placing a wall in a cell causes two regions to be
-  disconnected, then the cell must be empty ("empty
-  articulation point")
-
-level 5
-
-* for a cell: assume that it is blocked, then fill in greedily.
-  then, assume it is blank, fill in greedily. for each cell that
-  were filled in similarly for both, then the cell should be
-  filled in like this. in addition, if any of the assumptions
-  cause a contradiction, then the cell must be filled in the
-  other way.
-* try all combinations of filling in a numbered region. reject
-  all combinations causing disconnection, strip crossing >=2
-  borders and adjacent walls. fill in the intersection of
-  all these combinations. NB, do not run this heuristic if
-  regsize choose regnum is larger than some constant.
-
-HITORI
-
 PICROSS (NP-complete)
 
 level 5
@@ -326,46 +375,52 @@ level 5
 - for one edge: assume edge, and assume empty. fill in
   greedily and do the usual stuff
 
-MASYU
+YAJILIN
 
 level 1
+
+- if two arrows pointing the same way have one cell inbetween, then
+  that cell must be blocked or it must have edges through it
+- between two blocked separated by one gap there must be edge
+- if an empty cell is adjacent to blocked (or an edge is already
+  pointing into it) and there's only two ways to make an edge: it must be
+  filled like that
+- if an empty cell has only one legal edge, then it must be blocked
+- if there are two adjacent empty cells with only two legal edges, then
+  fill both cells with edges
+- if an empty cell borders only blocked, arrows and empty cells with degree 2,
+  then this cell must be blocked
+* in the following pattern, there must be edges:
+  ?##?    ?##?
+  #  # => #++#
+           ||
+
 level 2
+
+- if there is just one way to fill in blocked in an interval between
+  two arrows or one arrow and a wall, do it
+- given an arrow which is fulfilled with blocked: if any cell only has
+  two legal edges, the cell must be filled in this way
+
 level 3
+
+- if all possibilities of making an edge (except one) creates a loop
+  which doesn't solve the level, then create the only edge that doesn't
+
 level 4
-
-- if there is an enclosing with 4 loose ends, two occurrences of two
-  adjacent cells AB and CD, where both are adjacent to two spaces
-  and there are no dots in the enclosing: then the connection should
-  be AC BD or AD BC.
+* for each interval between two arrows, try all ways of placing
+  blocked, check correctness with verifyboard and take the intersection
 
 level 5
+* for each action, fill in greedily and take intersection
+* for each interval between two arrows, try all ways of placing
+  blocked, fill in greedily and take intersection
 
-HASHIWOKAKERO (np-complete)
-
-level 1
-
-- if there is only one way to fill in the remaining edges near a node, do it.
-- if a node has n available edges and its number is 2n-1 or higher, it must
-  have at least one edge in each direction.
-
-level 2
-
-- if a 2 has only two ways and one of the ways is towards 1 or 2, then the
-  other way must have an edge.
-- if a 1 has only one way to a non-1, then there must be an edge towards it.
-- if not putting an edge makes it impossible to fulfill the node, then the edge
-  must be there.
-
-level 3
-
-- if a node has one edge left, and each move except one causes an illegal
-  position (more specifically: disconnected subgraphs) then do the only legal
-  move
-* try all ways of distributing edges. apply the intersection (minimum) of all
-  legal ways.
-
-level 5
-
-- try all ways of distributing edges around a node, then solve greedily. then
-  take the min of all ways to put edges and apply it.
-
+level ? (unformalized heuristics)
+* deal with situations like this:
+    stuff
+  +--- ----+
+  |        |
+  +--  ----+
+  closing the loop from above separates the loop from the rest of the
+  stuff, avoid this somehow

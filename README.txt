@@ -91,4 +91,4 @@ To compile the grabber, you need the curl library:
 http://curl.haxx.se/download.html
 
 To run a 32-bit version of the program in 64-bit windows, you might need a
-32-bit copy of the libsasl.dll file in the programs's current directory.
+32-bit copy of the libsasl.dll file in the program's current directory.

@@ -793,10 +793,10 @@ static int level3avoidloop() {
       d2=ed[dirs[d]],x2=i+ex[dirs[d]],y2=j+ey[dirs[d]];
       m[d2][x2][y2]=1;
       followedge(i,j);
-      /*  check if:
-          all cells in loop has numedges==2 AND 
-          (there are nonvisited edges outside loop OR there are white/black
-           dots with numedges<2) */
+      /* check if:
+         all cells in loop has numedges==2 AND 
+         (there are nonvisited edges outside loop OR there are white/black
+          dots with numedges<2) */
       for(k=0;k<qe;k+=2) if(numedges(q[k],q[k+1])==1) goto noloop;
       for(k=0;k<x;k++) for(l=0;l<y;l++) {
         if(mn[k][l]!='.' && numedges(k,l)<2) goto yesloop;

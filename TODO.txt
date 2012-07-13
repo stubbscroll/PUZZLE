@@ -3,7 +3,6 @@ STUFF TO BE ADDED, IN DECREASING ORDER OF MOST DESIRED
 - BUGFIX in messagebox, add callback to a redraw routine
 - scoring
 - menu system with score tracking and puzzle selector
-- add yajilin
 
 COMPLETE LIST OF STUFF TO BE ADDED
 
@@ -45,17 +44,13 @@ COMPLETE LIST OF STUFF TO BE ADDED
 - masyu
   - improve solver (it's not very good right now)
 
-- hashiwokakero
-  - add end-of-game detection
-  - add V function for viewing connected sections
-  - add solver!
+- yajilin
+  - improve solver (it's unfinished right now)
+  - add support for x, pre-blocked cell (denote with **)
+  - add v as legal number. don't know why it was removed in the first place,
+    the direction is in another layer
 
 - add games:
-  - yajilin http://www.janko.at/Raetsel/Yajilin/index.htm
-    - distinguish between drag moves and click moves. also handle the case of a
-      click move in a cell containing edges (these edges will be destroyed).
-    - need some hefty data structures to hold both edges and boxes. same with
-      undo system.
   - numberlink (arukone) http://www.janko.at/Raetsel/Arukone/index.htm
     - normal edge dragging, easily stolen from masyu
   - gokigen naname http://www.janko.at/Raetsel/Gokigen/index.htm
@@ -72,6 +67,7 @@ COMPLETE LIST OF STUFF TO BE ADDED
       populate cell with new value. weakness with this: impossible to directly
       the value of non-adjacent cells. also, click in cell (another button) to
       remove number. use thickness-routines from heyawake.
+  - shakashaka
   - ripple effect (hakyuu) http://www.janko.at/Raetsel/Hakyuu/index.htm
     - how to do controls?
   - dominos http://www.janko.at/Raetsel/Dominos/index.htm
