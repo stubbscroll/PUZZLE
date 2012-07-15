@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -332,8 +333,8 @@ static void domovedir(int d,int x1,int y1,int val) {
 
 static void undo(int visible) {
   int old;
+	int val=stackpop(),y2=stackpop(),x2=stackpop(),y1=stackpop(),x1=stackpop(),d=stackpop();
   if(!stackempty()) {
-  int val=stackpop(),y2=stackpop(),x2=stackpop(),y1=stackpop(),x1=stackpop(),d=stackpop();
     old=m[x1][y1][d];
     m[x1][y1][d]=val;
     m[x2][y2][d^2]=val;
@@ -468,12 +469,12 @@ static int level2corner1() {
   return 0;
 }
 
-/*  check the general case if a missing edge makes it impossible to fulfill the node */
+/* check the general case if a missing edge makes it impossible to fulfill the node */
 static int level2mustedge() {
   int i,j,k,sum,num,a[4],can;
   for(i=0;i<x;i++) for(j=0;j<y;j++) if(mn[i][j] && (num=numedges(i,j))<mn[i][j]) {
     for(sum=k=0;k<4;k++) sum+=a[k]=howmanycanbeadded(i,j,k);
-    for(k=0;k<4;k++) if(!m[i][j][k]) {
+    for(k=0;k<4;k++) if(!m[i][j][k] && a[k]) {
       can=num+sum-a[k];
       if(can<mn[i][j]) {
         adddirtoqueue(k,i,j,1);
@@ -499,7 +500,6 @@ static int level3disconnect() {
     for(ways=k=0;k<4;k++) if(howmanycanbeadded(i,j,k)) {
       getneighbour(i,j,k,&x1,&y1);
       domove(k,i,j,x1,y1,m[i][j][k]+1);
-      updatetoscreen(0);
       if(verifyboard()>-1) {
         ways++;
         dir=k;
@@ -507,7 +507,6 @@ static int level3disconnect() {
       undo(0);
       if(ways>1) break;
     }
-/*    logprintf("at %d %d (num %d), %d legal ways\n",i,j,mn[i][j],ways);*/
     if(ways==1) {
       adddirtoqueue(dir,i,j,1);
       return 1;
@@ -553,9 +552,7 @@ static int level5brutemin(int lev) {
     num=numedges(i,j);
     for(k=0;k<4;k++) a[k]=howmanycanbeadded(i,j,k);
     for(k=0;k<x;k++) for(l=0;l<y;l++) if(mn[k][l]) for(v=0;v<4;v++) lev5min[k][l][v]=2;
-    for(a0=0;a0<=a[0];a0++)
-    for(a1=0;a1<=a[1];a1++)
-    for(a2=0;a2<=a[2];a2++) {
+    for(a0=0;a0<=a[0];a0++) for(a1=0;a1<=a[1];a1++) for(a2=0;a2<=a[2];a2++) {
       a3=mn[i][j]-num-a0-a1-a2;
       if(a3<0 || a3>a[3]) continue;
       if(a0) domovedir(0,i,j,m[i][j][0]+a0);
@@ -568,7 +565,7 @@ static int level5brutemin(int lev) {
         if(lev5min[k][l][v]>m[k][l][v]) lev5min[k][l][v]=m[k][l][v];
       }
       while(getstackpos()>oldsp) undo(0);
-    }
+		}
     /*  apply */
     for(k=0;k<x;k++) for(l=0;l<y;l++) if(mn[k][l]) for(v=0;v<4;v++) {
       if(lev5min[k][l][v]>m[k][l][v]) {
@@ -677,7 +674,7 @@ static void processkeydown(int key) {
       if(verifyboard()<1) messagebox("Sorry, no more moves found.");
     } else if(!res) messagebox("Sorry, no moves found.");
     else messagebox("Sorry, hint will not work on an illegal board.");
-  }
+	}
 }
 
 /*  set to 1 when a button is held and a move is done
