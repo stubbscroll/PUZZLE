@@ -105,6 +105,7 @@ void drawrectangle32(int,int,int,int,Uint32);
 void drawhorizontalline32(int,int,int,Uint32);
 void drawsolidcell32(int,int,Uint32);
 void drawsolidcell32w(int,int,Uint32,int,int,int,int);
+void drawcross(int,int,Uint32);
 void drawnumbercell32(int,int,int,Uint32,Uint32,Uint32);
 void drawnumbercell32w(int,int,int,Uint32,Uint32,Uint32,int,int,int,int);
 void drawdisc(int,int,double,Uint32,Uint32);

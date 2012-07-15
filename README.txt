@@ -6,11 +6,12 @@ http://www.stubbscroll.com/puzzle.html
 http://www.pvv.org/~spaans/puzzle.html
 http://www.pvv.ntnu.no/~spaans/puzzle.html
 
-This is a collection of logic puzzle games. There are currently five games
-implemented (Nurikabe, Akari (Light up), Heyawake, Hitori and Picross),
-and the interface is rather unfinished. The program should run on all
-desktop platforms capable of running a gcc C compiler and the SDl library,
-but it is currently only tested on Windows systems.
+This is a collection of logic puzzle games. There are currently nine games
+implemented (Nurikabe, Akari (Light up), Heyawake, Hitori, Picross,
+Hashiwokakero, Masyu, Slitherlink and Yajilin), and the interface is rather
+unfinished. The program should run on all desktop platforms capable of
+running a gcc C compiler and the SDl library, but it is not yet tested on
+Mac systems.
 
 The puzzle collection also includes a program that downloads puzzles from
 the Nikoli site.
@@ -21,8 +22,7 @@ Future plans include:
 - show more info on the screen (timer and possibly other info)
 - adding more puzzle types
 - auto-generation of puzzle instances
-- refactoring the code: more source files for each game type (gui, board/rules
-  manager, solver)
+- refactoring the code: move out common code (hint system, undo, etc)
 - expanding the documentation
 
 ==== How to build the program ================================================
@@ -40,6 +40,10 @@ From the command line, navigate to the directory where the program resides.
 Run with 'puzzle puzzles\file' (in windows) or './puzzle puzzles/file' (in
 unix) where file is the file name of the puzzle you want to run. Supplied
 puzzles reside in the puzzles/ directory.
+
+==== Controls that are common for all games ==================================
+
+TODO hint, undo, escape, V (connectedness) bla bla
 
 ==== How to play - Nurikabe ==================================================
 
@@ -81,6 +85,22 @@ TODO
 TODO
 
 ==== How to play - Picross ===================================================
+
+TODO
+
+==== How to play - Hashiwokakero =============================================
+
+TODO
+
+==== How to play - Slitherlink ===============================================
+
+TODO
+
+==== How to play - Masyu =====================================================
+
+TODO
+
+==== How to play - Yajilin ===================================================
 
 TODO
 

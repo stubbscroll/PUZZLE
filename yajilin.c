@@ -22,7 +22,10 @@ static int md[MAXS][MAXS];
 /*  indicator of what's filled in. 1:filled in, 0:not filled in
     [0] edge going right
     [1] edge going down
-    [2] blocked cell
+    [2] blocked cell:
+		    0 if no block
+				1 if blocked
+				2 if X
     0,1 cannot coexist with 2.
 */
 static int m[MAXS][MAXS][3];
@@ -58,6 +61,7 @@ static int convchar(char c) {
 	else if(c>='0' && c<='9') return c-48;
 	else if(c>='a' && c<='z') return c-'a'+10;
 	else if(c>='A' && c<='Z') return c-'A'+36;
+	else if(c=='*') return -2;
 	error("invalid character %c in level definition.",c);
 	return 0;
 }
@@ -84,7 +88,8 @@ static void genptr(int atx,int aty,int dx,int dy) {
 static void loadpuzzle(char *path) {
   static char s[MAXSTR];
   FILE *f=fopen(path,"r");
-  int z=0,ln=0,i,j;
+  int z=0,ln=0,i,j,r;
+	memset(m,0,sizeof(m));
   if(!f) error("couldn't open the file %s\n",path);
   while(fgets(s,MAXSTR,f)) if(s[0]!='%') {
     switch(z) {
@@ -99,7 +104,9 @@ static void loadpuzzle(char *path) {
       break;
     case 3:
       for(i=j=0;j<x;j++) {
-        mn[j][ln]=convchar(s[i++]);
+				r=convchar(s[i++]);
+				if(r<-1) mn[j][ln]=-1,m[j][ln][2]=2;
+        else mn[j][ln]=r;
         md[j][ln]=0;
         if(s[i]=='v') md[j][ln]=1;
         else if(s[i]=='<') md[j][ln]=2;
@@ -114,7 +121,6 @@ static void loadpuzzle(char *path) {
   mqs=mqe=0;
   for(i=0;i<x;i++) for(j=0;j<y;j++) {
     st[i][j]=touched[i][j]=0;
-    m[i][j][0]=m[i][j][1]=m[i][j][2]=0;
 		ptrn[i][j]=0;
   }
 	/* for each cell, generate list of arrows */
@@ -130,7 +136,7 @@ static int hasneighbouringblocked(int u,int v) {
   int d,x1,y1;
   for(d=0;d<4;d++) {
     x1=u+dx[d],y1=v+dy[d];
-    if(x1>=0 && y1>=0 && x1<x && y1<x && m[x1][y1][2]) return 1;
+    if(x1>=0 && y1>=0 && x1<x && y1<x && m[x1][y1][2]==1) return 1;
   }
   return 0;
 }
@@ -156,7 +162,7 @@ static int legaledge(int u,int v,int d) {
 	return degree(x2,y2)<2;
 }
 
-/* return 1 if cell is empty (no blocked, no arrow, but edges are
+/* return 1 if cell is empty (no blocked, no X, no arrow, but edges are
    allowed */
 static int isempty(int u,int v) {
 	if(u<0 || v<0 || u>=x || v>=y) return 0;
@@ -236,9 +242,9 @@ static void updatecellcol(int u,int v,Uint32 edgecol,Uint32 blankcol2) {
   } else {
 		drawrectangle32(startx+u*width+thick,starty+v*height+thick,startx+(u+1)*width-1,starty+(v+1)*height-1,blankcol);
     /*  non-number cell: draw either blocked or edges */
-    if(m[u][v][2]) {
-		drawsolidcell32(u,v,hasneighbouringblocked(u,v)?errorcol:filledcol);
-		}
+    if(m[u][v][2]==1)
+			drawsolidcell32(u,v,hasneighbouringblocked(u,v)?errorcol:filledcol);
+		else if(m[u][v][2]==2) drawcross(u,v,filled2col);
     else updateedge(u,v,edgecol);
   }
 }
@@ -288,7 +294,7 @@ static void updatearrow(int cellx,int celly) {
 	while(atx>=0 && atx<x && aty>=0 && aty<y) {
 		if(mn[atx][aty]>-1 && md[atx][aty]==type) break;
 		if(mn[atx][aty]<0) {
-			if(m[atx][aty][2]) count++;
+			if(m[atx][aty][2]==1) count++;
 			else if(!empty) {
 				/* count number of edges */
 				dirs=0;
@@ -371,7 +377,7 @@ static void followedge(int sx,int sy) {
 static int verifyboard() {
 	int i,j,incomplete=0,count,x2,y2,loop=0,loose=0;
 	/* check for illegal stuff: adjacent blocked */
-	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j][2] && hasneighbouringblocked(i,j)) return -1;
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j][2]==1 && hasneighbouringblocked(i,j)) return -1;
 	/* check edges */
 	for(i=0;i<x;i++) for(j=0;j<y;j++) if(!m[i][j][2] && mn[i][j]<0) {
 		count=degree(i,j);
@@ -385,7 +391,7 @@ static int verifyboard() {
 		x2+=dx[md[i][j]]; y2+=dy[md[i][j]];
 		while(x2>=0 && x2<x && y2>=0 && y2<y) {
 			if(mn[x2][y2]>-1 && md[x2][y2]==md[i][j]) break;
-			if(mn[x2][y2]<0 && m[x2][y2][2]) count++;
+			if(mn[x2][y2]<0 && m[x2][y2][2]==1) count++;
 			x2+=dx[md[i][j]]; y2+=dy[md[i][j]];
 		}
 		if(count>ptrnum[i][j]) return -1;
@@ -416,6 +422,7 @@ doneclose:
 		return -1;
 	}
 	cleanupbfs();
+	/* TODO check more advanced stuff later */
 	return 1-incomplete;
 }
 
@@ -484,7 +491,7 @@ static void removeedges(int i,int j) {
 }
 
 /* if two arrows pointing the same way has a gap of one cell between
-   them: then the gap must contain either an edge goign though (if
+   them: then the gap must contain either an edge going though (if
 	 arrows have the same number) or blocked (number difference==1) */
 static int level1gapone() {
 	int i,j,x2,y2,x3,y3,ok=0,d;
@@ -515,28 +522,28 @@ static int level1gapone() {
 }
 
 /* if there is a one-cell gap between two blocked or a blocked and an
-   arrow, then the gap must contain edge */
+   arrow/X, then the gap must contain edge */
 static int level1blockedgap() {
 	int i,j,blocked,ok=0;
 	/* downward */
 	for(i=1;i<x-1;i++) for(j=0;j<y-2;j++) {
 		blocked=0;
-		if(m[i][j][2]) blocked++;
-		if(m[i][j+2][2]) blocked++;
+		if(m[i][j][2]==1) blocked++;
+		if(m[i][j+2][2]==1) blocked++;
 		if(mn[i][j+1]>-1) continue;
 		if(!blocked) continue;
-		if(blocked<2 && mn[i][j]<0 && mn[i][j+2]<0) continue;
+		if(blocked<2 && mn[i][j]<0 && m[i][j][2]<2 && mn[i][j+2]<0 && m[i][j+2][2]<2) continue;
 		if(!m[i][j+1][0]) addmovetoqueue(i,j+1,0,1),ok=1;
 		if(!m[i-1][j+1][0]) addmovetoqueue(i-1,j+1,0,1),ok=1;
 	}
 	/* sideways */
 	for(i=0;i<x-2;i++) for(j=1;j<y-1;j++) {
 		blocked=0;
-		if(m[i][j][2]) blocked++;
-		if(m[i+2][j][2]) blocked++;
+		if(m[i][j][2]==1) blocked++;
+		if(m[i+2][j][2]==1) blocked++;
 		if(mn[i+1][j]>-1) continue;
 		if(!blocked) continue;
-		if(blocked<2 && mn[i][j]<0 && mn[i+2][j]<0) continue;
+		if(blocked<2 && mn[i][j]<0 && m[i][j][2]<2 && mn[i+2][j]<0 && m[i+2][j][2]<2) continue;
 		if(!m[i+1][j][1]) addmovetoqueue(i+1,j,1,1),ok=1;
 		if(!m[i+1][j-1][1]) addmovetoqueue(i+1,j-1,1,1),ok=1;
 	}
@@ -624,7 +631,7 @@ static int level2uniqueblocked() {
 		x2=i+dx[md[i][j]]; y2=j+dy[md[i][j]];
 		while(x2>=0 && x2<x && y2>=0 && y2<y) {
 			if(mn[x2][y2]>-1 && md[x2][y2]==md[i][j]) break;
-			if(m[x2][y2][2]) rem--;
+			if(m[x2][y2][2]==1) rem--;
 			x2+=dx[md[i][j]]; y2+=dy[md[i][j]];
 		}
 		if(!rem) continue;
@@ -814,14 +821,14 @@ static int togglecell(int val) {
 static void processmousedown() {
   int cellx,celly,d,x2,y2,new=-1,e;
   getcell(event_mousex,event_mousey,&cellx,&celly);
-  if(cellx<0 || celly<0 || cellx>=x || celly>=y || mn[cellx][celly]>-1) return;
+  if(cellx<0 || celly<0 || cellx>=x || celly>=y || mn[cellx][celly]>-1 || m[cellx][celly][2]>1) return;
   if(event_mousebutton==SDL_BUTTON_RIGHT) new=1;
   else if(event_mousebutton==SDL_BUTTON_MIDDLE) new=0;
   if(new>-1 && m[cellx][celly][2]!=new) {
     domove(cellx,celly,2,new);
     for(d=0;d<4;d++) {
       x2=cellx+ex[d],y2=celly+ey[d],e=ed[d];
-      if(x2>=0 && x2<x && y2>=0 && y2<y && mn[x2][y2]<0 && m[x2][y2][e]) {
+      if(x2>=0 && x2<x && y2>=0 && y2<y && mn[x2][y2]<0 && m[x2][y2][2]<2 && m[x2][y2][e]) {
         domove(x2,y2,e,0);
       }
     }

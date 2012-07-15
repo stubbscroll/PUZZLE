@@ -5,9 +5,5 @@ general:
   (for example) is messed up.
 - when in anykeypress, redraw doesn't draw the fancy colours.
 
-nurikabe:
-- FIXED (puzzles re-gained by adding another heuristic)
-  fixing the bug in level4connectborder resulted in losing R0329 and R0555.
-
 picross:
 - solver freezes on illegal boards

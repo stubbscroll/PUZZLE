@@ -5,16 +5,16 @@ v0.0 - 2011-07-18
 
 TODO next version
 
-- added more games: hashiwokakero, masyu and slitherlink.
+- added more games: hashiwokakero, masyu, slitherlink and yajilin.
 - quick fix so that the graphics work under gnu/linux. bytes per pixel was
   changed from 1 to 4, and this is the only mode supported.
 - fixed black screen when resizing windows in verify mode.
 
-the program will only reach v1.0 when the following is in place
+needed changes before v1.0 is reached
 
 - menu system with puzzle selector and score tracking.
 - automatic scanning of puzzles (on first time run), user-triggable scan for
-  new puzzles
+  new puzzles (check file date compared to date of last scan)
 - every feature should run on windows and gnu/linux, and hopefully on mac
   (which i cannot test)
 

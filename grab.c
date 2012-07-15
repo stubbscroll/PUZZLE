@@ -757,7 +757,7 @@ void parsejankoyaj(FILE *f,char *p3,int x,int y) {
 				fprintf(f,"%s%c",yajcode(v),dir);
 			} else {
 				p+=2;
-				fprintf(f,"xx");
+				fprintf(f,"**");
 			}
     }
     fprintf(f,"\n");

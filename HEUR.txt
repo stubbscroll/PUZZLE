@@ -78,6 +78,8 @@ level 3
 * try all ways of distributing edges. apply the intersection (minimum) of all
   legal ways.
 
+level 4
+
 level 5
 
 - try all ways of distributing edges around a node, then solve greedily. then
@@ -131,13 +133,13 @@ level 4
 
 level 5
 
-* for a cell: assume that it is blocked, then fill in greedily.
+- for a cell: assume that it is blocked, then fill in greedily.
   then, assume it is blank, fill in greedily. for each cell that
   were filled in similarly for both, then the cell should be
   filled in like this. in addition, if any of the assumptions
   cause a contradiction, then the cell must be filled in the
   other way.
-* try all combinations of filling in a numbered region. reject
+- try all combinations of filling in a numbered region. reject
   all combinations causing disconnection, strip crossing >=2
   borders and adjacent walls. fill in the intersection of
   all these combinations. NB, do not run this heuristic if
@@ -146,16 +148,69 @@ level 5
 HITORI
 
 level 1
+
+- if a value occurs once in its row and column, it's never blocked
+- if there are three equal values in a row/column, 1 and 3 must be
+  blocked, while 2 must be empty
+- all cells adjacent to a wall must be empty
+
 level 2
+
+- if a row/column has two or more of a number and one is filled in wih
+  empty, the rest must be wall
+
 level 3
+
 level 4
+
+- if placing a wall in a cell causes the empty area to be disconnected, then
+  that cell must be empty
+
 level 5
+- assume that a cell is empty or wall, then fill in greedily (using heuristics
+  up to level 3) and take intersection or hope for contradiction.
+- same as above, but can use level 4 heuristics
 
 MASYU
 
 level 1
+
+- if a black dot is near or 1 away from the border, then an edge must point
+  away from the border
+- if a white dot is near the border, an edge parallel to the border must go
+  through it
+- if there are three whites in a row, draw three parallel lines through them
+  (orthogonal to the white dots)
+- if there are two black dots in a row, draw 2 edges out from them, extended
+  in the direction of adjacency
+- if an edge through a white is extended on one side and can only turn one
+  way on the other side, then make this turn. this heuristic automatically
+  handles two whites in a row
+- if it is impossible to extende an edge of length 2 from a black dot, then
+  there must be an edge of length 2 in the opposite direction
+- if a loose end can only grow to one place, let it
+- if a loose end is within a white, let it continue through in the same
+  direction
+- if an edge can go though a white dot in only one direction, then do it
+- if there is an edge of length 1 going out of a black dot, extend it
+- line through a white dot such that it must turn in the next cell,
+  and white 2 away or black 3 away.
+  white: 2-line must be orthogonal
+  black: 2-line in opposite direction, from black
+  TODO refomulate (level1beyondmustturn)
+- two black dots of distance 2 away: if one has an edge pointing away,
+  the other must also have it
+- for the pattern *.oo, black must have edge away from oo
+
 level 2
+
 level 3
+
+- if there are two possible moves from a loose end and one of them causes a
+  closed loop which doesn't include all dots and edges, then the other
+  move must be taken
+- check if a move causes an odd number of loose ends in a region
+
 level 4
 
 - if there is an enclosing with 4 loose ends, two occurrences of two
@@ -164,6 +219,12 @@ level 4
   be AC BD or AD BC.
 
 level 5
+
+- try all ways of extending an edge and solve greedily and take
+  intersection or hope for contradiction
+- try both ways of making a straight line through o, solve greedily
+  and take intersection
+- try all ways of fulfilling black, solve greedily and take intersection
 
 NURIKABE (NP-complete)
 
@@ -176,7 +237,8 @@ level 1 (trivial, immediate)
 - if there is an island of the same size as its number, all
   unfilled neighbouring cells must be wall.
 * if an unfilled cell is surrounded by island, it must be
-  island (not needed so far).
+  island (not needed so far). (nb, apply only if there are blocked
+  elsewhere)
 
 level 2 (easy, almost immediate)
 
@@ -326,8 +388,25 @@ unsolved situations
 
 PICROSS (NP-complete)
 
+level 1
+
+- if clue is 0, then all cells in row/column become empty
+- if there is just one possible combination for a given row/column,
+  apply it
+
+level 2
+
+level 3
+
+level 4
+
+- try all possibilities for a row/column and apply the intersection of
+  all possibilities
+
 level 5
 
+- for each cell, assume filled/empty, solve greedily and take intersection
+  and/or achieve contradiction
 * try all legal combinations of filling in a row or column,
   then do greedy. then fill in the intersection of all these
   combinations.

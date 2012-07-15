@@ -273,6 +273,24 @@ void drawsolidcell32(int u,int v,Uint32 col) {
   drawsolidcell32w(u,v,col,thick,thick,0,0);
 }
 
+void drawcross(int u,int v,Uint32 col) {
+	int i,j,basex=startx+u*width,basey=starty+v*height;
+	int w=width<height?width:height;
+	drawsolidcell32(u,v,blankcol);
+	for(i=thick+2,j=w-3;i<w-2;i++,j--) {
+		drawpixel32(basex+i,basey+i,col);
+		drawpixel32(basex+i-1,basey+i,col);
+		drawpixel32(basex+i+1,basey+i,col);
+		drawpixel32(basex+i,basey+i-1,col);
+		drawpixel32(basex+i,basey+i+1,col);
+		drawpixel32(basex+i,basey+j,col);
+		drawpixel32(basex+i-1,basey+j,col);
+		drawpixel32(basex+i+1,basey+j,col);
+		drawpixel32(basex+i,basey+j-1,col);
+		drawpixel32(basex+i,basey+j+1,col);
+	}
+}
+
 /*  draw a number in cell x,y with custom border */
 void drawnumbercell32w(int u,int v,int num,Uint32 col,Uint32 col2,Uint32 b,int left,int up,int right,int down) {
   drawrectangle32(startx+u*width+left,starty+v*height+up,

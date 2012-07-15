@@ -33,11 +33,11 @@ puzzles\sli*.txt
 TEXT FILES
 
 BUGS.txt         list of currently known bugs
-CHANGES.txt      list of changes between different versions
 COPYING.txt      license
 FILES.txt        this file
 format.txt       description of puzzle file format
 HEUR.txt         list of solving strategies (heuristics) used by the program
+HISTORY.txt      list of changes between different versions
 PUZZLE.txt       list of all puzzles
 README.txt       the readme file
 STATUS.txt       status of the automatic solver
