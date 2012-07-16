@@ -1836,7 +1836,8 @@ static void processkeydown(int key) {
 }
 
 static void autosolver(char *s) {
-  int res;
+  int res,i,j;
+	char t[256];
   double start=gettime(),end;
   logprintf("%s: ",s);
   while(hint()>0) executemovequeue();
@@ -1847,6 +1848,13 @@ static void autosolver(char *s) {
   if(res==-1) logprintf("Solver reached illegal state!\n");
   else if(!res) logprintf("Not solved\n");
   else logprintf("Solved!\n");
+	for(j=i=0;s[i];i++) if(s[i]=='/' || s[i]=='\\') j=i+1;
+	for(i=0;s[j];) t[i++]=s[j++];
+	for(i=0;t[i] && t[i]!='.';i++);
+	if(!t[i]) t[i++]='.';
+	else i++;
+	t[i++]='b'; t[i++]='m'; t[i++]='p'; t[i]=0;
+	SDL_SaveBMP(screen,t);
 }
 
 void nurikabe(char *path,int solve) {
