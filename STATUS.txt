@@ -38,6 +38,9 @@ slitherlink:
 - playable, done
 - solver is good and fast (not solved: C024, and a bunch of R)
 
+yajilin:
+
+
 SOLVING STATUS (YES=solved,**YES**=yay solved a hard puzzle, something else=description)
 
 NURIKABE

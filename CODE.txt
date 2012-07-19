@@ -1,0 +1,31 @@
+explanation of the general code structure. beware that the games implemented
+earlier (like nurikabe) can deviate from this explanation. adhering games
+include hashiwokakero and yajilin.
+
+every game has the same code structure, with the following functions:
+
+[gamename]() - entry point for game
+autosolver() - special solver mode
+processkeydown(), processmousemotion(), processmousedown() - get input
+showverify() - show connectedness, show different regions in different colours
+hint() - hint system
+levelnhint() - call hints for levels n=1,2,3,4,5
+- for level 5 (or possibly other levels) hints that modify the board: use
+  domove() and undo() with visible=0 instead of writing directly to m[][]
+  and creating total backups
+- use addmovetoqueue to let the hint system add a move
+executemovequeue(), executeonemovefromqueue(), movequeueisempty(),
+  addmovetoqueue() - add and execute moves in hint system
+domove() - add a move to the undo stack, then perform move
+applymove() - perform a move, including updating touched[] and st[]
+undo() - undo the topmost move on the undo stack
+verifyboard() - check if the board is solved, unfinished or illegal
+updatetoscreen() - draw all board changes to screen
+loadpuzzle() - load puzzle from disk into data structures
+
+variables:
+
+x,y - map size
+visit[][], qs, qe, q[] - bfs stuff
+m[][], mn[][] (and possible more) - board 
+st[][] - internal helper array (counts etc)

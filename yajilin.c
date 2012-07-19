@@ -14,6 +14,9 @@
 static int x,y;                 /*  map size */
 static char difficulty[MAXSTR]; /*  string holding the difficulty */
 
+#define UNFILLED    -100
+#define NOINTERSECT -101
+
 /*  -1:  no number
     0-  numbered cell */
 static int mn[MAXS][MAXS];
@@ -46,7 +49,7 @@ static int st[MAXS][MAXS];
 static int ptrx[MAXS][MAXS][MAXS];
 static int ptry[MAXS][MAXS][MAXS];
 static int ptrn[MAXS][MAXS];
-static int ptrnum[MAXS][MAXS];
+static int ptrnum[MAXS][MAXS];	/* number of blocked needed in interval */
 
 /*  move queue for hint system */
 #define MAXMQ MAXS*MAXS*4
@@ -153,12 +156,12 @@ static int degree(int i,int j) {
 
 /* check if we can create edge from u,v in direction d */
 /* this function assumes that u,v is empty with degree<2 */
-/* return 1 if edge already exists */
+/* return 2 if edge already exists */
 static int legaledge(int u,int v,int d) {
 	int x2=u+dx[d],y2=v+dy[d],x3=u+ex[d],y3=v+ey[d];
 	if(x2<0 || y2<0 || x2>=x || y2>=y) return 0;
 	if(mn[x2][y2]>-1 || m[x2][y2][2]) return 0;
-	if(m[x3][y3][ed[d]]) return 1;
+	if(m[x3][y3][ed[d]]) return 2;
 	return degree(x2,y2)<2;
 }
 
@@ -283,7 +286,7 @@ static void updatetoscreen(int visible) {
 }
 
 /* update background colour for arrow cell */
-static void updatearrow(int cellx,int celly) {
+static void updatearrow(int cellx,int celly,int visible) {
 	int newcol,count=0,empty=0,dirs,type=md[cellx][celly];
 	int dx=0,dy=0,atx=cellx,aty=celly;
 	if(!type) dx=1;
@@ -313,19 +316,21 @@ static void updatearrow(int cellx,int celly) {
 	else newcol=empty?1:2;
 	if(st[cellx][celly]!=newcol) {
 		st[cellx][celly]=newcol;
-		touched[cellx][celly]=1;
+		touched[cellx][celly]=visible;
 	}
 }
 
-static void applymove(int cellx,int celly,int celld,int val) {
+static void applymove(int cellx,int celly,int celld,int val,int visible) {
 	int i,atx,aty,x2,y2;
   m[cellx][celly][celld]=val;
-  touched[cellx][celly]=1;
-  if(celld==1) touched[cellx][celly+1]=1;
-  else if(!celld) touched[cellx+1][celly]=1;
+	if(visible) {
+		touched[cellx][celly]=1;
+		if(celld==1) touched[cellx][celly+1]=1;
+		else if(!celld) touched[cellx+1][celly]=1;
+	}
 	/* recheck all arrows affected by this cell */
 	for(i=0;i<ptrn[cellx][celly];i++)
-		updatearrow(ptrx[cellx][celly][i],ptry[cellx][celly][i]);
+		updatearrow(ptrx[cellx][celly][i],ptry[cellx][celly][i],visible);
 	/* if edge: check other cell */
 	if(celld<2) {
 		atx=cellx;
@@ -333,8 +338,8 @@ static void applymove(int cellx,int celly,int celld,int val) {
 		if(celld) aty++;
 		else atx++;
 		for(i=0;i<ptrn[atx][aty];i++)
-			updatearrow(ptrx[atx][aty][i],ptry[atx][aty][i]);
-	} else {
+			updatearrow(ptrx[atx][aty][i],ptry[atx][aty][i],visible);
+	} else if(visible) {
 		for(i=0;i<4;i++) {
 			x2=cellx+dx[i]; y2=celly+dy[i];
 			if(x2>=0 && y2>=0 && x2<x && y2<y) touched[x2][y2]=1;
@@ -422,23 +427,25 @@ doneclose:
 		return -1;
 	}
 	cleanupbfs();
-	/* TODO check more advanced stuff later */
+	/* find empty cells adjacent to blocked with only one legal edge */
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(mn[i][j]<0 && !m[i][j][2] && hasneighbouringblocked(i,j))
+		if(countlegaledges(i,j)==1) return -1;
 	return 1-incomplete;
 }
 
 static void undo(int visible) {
   if(!stackempty()) {
     int val=stackpop(),celld=stackpop(),celly=stackpop(),cellx=stackpop();
-    applymove(cellx,celly,celld,val);
+    applymove(cellx,celly,celld,val,visible);
     updatetoscreen(visible);
   }
 }
 
 /*  do move bookkeeping, including putting it on the stack */
-static void domove(int cellx,int celly,int celld,int val) {
+static void domove(int cellx,int celly,int celld,int val,int visible) {
   if(val==m[cellx][celly][celld]) error("logical error, tried to set cell to existing value");
   stackpush(cellx); stackpush(celly); stackpush(celld); stackpush(m[cellx][celly][celld]);
-  applymove(cellx,celly,celld,val);
+  applymove(cellx,celly,celld,val,visible);
 }
 
 /*  start of hint system! */
@@ -462,7 +469,7 @@ loop:
     if(mqs==MAXMQ) mqs=0;
     goto loop;
   }
-  domove(mq[mqs],mq[mqs+1],mq[mqs+2],mq[mqs+3]);
+  domove(mq[mqs],mq[mqs+1],mq[mqs+2],mq[mqs+3],1);
   updatetoscreen(visible);
   mqs+=4;
   if(mqs==MAXMQ) mqs=0;
@@ -526,7 +533,7 @@ static int level1gapone() {
 static int level1blockedgap() {
 	int i,j,blocked,ok=0;
 	/* downward */
-	for(i=1;i<x-1;i++) for(j=0;j<y-2;j++) {
+	for(i=1;i<x-1;i++) for(j=0;j<y-2;j++) if(isempty(i,j+1)) {
 		blocked=0;
 		if(m[i][j][2]==1) blocked++;
 		if(m[i][j+2][2]==1) blocked++;
@@ -537,7 +544,7 @@ static int level1blockedgap() {
 		if(!m[i-1][j+1][0]) addmovetoqueue(i-1,j+1,0,1),ok=1;
 	}
 	/* sideways */
-	for(i=0;i<x-2;i++) for(j=1;j<y-1;j++) {
+	for(i=0;i<x-2;i++) for(j=1;j<y-1;j++) if(isempty(i+1,j)) {
 		blocked=0;
 		if(m[i][j][2]==1) blocked++;
 		if(m[i+2][j][2]==1) blocked++;
@@ -570,7 +577,8 @@ static int level1twoways() {
 /* if an empty cell has only one legal edge, then it must be blocked */
 static int level1oneedge() {
 	int i,j,d,ok=0,count;
-	for(i=0;i<x;i++) for(j=0;j<y;j++) if(mn[i][j]<0 && !m[i][j][2]) {
+	for(i=0;i<x;i++) for(j=0;j<y;j++
+	) if(mn[i][j]<0 && !m[i][j][2]) {
 		for(count=d=0;d<4;d++) if(legaledge(i,j,d)) count++;
 		if(count==1) for(d=0;d<4;d++) if(legaledge(i,j,d) && !m[i+ex[d]][j+ey[d]][ed[d]])
 			addmovetoqueue(i,j,2,1),ok=1;
@@ -747,7 +755,118 @@ static int level3hint() {
   return 0;
 }
 
+/* for each interval between two similar arrows: find all ways of placing
+   blocked, check correctness with verifyboard and take intersection */
+
+static int btr4row[MAXS];
+
+static void level4tryallbtr(int x1,int y1,int d,int cx,int cy,int x2,int y2,int rem) {
+	if(!rem) {
+		if(verifyboard()>-1) {
+			cx=x1+dx[d]; cy=y1+dy[d];
+			while(cx!=x2 || cy!=y2) {
+				if(d&1) {
+					if(btr4row[cy]==UNFILLED) btr4row[cy]=m[cx][cy][2];
+					else if(btr4row[cy]!=NOINTERSECT && btr4row[cy]!=m[cx][cy][2]) btr4row[cy]=NOINTERSECT;
+				} else {
+					if(btr4row[cx]==UNFILLED) btr4row[cx]=m[cx][cy][2];
+					else if(btr4row[cx]!=NOINTERSECT && btr4row[cx]!=m[cx][cy][2]) btr4row[cx]=NOINTERSECT;
+				}
+				cx+=dx[d]; cy+=dy[d];
+			}
+		}
+		return;
+	}
+	while(cx!=x2 || cy!=y2) {
+		if(isempty(cx,cy) && !hasneighbouringblocked(cx,cy) && !degree(cx,cy)) {
+			domove(cx,cy,2,1,0);
+			level4tryallbtr(x1,y1,d,cx+dx[d],cy+dy[d],x2,y2,rem-1);
+			undo(0);
+		}
+		cx+=dx[d]; cy+=dy[d];
+	}
+}
+
+static int level4tryallintervals() {
+	static int i=0,j=0;
+	int z=x*y,rem,x1,y1,x2,y2,xy=x>y?x:y,ok=0,k;
+	while(z--) {
+		/* only continue if non-fulfilled arrow */
+		if(mn[i][j]<0 || st[i][j]) goto next;
+		rem=ptrnum[i][j];
+		/* find first cell beyond segment */
+		x1=x2=i+dx[md[i][j]]; y1=y2=j+dy[md[i][j]];
+		while(x2>=0 && x2<x && y2>=0 && y2<y) {
+			if(mn[x2][y2]>-1 && md[x2][y2]==md[i][j]) break;
+			if(m[x2][y2][2]==1) rem--;
+			x2+=dx[md[i][j]]; y2+=dy[md[i][j]];
+		}
+		for(k=0;k<xy;k++) btr4row[k]=UNFILLED;
+		level4tryallbtr(i,j,md[i][j],x1,y1,x2,y2,rem);
+		x1=i+dx[md[i][j]]; y1=j+dy[md[i][j]];
+		while(x1!=x2 || y1!=y2) {
+			if(md[i][j]&1) {
+				if(btr4row[y1]!=UNFILLED && btr4row[y1]!=NOINTERSECT && btr4row[y1]!=m[x1][y1][2])
+					addmovetoqueue(x1,y1,2,btr4row[y1]),ok=1;
+			} else {
+				if(btr4row[x1]!=UNFILLED && btr4row[x1]!=NOINTERSECT && btr4row[x1]!=m[x1][y1][2])
+					addmovetoqueue(x1,y1,2,btr4row[x1]),ok=1;
+			}
+			x1+=dx[md[i][j]]; y1+=dy[md[i][j]];
+		}
+		if(ok) return 1;
+	next:
+		j++;
+		if(j==y) {
+			j=0; i++;
+			if(i==x) i=0;
+		}
+	}
+	return 0;
+}
+
+/* find a loose end. try all ways of extending it. then, extend the edge
+   further as long as it has only one possibility of expanding. if all
+   combinations except one lead to an illegal position according to
+   verifyboard, apply that one combination. */
+static int level4findonlyokedge() {
+	static int i=0,j=0;
+	int z=x*y,d,okcount,okdir,x2,y2,e,added;
+	while(z--) {
+		if(degree(i,j)!=1) goto next;
+		for(okdir=-1,okcount=d=0;d<4;d++) if(legaledge(i,j,d)==1) {
+			domove(i+ex[d],j+ey[d],ed[d],1,0);
+			added=1;
+			/* greedily add as long it's forced */
+			x2=i+dx[d]; y2=j+dy[d];
+			while(countlegaledges(x2,y2)==2) {
+				for(e=0;e<4;e++) if(legaledge(x2,y2,e)==1) {
+					domove(x2+ex[e],y2+ey[e],ed[e],1,0); added++;
+					x2+=dx[e]; y2+=dy[e];
+					break;
+				}
+				if(e==4) break;
+			}
+			if(verifyboard()>-1) okcount++,okdir=d;
+			while(added--) undo(0);
+		}
+		if(okcount==1) {
+			addmovetoqueue(i+ex[okdir],j+ey[okdir],ed[okdir],1);
+			return 1;
+		}
+	next:
+		j++;
+		if(j==y) {
+			j=0; i++;
+			if(i==x) i=0;
+		}
+	}
+	return 0;
+}
+
 static int level4hint() {
+	if(level4tryallintervals()) return 1;
+	if(level4findonlyokedge()) return 1;
   return 0;
 }
 
@@ -825,11 +944,11 @@ static void processmousedown() {
   if(event_mousebutton==SDL_BUTTON_RIGHT) new=1;
   else if(event_mousebutton==SDL_BUTTON_MIDDLE) new=0;
   if(new>-1 && m[cellx][celly][2]!=new) {
-    domove(cellx,celly,2,new);
+    domove(cellx,celly,2,new,1);
     for(d=0;d<4;d++) {
       x2=cellx+ex[d],y2=celly+ey[d],e=ed[d];
       if(x2>=0 && x2<x && y2>=0 && y2<y && mn[x2][y2]<0 && m[x2][y2][2]<2 && m[x2][y2][e]) {
-        domove(x2,y2,e,0);
+        domove(x2,y2,e,0,1);
       }
     }
     updatetoscreen(1);
@@ -849,7 +968,7 @@ static void processmousemotion() {
       if(x1==x2) d=1;
       else d=0;
       if(mn[x1][y1]>-1 || mn[x2][y2]>-1 || m[x1][y1][2] || m[x2][y2][2]) return;
-      domove(x1,y1,d,togglecell(m[x1][y1][d]));
+      domove(x1,y1,d,togglecell(m[x1][y1][d]),1);
       updatetoscreen(1);
     }
   }
@@ -870,7 +989,9 @@ static void processkeydown(int key) {
     res=hint();
     if(res>0) {
       executemovequeue();
-      while(hint()>0) executemovequeue();
+      while(hint()>0) {
+				executemovequeue();
+			}
       if(verifyboard()<1) messagebox("Sorry, no more moves found.");
     } else if(!res) messagebox("Sorry, no moves found.");
     else messagebox("Sorry, hint will not work on an illegal board.");
@@ -903,7 +1024,7 @@ void yajilin(char *path,int solve) {
   int event,i,j;
   loadpuzzle(path);
   initbfs();
-	for(i=0;i<x;i++) for(j=0;j<y;j++) if(mn[i][j]>-1) updatearrow(i,j);
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(mn[i][j]>-1) updatearrow(i,j,1);
   drawgrid();
   if(solve) { autosolver(path); return; }
   do {

@@ -7,3 +7,4 @@ general:
 
 picross:
 - solver freezes on illegal boards
+- investigate why solver is slow in the presence of yellow on R0806

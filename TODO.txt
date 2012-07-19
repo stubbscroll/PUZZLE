@@ -7,6 +7,9 @@ STUFF TO BE ADDED, IN DECREASING ORDER OF MOST DESIRED
 COMPLETE LIST OF STUFF TO BE ADDED
 
 - general:
+  - for extremely time intensive solving heuristics: estimate the number
+    of combinations needed to investigate for a given move and try moves
+    in order of increasing work
   - make a menu system for selecting puzzles. it should cache, and only
     reload upon the user issuing a refresh command. in addition, add score 
     tracking. in the menu, display whether the puzzle is solved, along with
@@ -35,7 +38,8 @@ COMPLETE LIST OF STUFF TO BE ADDED
   - improve solver, get those last puzzles!
 
 - heyawake
-  - improve solver speed, 8 hours on heyC138 is way too much
+  - improve solver speed, 8 hours on heyC138 is way too much. check if it has
+    anything to do with that rectangle with 16 cells, and rectify
 
 - picross
   - make better legalrow,legalcolumn routines: given clues and partially
@@ -53,13 +57,14 @@ COMPLETE LIST OF STUFF TO BE ADDED
     the direction is in another layer
 
 - add games:
+  - minesweeper http://www.janko.at/Raetsel/Minesweeper/index.htm
+    - warning, grid can contain "x" (cell cannot have mine and cannot be marked)
+      (see R0090)
+    - tri-state, unfilled, blank, bomb
   - numberlink (arukone) http://www.janko.at/Raetsel/Arukone/index.htm
     - normal edge dragging, easily stolen from masyu
   - gokigen naname http://www.janko.at/Raetsel/Gokigen/index.htm
     - tri-state as nurikabe: unfilled, backslash, slash
-  - minesweeper http://www.janko.at/Raetsel/Minesweeper/index.htm
-    - warning, grid can contain "x" (cell cannot have mine and cannot be marked)
-    - tri-state, unfilled, blank, bomb
   - kuromasu http://www.janko.at/Raetsel/Kuromasu/index.htm
   - shikaku http://www.janko.at/Raetsel/Sikaku/index.htm
     - i don't have any good idea yet on how to implement the controls. maybe do
@@ -84,8 +89,9 @@ COMPLETE LIST OF STUFF TO BE ADDED
 
 GENERAL GOAL
 
-make a client for playing nurikabe, heyawake, akari, slitherlink, yajilin, hashiwokakero, masyu
-and possibly other fun puzzles. use sdl (maybe opengl) for graphics.
+make a client for playing nurikabe, heyawake, akari, slitherlink, yajilin,
+hashiwokakero, masyu and possibly other fun puzzles. use sdl (maybe opengl)
+for graphics.
 
 features:
 - automatic puzzle generation

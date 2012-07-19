@@ -263,7 +263,7 @@ level 3
   grow enough, it must be island ("island articulation point").
 - if there is an island which, when grown maximally, reaches
   exactly its size, then let it do so.
-- if there is an enclosed area with two several blank cells,
+- if there is an enclosed area with several blank cells,
   and exactly one must be blocked: if there is a blank cell
   such that making it black connects the existing blocked at least
   as strong as the other moves, then that cell must be blocked.
@@ -439,6 +439,7 @@ level 1
   for this corner must be empty
 
 level 2
+
 * a diagonal 3 2 2 ... 2 3 must have the outside edges of 3
   filled with edge
 - jordan curve theorem
@@ -469,10 +470,6 @@ level 1
   fill both cells with edges
 - if an empty cell borders only blocked, arrows and empty cells with degree 2,
   then this cell must be blocked
-* in the following pattern, there must be edges:
-  ?##?    ?##?
-  #  # => #++#
-           ||
 
 level 2
 
@@ -485,12 +482,30 @@ level 3
 
 - if all possibilities of making an edge (except one) creates a loop
   which doesn't solve the level, then create the only edge that doesn't
+- if there is only one way that prevents self-loop for a special case,
+  then apply it.
+  x -??    x|-??
+  x| ?? => x| ?? (and all its rotations)
+  x????    x????
 
 level 4
-* for each interval between two arrows, try all ways of placing
+
+- for each interval between two arrows, try all ways of placing
   blocked, check correctness with verifyboard and take the intersection
+* given an enclosing with only a few reachable spaces: try all ways of
+  connecting all loose ends (and placing blocked, if necessary). if there
+  are >=two ways of tying the same ends, then all of them are illegal due to
+  the requirement of having a unique solution! check verifyboard and take the
+  intersection of all legal ways
+- find a loose end. try all ways of extending it. then, extend the edge
+  further as long as it has only one possibility of expanding. if all
+  combinations except one lead to an illegal position according to
+  verifyboard, apply that one combination
+* for each pair of (close) loose ends (within an enclosing), try all ways of
+  connecting them, use verifyboard and apply the only correct possibility
 
 level 5
+
 * for each action, fill in greedily and take intersection
 * for each interval between two arrows, try all ways of placing
   blocked, fill in greedily and take intersection
@@ -503,3 +518,9 @@ level ? (unformalized heuristics)
   +--  ----+
   closing the loop from above separates the loop from the rest of the
   stuff, avoid this somehow
+* more specifically:
+  xxx    xxx
+  - - => --- (where x is blocked), since the other way of connecting the loose
+  - -    --- ends isn't unique
+  xxx    xxx
+  (occurs in C096)
