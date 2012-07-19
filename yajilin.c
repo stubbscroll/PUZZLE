@@ -378,6 +378,30 @@ static void followedge(int sx,int sy) {
   }
 }
 
+/* type 0: search empty cells with degree <2
+   return: loose: number of visited cells with numegdes==1 */
+static void genericbfs(int sx,int sy,int type,int *loose) {
+	int cx,cy,x2,y2,d,num=degree(sx,sy);
+	*loose=0;
+	if(visit[sx][sy]) return;
+	*loose=num==1;
+	if(type==0 && num>1) return;
+	visit[sx][sy]=1;
+	q[qe++]=sx; q[qe++]=sy;
+	while(qs<qe) {
+    cx=q[qs++]; cy=q[qs++];
+    for(d=0;d<4;d++) {
+      x2=cx+dx[d],y2=cy+dy[d];
+      if(x2<0 || y2<0 || x2>=x || y2>=y || visit[x2][y2] || !isempty(x2,y2)) continue;
+      num=degree(x2,y2);
+      if(type==0 && num>1) continue;
+      if(num==1) (*loose)++;
+      q[qe++]=x2; q[qe++]=y2;
+      visit[x2][y2]=1;
+    }
+	}
+}
+
 /* 0: unfinished, 1: finished, -1: error */
 static int verifyboard() {
 	int i,j,incomplete=0,count,x2,y2,loop=0,loose=0;
@@ -430,6 +454,17 @@ doneclose:
 	/* find empty cells adjacent to blocked with only one legal edge */
 	for(i=0;i<x;i++) for(j=0;j<y;j++) if(mn[i][j]<0 && !m[i][j][2] && hasneighbouringblocked(i,j))
 		if(countlegaledges(i,j)==1) return -1;
+	/* TODO for each enclosing, count the number of loose ends in it. if there
+	   is an enclosing with an odd number of loose ends, the board is illegal.
+		 an enclosing consists of 4-connected empty cells with 0 or 1 edges. */
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(!visit[i][j] && isempty(i,j) && degree(i,j)<2) {
+		genericbfs(i,j,0,&loose);
+		if(loose&1) {
+			cleanupbfs();
+			return -1;
+		}
+	}
+	cleanupbfs();
 	return 1-incomplete;
 }
 

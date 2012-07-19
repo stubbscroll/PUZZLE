@@ -482,7 +482,7 @@ level 3
 
 - if all possibilities of making an edge (except one) creates a loop
   which doesn't solve the level, then create the only edge that doesn't
-- if there is only one way that prevents self-loop for a special case,
+* if there is only one way that prevents self-loop for a special case,
   then apply it.
   x -??    x|-??
   x| ?? => x| ?? (and all its rotations)
@@ -492,15 +492,17 @@ level 4
 
 - for each interval between two arrows, try all ways of placing
   blocked, check correctness with verifyboard and take the intersection
-* given an enclosing with only a few reachable spaces: try all ways of
-  connecting all loose ends (and placing blocked, if necessary). if there
-  are >=two ways of tying the same ends, then all of them are illegal due to
-  the requirement of having a unique solution! check verifyboard and take the
-  intersection of all legal ways
 - find a loose end. try all ways of extending it. then, extend the edge
   further as long as it has only one possibility of expanding. if all
   combinations except one lead to an illegal position according to
   verifyboard, apply that one combination
+* given an enclosing with only a few reachable spaces: try all ways of
+  connecting all loose ends (and placing blocked, if necessary). if there
+  are >=two ways of tying the same ends, then all of them are illegal due to
+  the requirement of having a unique solution! check verifyboard and take the
+  intersection of all legal ways. do not use the uniqueness criterium if one
+  or more of the possibilities involve placing blocked in rows/columns with
+  numbered arrows
 * for each pair of (close) loose ends (within an enclosing), try all ways of
   connecting them, use verifyboard and apply the only correct possibility
 
