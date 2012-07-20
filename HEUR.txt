@@ -508,9 +508,12 @@ level 4
 
 level 5
 
-* for each action, fill in greedily and take intersection
-* for each interval between two arrows, try all ways of placing
+- for each action in an empty cell (blocked and 6 ways of placing two edges),
+  fill in greedily and take intersection
+- for each interval between two arrows, try all ways of placing
   blocked, fill in greedily and take intersection
+- for every way to extend a loose end by one edge, fill in greedily and take
+  intersection
 
 level ? (unformalized heuristics)
 * deal with situations like this:

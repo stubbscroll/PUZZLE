@@ -404,7 +404,7 @@ static void genericbfs(int sx,int sy,int type,int *loose) {
 
 /* 0: unfinished, 1: finished, -1: error */
 static int verifyboard() {
-	int i,j,incomplete=0,count,x2,y2,loop=0,loose=0;
+	int i,j,incomplete=0,count,x2,y2,loop=0,loose=0,rem,atx,aty;
 	/* check for illegal stuff: adjacent blocked */
 	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j][2]==1 && hasneighbouringblocked(i,j)) return -1;
 	/* check edges */
@@ -454,7 +454,7 @@ doneclose:
 	/* find empty cells adjacent to blocked with only one legal edge */
 	for(i=0;i<x;i++) for(j=0;j<y;j++) if(mn[i][j]<0 && !m[i][j][2] && hasneighbouringblocked(i,j))
 		if(countlegaledges(i,j)==1) return -1;
-	/* TODO for each enclosing, count the number of loose ends in it. if there
+	/* for each enclosing, count the number of loose ends in it. if there
 	   is an enclosing with an odd number of loose ends, the board is illegal.
 		 an enclosing consists of 4-connected empty cells with 0 or 1 edges. */
 	for(i=0;i<x;i++) for(j=0;j<y;j++) if(!visit[i][j] && isempty(i,j) && degree(i,j)<2) {
@@ -465,6 +465,33 @@ doneclose:
 		}
 	}
 	cleanupbfs();
+	/* check each interval between two similar arrows and check if it is
+     impossible to greedily place blocked. if so, the board is illegal! */
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(mn[i][j]>-1 && (rem=ptrnum[i][j])) {
+		/* find first cell beyond segment */
+		x2=i+dx[md[i][j]]; y2=j+dy[md[i][j]];
+		while(x2>=0 && x2<x && y2>=0 && y2<y) {
+			if(mn[x2][y2]>-1 && md[x2][y2]==md[i][j]) break;
+			if(m[x2][y2][2]==1) rem--;
+			x2+=dx[md[i][j]]; y2+=dy[md[i][j]];
+		}
+		if(!rem) continue;
+		/* fill in greedily */
+		atx=i+dx[md[i][j]]; aty=j+dy[md[i][j]];
+		while(rem) {
+			if(mn[atx][aty]<0 && !degree(atx,aty) && !m[atx][aty][2] && !hasneighbouringblocked(atx,aty)) {
+				rem--;
+				atx+=dx[md[i][j]];
+				aty+=dy[md[i][j]];
+				if(atx==x2 && aty==y2) break;
+				if(!rem) break;
+			}
+			atx+=dx[md[i][j]];
+			aty+=dy[md[i][j]];
+			if(atx==x2 && aty==y2) break;
+		}
+		if(rem) return -1;
+	}
 	return 1-incomplete;
 }
 
@@ -513,6 +540,10 @@ loop:
 
 static void executemovequeue() {
   while(executeonemovefromqueue(1)) if(dummyevent()) drawgrid();
+}
+
+static void silentexecutemovequeue() {
+  while(executeonemovefromqueue(0));
 }
 
 /* hint:
@@ -612,8 +643,7 @@ static int level1twoways() {
 /* if an empty cell has only one legal edge, then it must be blocked */
 static int level1oneedge() {
 	int i,j,d,ok=0,count;
-	for(i=0;i<x;i++) for(j=0;j<y;j++
-	) if(mn[i][j]<0 && !m[i][j][2]) {
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(mn[i][j]<0 && !m[i][j][2]) {
 		for(count=d=0;d<4;d++) if(legaledge(i,j,d)) count++;
 		if(count==1) for(d=0;d<4;d++) if(legaledge(i,j,d) && !m[i+ex[d]][j+ey[d]][ed[d]])
 			addmovetoqueue(i,j,2,1),ok=1;
@@ -668,7 +698,7 @@ static int level1hint() {
 /* if there is only one way to fill in blocked in an interval between
    two arrows pointing the same way, do it */
 static int level2uniqueblocked() {
-	int i,j,x2,y2,rem,atx,aty,rem2,wrong;
+	int i,j,x2,y2,rem,atx,aty,rem2,wrong,ok=0;
 	for(i=0;i<x;i++) for(j=0;j<y;j++) if(mn[i][j]>-1 && (rem=ptrnum[i][j])) {
 		/* find first cell beyond segment */
 		x2=i+dx[md[i][j]]; y2=j+dy[md[i][j]];
@@ -678,8 +708,7 @@ static int level2uniqueblocked() {
 			x2+=dx[md[i][j]]; y2+=dy[md[i][j]];
 		}
 		if(!rem) continue;
-		/* fill in the correct way and check if the last block
-		   is placed on the last eligible cell */
+		/* fill in greedily */
 		atx=i+dx[md[i][j]]; aty=j+dy[md[i][j]];
 		rem2=rem;
 		while(rem) {
@@ -688,10 +717,21 @@ static int level2uniqueblocked() {
 				rem--;
 				atx+=dx[md[i][j]];
 				aty+=dy[md[i][j]];
+				if(atx==x2 && aty==y2) break;
 				if(!rem) break;
 			}
 			atx+=dx[md[i][j]];
 			aty+=dy[md[i][j]];
+			if(atx==x2 && aty==y2) break;
+		}
+		if(rem) {
+			atx=i; aty=j;
+			while(atx!=x2 || aty!=y2) {
+				visit[atx][aty]=0;
+				atx+=dx[md[i][j]];
+				aty+=dy[md[i][j]];
+			}
+			continue;
 		}
 		/* traverse backwards and compare */
 		rem=rem2;
@@ -722,6 +762,7 @@ static int level2uniqueblocked() {
 		while(1) {
 			if(mn[atx][aty]<0 && !degree(atx,aty) && !m[atx][aty][2] && !hasneighbouringblocked(atx,aty)) {
 				addmovetoqueue(atx,aty,2,1);
+				ok=1;
 				atx+=dx[md[i][j]];
 				aty+=dy[md[i][j]];
 				if(atx==x2 && aty==y2) break;
@@ -730,7 +771,8 @@ static int level2uniqueblocked() {
 			aty+=dy[md[i][j]];
 			if(atx==x2 && aty==y2) break;
 		}
-		return 1;
+		if(!ok) logprintf("ERROR\n");
+		return ok;
 	}
 	return 0;
 }
@@ -905,7 +947,160 @@ static int level4hint() {
   return 0;
 }
 
+static int lev5m[MAXS][MAXS][3];
+
+static int dogreedy(int lev) {
+  int r;
+  while(1) {
+    r=verifyboard();
+    if(r<0) return -1;
+    if(r>0) return 0;
+    if(level1hint()) goto theend;
+    if(lev>1 && level2hint()) goto theend;
+    if(lev>2 && level3hint()) goto theend;
+    if(lev>3 && level4hint()) goto theend;
+    break;
+  theend:
+    silentexecutemovequeue();
+  }
+  return 0;
+}
+
+/* try all intervals, apply greedy and take intersection */
+static void level5tryallbtr(int x1,int y1,int d,int cx,int cy,int x2,int y2,int rem) {
+	int i,j,k,r,oldsp;
+	if(!rem) {
+		oldsp=getstackpos();
+		r=dogreedy(4);
+		if(r<0) goto done;
+		for(i=0;i<x;i++) for(j=0;j<y;j++) for(k=0;k<3;k++) {
+			if(lev5m[i][j][k]==UNFILLED) lev5m[i][j][k]=m[i][j][k];
+			else if(lev5m[i][j][k]!=m[i][j][k]) lev5m[i][j][k]=NOINTERSECT;
+		}
+	done:
+		while(getstackpos()>oldsp) undo(0);
+		return;
+	}
+	while(cx!=x2 || cy!=y2) {
+		if(isempty(cx,cy) && !hasneighbouringblocked(cx,cy) && !degree(cx,cy)) {
+			domove(cx,cy,2,1,0);
+			level5tryallbtr(x1,y1,d,cx+dx[d],cy+dy[d],x2,y2,rem-1);
+			undo(0);
+		}
+		cx+=dx[d]; cy+=dy[d];
+	}
+}
+
+static int level5tryallintervals() {
+	static int i=0,j=0;
+	int z=x*y,rem,x1,y1,x2,y2,k,l,ok=0,o;
+	while(z--) {
+		if(mn[i][j]<0 || st[i][j]) goto next;
+		rem=ptrnum[i][j];
+		/* find first cell beyond segment */
+		x1=x2=i+dx[md[i][j]]; y1=y2=j+dy[md[i][j]];
+		while(x2>=0 && x2<x && y2>=0 && y2<y) {
+			if(mn[x2][y2]>-1 && md[x2][y2]==md[i][j]) break;
+			if(m[x2][y2][2]==1) rem--;
+			x2+=dx[md[i][j]]; y2+=dy[md[i][j]];
+		}
+		for(k=0;k<x;k++) for(l=0;l<y;l++) for(o=0;o<3;o++) lev5m[k][l][o]=UNFILLED;
+		level5tryallbtr(i,j,md[i][j],x1,y1,x2,y2,rem);
+		for(k=0;k<x;k++) for(l=0;l<y;l++) for(o=0;o<3;o++) {
+			if(lev5m[k][l][o]!=UNFILLED && lev5m[k][l][o]!=NOINTERSECT && lev5m[k][l][o]!=m[k][l][o])
+				addmovetoqueue(k,l,o,lev5m[k][l][o]),ok=1;
+		}
+		if(ok) return 1;
+	next:
+		j++;
+		if(j==y) {
+			j=0; i++;
+			if(i==x) i=0;
+		}
+	}
+	return 0;
+}
+
+static void updateresult() {
+	int i,j,k;
+	for(i=0;i<x;i++) for(j=0;j<y;j++) for(k=0;k<3;k++) {
+		if(lev5m[i][j][k]==UNFILLED) lev5m[i][j][k]=m[i][j][k];
+		else if(lev5m[i][j][k]!=m[i][j][k]) lev5m[i][j][k]=NOINTERSECT;
+	}
+}
+
+/* for each empty cell (no edges), try all ways of placing blocked or
+   all 6 ways of placing edges, then take intersection or get contradiction */
+static int level5tryallblank() {
+	static int i=0,j=0;
+	int z=x*y,k,l,o,oldsp=getstackpos(),ok=0,can[4],r;
+	while(z--) {
+		if(mn[i][j]>-1 || !isempty(i,j) || degree(i,j)) goto next;
+		/* init */
+		for(k=0;k<x;k++) for(l=0;l<y;l++) for(o=0;o<3;o++) lev5m[k][l][o]=UNFILLED;
+		/* try blocked */
+		domove(i,j,2,1,0);
+		r=dogreedy(4);
+		if(r>=0) updateresult();
+		while(getstackpos()>oldsp) undo(0);
+		/* try all edges */
+		for(k=0;k<4;k++) can[k]=legaledge(i,j,k) && !m[i+ex[k]][j+ey[k]][ed[k]];
+		for(k=0;k<3;k++) if(can[k]) for(l=k+1;l<4;l++) if(can[l]) {
+			domove(i+ex[k],j+ey[k],ed[k],1,0);
+			domove(i+ex[l],j+ey[l],ed[l],1,0);
+			r=dogreedy(4);
+			if(r>=0) updateresult();
+			while(getstackpos()>oldsp) undo(0);
+		}
+		for(k=0;k<x;k++) for(l=0;l<y;l++) for(o=0;o<3;o++) {
+			if(lev5m[k][l][o]!=UNFILLED && lev5m[k][l][o]!=NOINTERSECT && lev5m[k][l][o]!=m[k][l][o])
+				addmovetoqueue(k,l,o,lev5m[k][l][o]),ok=1;
+		}
+		if(ok) return 1;
+	next:
+		j++;
+		if(j==y) {
+			j=0; i++;
+			if(i==x) i=0;
+		}
+	}
+	return 0;
+}
+
+/* for each loose end, try all ways of extending it by one edge and take
+   intersection */
+static int level5tryallloose() {
+	static int i=0,j=0;
+	int z=x*y,k,l,o,oldsp=getstackpos(),ok=0,r;
+	while(z--) {
+		if(mn[i][j]>-1 || !isempty(i,j) || degree(i,j)!=1) goto next;
+		/* init */
+		for(k=0;k<x;k++) for(l=0;l<y;l++) for(o=0;o<3;o++) lev5m[k][l][o]=UNFILLED;
+		for(k=0;k<4;k++) if(legaledge(i,j,k) && !m[i+ex[k]][j+ey[k]][ed[k]]) {
+			domove(i+ex[k],j+ey[k],ed[k],1,0);
+			r=dogreedy(4);
+			if(r>=0) updateresult();
+			while(getstackpos()>oldsp) undo(0);
+		}
+		for(k=0;k<x;k++) for(l=0;l<y;l++) for(o=0;o<3;o++) {
+			if(lev5m[k][l][o]!=UNFILLED && lev5m[k][l][o]!=NOINTERSECT && lev5m[k][l][o]!=m[k][l][o])
+				addmovetoqueue(k,l,o,lev5m[k][l][o]),ok=1;
+		}
+		if(ok) return 1;
+	next:
+		j++;
+		if(j==y) {
+			j=0; i++;
+			if(i==x) i=0;
+		}
+	}
+	return 0;
+}
+
 static int level5hint() {
+	if(level5tryallintervals()) return 1;
+	if(level5tryallblank()) return 1;
+	if(level5tryallloose()) return 1;
   return 0;
 }
 
