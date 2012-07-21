@@ -1,0 +1,116 @@
+list of puzzles
+
+sources:
+
+mathgrant (Grant Fikes): http://mathgrant.blogspot.com/
+melon (Palmer Mebane):   http://mellowmelon.wordpress.com/
+motris (Thomas Snyder):  http://motris.livejournal.com/
+janko (various):         http://www.janko.at/Raetsel/
+
+nurikabe (streaming content)
+
+001 melon 333
+002 motris 67
+003 motris 51
+004 motris 85
+005 motris 32
+006 motris 10
+007 melon 339
+008 mathgrant 262 (19)
+009 mathgrant 277 (20)
+010 mathgrant 296 (21)
+011 mathgrant 301 (22)
+012 mathgrant 310 (23)
+013 mathgrant 322 (24)
+014 mathgrant 324 (25)
+015 mathgrant 347 (26)
+016 mathgrant 350 (27)
+017 mathgrant 373 (28)
+018 mathgrant 389 (29)
+019 melon 268
+020 melon 250
+021 melon 224
+022 mathgrant 53 (6)
+023 mathgrant 5 (1)
+024 mathgrant 6 (2)
+025 mathgrant 7 (3)
+026 mathgrant 29 (4)
+027 mathgrant 40 (5)
+028 mathgrant 89 (7)
+029 mathgrant 112 (8)
+030 mathgrant 120 (9)
+031 mathgrant 132 (10)
+032 mathgrant 138 (11)
+033 mathgrant 160 (12)
+034 mathgrant 161 (13)
+035 mathgrant 193 (14)
+036 mathgrant 215 (15)
+037 mathgrant 216 (16)
+038 mathgrant 241 (17)
+039 mathgrant 242 (18)
+040 mathgrant 444 (30)
+041 lars huttar 24x14
+042 mathgrant 449 (31)
+043 mathgrant 460 (32)
+044 mathgrant 463 (33)
+045 mathgrant 468 (34)
+046 mathgrant 493 (35)
+047 melon 170
+048 melon 145
+049 melon 124
+050 melon 107
+051 melon 75
+052 melon 49
+053 melon 39
+
+akari (light up, process of illumination)
+
+X01 Brandon McPhail, from NP-completeness paper
+
+heyawake (room and reason)
+
+001 motris 70
+002 motris 37
+003 motris 19 (non-rectangular)
+004 motris 19 (non-rectangular)
+005 motris 14 (non-rectangular)
+
+hitori (twincognito)
+
+picross (nonogram)
+
+slitherlink (fencing match)
+
+001 motris 30
+
+masyu (pearls of wisdom)
+
+001 motris 64
+
+yajilin (straight and arrow)
+
+fillomino (polyominous)
+
+shikaku (quad-wrangle)
+
+numberlink (arukone, reunion tour)
+
+------------------------
+
+corral (bag, the inner limits)
+gokigen naname
+hebi-ichibo (spirits of serpentine)
+kakuro (cross sums, totally awesum)
+kanaore (seek and spell)
+LITS (nuruomino, tetra firma)
+mochikoro (block band)
+nansuke (numerical crossing)
+ripple effect (hakyuu kouka, ripple play)
+shakashaka (proof of quilt)
+sudoku (crowd nine)
+suraromu (circumnavi-gates)
+tatamibari (tatami for now)
+tentai show (artist's block)
+where is black cells (blackberrier jam)
+writer's block
+yajisan-kazusan (prev-arrow-cation)

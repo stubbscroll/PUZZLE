@@ -21,6 +21,14 @@ COMPLETE LIST OF STUFF TO BE ADDED
     doing that, also add some info about the puzzle, as the credits,
     difficulty and puzzle name.
   - nice resizing of numbers
+  - add achievements! for instance:
+    - for each puzzle type, achievement for completing one puzzle without using hints
+    - complete at least one puzzle of each type without using hints
+    - complete one puzzle OF difficulty "extra" without using hints
+    - complete one puzzle using the hint function only
+    - complete a puzzle using no unnecessary moves, without using hints
+    - complete a puzzle in under 10 seconds without using hints
+    - complete 1000 puzzles without using hints
   - print error message (at least into log.txt or error.txt) when something
     bad happens
   - processmousedown() is hideous, improve it
@@ -51,8 +59,10 @@ COMPLETE LIST OF STUFF TO BE ADDED
 - masyu
   - improve solver (it's not very good right now)
 
+- slitherlink
+  - improve solver (it's not very good right now)
+
 - yajilin
-  - improve solver (it's unfinished right now)
   - add v as legal number. don't know why it was removed in the first place,
     the direction is in another layer
 

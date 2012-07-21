@@ -8,27 +8,31 @@ hashiwokakero (0 unsolved!)
 - playable, done
 - solver is perfect!
 
+yajilin (0 unsolved!)
+- playable, done
+- solver is perfect!
+
 akari: (1 unsolved)
 - playable, done
 - solver is fantastic and fast (not solved: X01)
 
-picross (3/1392 unsolved)
+picross (4/1392 unsolved)
 - playable, seems to be done
-- solver is good and fast (not solved: R0583 R0642 R1183)
+- solver is good and fast (not solved: R0583 R0642 R1183 R1447)
 
-heyawake:
+heyawake (6 unsolved)
 - playable, done
-- solver is fantastic, but slow (not solved: R0108 R0128 R0129 R0154 R0250)
+- solver is fantastic, but slow (not solved: R0108 R0128 R0129 R0154 R0250 R0297)
 
-hitori:
+nurikabe (10 unsolved)
 - playable, done
-- solver is poor, but fast (not solved: C008 C014 C019 C032 C045 C059 S08 S10
-  R0077 R0078)
-
-nurikabe (9/679 unsolved)
-- playable, done
-- solver is great, but slow (not solved: 003 005 047 R0029 R0400 R0402 R0499
+- solver is great, but slow (not solved: 003 005 047 055 R0029 R0400 R0499
   R0500 R0559 R0583)
+
+hitori (14 unsolved)
+- playable, done
+- solver is poor, but fast (not solved: C008 C014 C019 C032 C045 C059 C118
+  C135 R0077 R0078 R0599 R0609 S08 S10)
 
 masyu:
 - playable, almost done (no colours, no V)
@@ -37,8 +41,6 @@ masyu:
 slitherlink:
 - playable, done
 - solver is good and fast (not solved: C024, and a bunch of R)
-
-yajilin:
 
 
 SOLVING STATUS (YES=solved,**YES**=yay solved a hard puzzle, something else=description)

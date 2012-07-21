@@ -247,7 +247,7 @@ static void updatecellcol(int u,int v,Uint32 edgecol,Uint32 blankcol2) {
     /*  non-number cell: draw either blocked or edges */
     if(m[u][v][2]==1)
 			drawsolidcell32(u,v,hasneighbouringblocked(u,v)?errorcol:filledcol);
-		else if(m[u][v][2]==2) drawcross(u,v,filled2col);
+		else if(m[u][v][2]==2) drawcross(u,v,blankcol,filled2col);
     else updateedge(u,v,edgecol);
   }
 }

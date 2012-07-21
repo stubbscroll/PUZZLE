@@ -226,6 +226,29 @@ level 5
   and take intersection
 - try all ways of fulfilling black, solve greedily and take intersection
 
+MINESWEEPER
+
+level 1
+
+- if the rest of the cells around a number can only be filled in one way,
+  do it (the rest must be bomb or the rest must be empty)
+
+level 2
+
+- try all combinations of placing the mines around a number. reject those
+  combinations that violate other numbers within a 5x5 area around the
+  current number. then take intersection of all legal combinations. worst
+  case is (8 choose 4)=70, so the boundedness of the total number of
+  operations justifies level 2
+
+level 3
+
+level 4
+
+level 5
+* try all ways of placing mines around a number, then do greedy and
+  apply intersection or reach contradiction
+
 NURIKABE (NP-complete)
 
 level 1 (trivial, immediate)

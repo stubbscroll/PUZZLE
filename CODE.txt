@@ -7,6 +7,7 @@ every game has the same code structure, with the following functions:
 [gamename]() - entry point for game
 autosolver() - special solver mode
 processkeydown(), processmousemotion(), processmousedown() - get input
+- remember to create a control scheme variable for each game!
 showverify() - show connectedness, show different regions in different colours
 hint() - hint system
 levelnhint() - call hints for levels n=1,2,3,4,5
@@ -29,3 +30,4 @@ x,y - map size
 visit[][], qs, qe, q[] - bfs stuff
 m[][], mn[][] (and possible more) - board 
 st[][] - internal helper array (counts etc)
+touched[][] - indicate that a cell should be redrawn

@@ -42,6 +42,7 @@ int controlscheme_hitori=0;
 int controlscheme_picross=0;
 int controlscheme_slitherlink=0;
 int controlscheme_masyu=0;
+int controlscheme_mine=0;
 
 /*  keyboard settings */
 
@@ -171,6 +172,7 @@ static void initinifile() {
     else if(!strcmp(t,"controlscheme_picross")) controlscheme_picross=strtol(u,0,10);
     else if(!strcmp(t,"controlscheme_slitherlink")) controlscheme_slitherlink=strtol(u,0,10);
     else if(!strcmp(t,"controlscheme_masyu")) controlscheme_masyu=strtol(u,0,10);
+    else if(!strcmp(t,"controlscheme_mine")) controlscheme_mine=strtol(u,0,10);
     /*  colour options */
     else if(!strcmp(t,"unfilledcol")) unfilledcol=parsecolour(u);
     else if(!strcmp(t,"mustprocesscol")) mustprocesscol=parsecolour(u);
@@ -273,10 +275,10 @@ void drawsolidcell32(int u,int v,Uint32 col) {
   drawsolidcell32w(u,v,col,thick,thick,0,0);
 }
 
-void drawcross(int u,int v,Uint32 col) {
+void drawcross(int u,int v,Uint32 bk,Uint32 col) {
 	int i,j,basex=startx+u*width,basey=starty+v*height;
 	int w=width<height?width:height;
-	drawsolidcell32(u,v,blankcol);
+	drawsolidcell32(u,v,bk);
 	for(i=thick+2,j=w-3;i<w-2;i++,j--) {
 		drawpixel32(basex+i,basey+i,col);
 		drawpixel32(basex+i-1,basey+i,col);

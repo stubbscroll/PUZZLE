@@ -7,6 +7,7 @@ move nur*.bmp pic
 move pic*.bmp pic
 move sli*.bmp pic
 move yaj*.bmp pic
+move min*.bmp pic
 cd pic
 for %%s in (*.bmp) do convert %%s %%~ns.png
 del *.bmp

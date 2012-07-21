@@ -50,6 +50,7 @@ extern int controlscheme_hitori;
 extern int controlscheme_picross;
 extern int controlscheme_slitherlink;
 extern int controlscheme_masyu;
+extern int controlscheme_mine;
 
 extern Uint32 unfilledcol;
 extern Uint32 mustprocesscol;
@@ -105,7 +106,7 @@ void drawrectangle32(int,int,int,int,Uint32);
 void drawhorizontalline32(int,int,int,Uint32);
 void drawsolidcell32(int,int,Uint32);
 void drawsolidcell32w(int,int,Uint32,int,int,int,int);
-void drawcross(int,int,Uint32);
+void drawcross(int,int,Uint32,Uint32);
 void drawnumbercell32(int,int,int,Uint32,Uint32,Uint32);
 void drawnumbercell32w(int,int,int,Uint32,Uint32,Uint32,int,int,int,int);
 void drawdisc(int,int,double,Uint32,Uint32);
@@ -138,5 +139,6 @@ void slitherlink(char *,int);
 void masyu(char *,int);
 void hashiwokakero(char *,int);
 void yajilin(char *,int);
+void mine(char *,int);
 
 #endif  /*  PUZZLE_H */

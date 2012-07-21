@@ -21,6 +21,7 @@ void launch(char *s,int autosolve) {
   else if(t[0]=='m' && t[1]=='a' && t[2]=='s') masyu(s,autosolve);
   else if(t[0]=='h' && t[1]=='a' && t[2]=='s') hashiwokakero(s,autosolve);
   else if(t[0]=='y' && t[1]=='a' && t[2]=='j') yajilin(s,autosolve);
+  else if(t[0]=='m' && t[1]=='i' && t[2]=='n') mine(s,autosolve);
 }
 
 int main(int argc,char **argv) {

@@ -37,12 +37,11 @@ size_t webline(void *ptr,size_t size,size_t n,void *userdata) {
 
 void loadwebpage(char *url,char *buf) {
   CURL *curl=curl_easy_init();
-  CURLcode res;
   writeto=buf;
   curl_easy_setopt(curl,CURLOPT_URL,url);
   curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,webline);
   bptr=0;
-  res=curl_easy_perform(curl);
+	curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 }
 
@@ -515,6 +514,7 @@ int supportedjanko(char *s) {
   if(!strcmp(s,"mas")) return 1;
   if(!strcmp(s,"has")) return 1;
   if(!strcmp(s,"yaj")) return 1;
+  if(!strcmp(s,"min")) return 1;
   return 0;
 }
 
@@ -531,6 +531,7 @@ void find3(char *s,char *t) {
     strcpy(t,"pic");
     strcpy(s,"picross");
   } else if(!strcmp(s,"yajilin")) strcpy(t,"yaj");
+  else if(!strcmp(s,"minesweeper")) strcpy(t,"min");
   else printf("[%s] not found\n",s);
 }
 
@@ -674,6 +675,29 @@ void parsejankohit(FILE *f,char *p3,int x,int y) {
     }
     fprintf(f,"\n");
   }
+}
+
+void parsejankomin(FILE *f,char *p3,int x,int y) {
+  char find[256],*p=buffer;
+  int i,j;
+  for(i=1;i<=y;i++) {
+    sprintf(find,"name=\"p%d\" value=\"",i);
+    p=strstr(p,find);
+    if(!p) { printf("error parsing minesweeper %s\n",find); exit(1); }
+    p+=strlen(find);
+    for(j=0;j<x;j++) {
+			if(*p=='x') fprintf(f,"x"),p+=2;
+			else if(*p=='-') fprintf(f,"."),p+=2;
+			else if(*p=='O') fprintf(f,"0"),p+=2;
+      else fprintf(f,"%s",yajcode(parsenum(p))),p=afternum(p)+1;
+    }
+    fprintf(f,"\n");
+  }
+	/* read required number of mines */
+	p=strstr(buffer,"mines\" value=\"");
+	if(!p) i=0;
+	else i=parsenum(p+strlen("mines\" value=\""));
+	fprintf(f,"mines %d\n",i);
 }
 
 void parsejankohas(FILE *f,char *p3,int x,int y) {
@@ -850,6 +874,7 @@ void parsejankopuzzle(FILE *f,char *p3,int x,int y) {
   else if(!strcmp(p3,"mas")) parsejankomas(f,p3,x,y);
   else if(!strcmp(p3,"has")) parsejankohas(f,p3,x,y);
   else if(!strcmp(p3,"yaj")) parsejankoyaj(f,p3,x,y);
+  else if(!strcmp(p3,"min")) parsejankomin(f,p3,x,y);
   else return;
   num++;
 }
