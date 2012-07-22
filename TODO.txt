@@ -62,15 +62,14 @@ COMPLETE LIST OF STUFF TO BE ADDED
 - slitherlink
   - improve solver (it's not very good right now)
 
+- minesweeper
+  - improve solver
+
 - yajilin
   - add v as legal number. don't know why it was removed in the first place,
     the direction is in another layer
 
 - add games:
-  - minesweeper http://www.janko.at/Raetsel/Minesweeper/index.htm
-    - warning, grid can contain "x" (cell cannot have mine and cannot be marked)
-      (see R0090)
-    - tri-state, unfilled, blank, bomb
   - numberlink (arukone) http://www.janko.at/Raetsel/Arukone/index.htm
     - normal edge dragging, easily stolen from masyu
   - gokigen naname http://www.janko.at/Raetsel/Gokigen/index.htm
@@ -80,10 +79,10 @@ COMPLETE LIST OF STUFF TO BE ADDED
     - i don't have any good idea yet on how to implement the controls. maybe do
       edge dragging of some kind. look to other games and see how they did it.
   - fillomino
-    - suggested controls: drag number from numbered cell to non-numbered cell to
-      populate cell with new value. weakness with this: impossible to directly
-      the value of non-adjacent cells. also, click in cell (another button) to
-      remove number. use thickness-routines from heyawake.
+    - suggested controls: drag number from numbered cell to non-numbered cell
+      to populate cell with new value. weakness with this: impossible to
+      directly enter the value of non-adjacent cells. also, click in cell
+      (another button) to remove number. use thickness-routines from heyawake.
   - shakashaka
   - ripple effect (hakyuu) http://www.janko.at/Raetsel/Hakyuu/index.htm
     - how to do controls?

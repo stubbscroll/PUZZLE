@@ -21,7 +21,10 @@ domove() - add a move to the undo stack, then perform move
 applymove() - perform a move, including updating touched[] and st[]
 undo() - undo the topmost move on the undo stack
 verifyboard() - check if the board is solved, unfinished or illegal
-updatetoscreen() - draw all board changes to screen
+updatetoscreen() - draw all board changes to screen (uses functions like
+  drawgrid(), updatecell() etc). if we need space for other stuff than the
+  actual board, send larger values than x,y to updatescale (see picross
+  and mine)
 loadpuzzle() - load puzzle from disk into data structures
 
 variables:

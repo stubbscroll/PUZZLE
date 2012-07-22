@@ -30,7 +30,10 @@ static char difficulty[MAXSTR]; /*  string holding the difficulty */
 static int m[MAXS][MAXS];
 /* no st[][], it's calculated on the fly */
 static char touched[MAXS][MAXS]; /* 1 if cell needs to be redrawn */
+static char touchcount;          /* 1 if mine counter needs to be redrawn */
 static int maxmines;
+
+static int curmines; /* current number of mines in game */
 
 /*  move queue for hint system */
 #define MAXMQ MAXS*MAXS*3
@@ -78,6 +81,7 @@ done:
   startx=10,starty=30;
   mqs=mqe=0;
   for(i=0;i<x;i++) for(j=0;j<y;j++) touched[i][j]=0;
+	touchcount=curmines=0;
 }
 
 static void count(int u,int v,int *unfilled,int *empty,int *mine) {
@@ -112,16 +116,30 @@ static void updatecell(int u,int v) {
 	}
 }
 
+static void updateminesleft() {
+	static int prev=0;
+	int w;
+	char s[128];
+	if(!maxmines) sprintf(s,"Mines left: N/A");
+	else sprintf(s,"Mines left: %d\n",maxmines-curmines);
+	w=sdl_font_width(font,"%s",s);
+	drawrectangle32(startx,starty+(y+1)*height,startx+prev-1,starty+(y+2)*height-1,WHITE32);
+	sdl_font_printf(screen,font,startx,starty+(y+1)*height,BLACK32,GRAY32,"%s",s);
+	prev=w;
+}
+
 static void drawgrid() {
   int i,j;
   if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
   clear32(WHITE32);
-  updatescale(resx-startx,resy-starty,x,y,thick);
+	/* added +1 to allow for "mines left" info */
+  updatescale(resx-startx,resy-starty,x,y+2,thick);
   if(thick) {
     for(i=0;i<=y;i++) for(j=0;j<thick;j++) drawhorizontalline32(startx,startx+width*x+thick-1,starty+i*height+j,BLACK32);
     for(i=0;i<=x;i++) drawrectangle32(startx+width*i,starty,startx+i*width+thick-1,starty+y*height+thick-1,BLACK32);
   }
   for(i=0;i<x;i++) for(j=0;j<y;j++) updatecell(i,j);
+	updateminesleft();
   if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
   SDL_UpdateRect(screen,0,0,resx,resy);
 }
@@ -130,11 +148,16 @@ static void partialredraw() {
   int i,j;
   if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
   for(i=0;i<x;i++) for(j=0;j<y;j++) if(touched[i][j]) updatecell(i,j);
+	if(touchcount) updateminesleft();
   if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
   for(i=0;i<x;i++) for(j=0;j<y;j++) if(touched[i][j]) {
     sdlrefreshcell(i,j);
     touched[i][j]=0;
   }
+	if(touchcount) {
+		touchcount=0;
+		SDL_UpdateRect(screen,0,starty+(y+1)*height,resx,height);
+	}
 }
 
 static void updatetoscreen(int visible) {
@@ -143,6 +166,8 @@ static void updatetoscreen(int visible) {
 
 static void applymove(int cellx,int celly,int val,int visible) {
 	int i,x2,y2;
+	if(m[cellx][celly]==MINE && val!=MINE) curmines--,touchcount=visible;
+	else if(m[cellx][celly]!=MINE && val==MINE) curmines++,touchcount=visible;
 	m[cellx][celly]=val;
 	if(visible) {
 		touched[cellx][celly]=1;
@@ -179,6 +204,7 @@ static int verifyboard() {
 		if(mine>m[i][j]) return -1;
 	}
 	if(maxmines && totmines>maxmines) return -1;
+	if(totmines<maxmines) incomplete=1;
 	return 1-incomplete;
 }
 
@@ -418,7 +444,7 @@ static int togglecell(int val) {
 static void processmousedown() {
   int cellx,celly,v=controlscheme_mine,up=0;
   getcell(event_mousex,event_mousey,&cellx,&celly);
-  if(cellx<0 || celly<0 || cellx>=x || celly>=y || m[cellx][celly]>-1) return;
+  if(cellx<0 || celly<0 || cellx>=x || celly>=y || m[cellx][celly]>-1 || m[cellx][celly]==UNAVAIL) return;
   if(event_mousebutton==SDL_BUTTON_LEFT) {
     if(!v) {
       domove(cellx,celly,togglecell(m[cellx][celly]),1); up=1;
