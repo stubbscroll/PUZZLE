@@ -375,7 +375,7 @@ static int level5tryallways() {
 		if(m[i][j]<0) goto next;
 		count(i,j,&unfilled,&empty,&mine);
 		if(!unfilled) goto next;
-		for(k=0;k<x;k++) for(l=0;l<y;l++) lev5m[i][j]=UNFILLED;
+		for(k=0;k<x;k++) for(l=0;l<y;l++) lev5m[k][l]=UNFILLED;
 		for(d=e=0;d<8;d++) {
 			x2=i+dx8[d]; y2=j+dy8[d];
 			if(x2<0 || y2<0 || x2>=x || y2>=y || m[x2][y2]!=UNFILLED) continue;
