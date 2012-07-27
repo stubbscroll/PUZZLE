@@ -15,8 +15,10 @@ static int x,y;                 /*  map size */
 static char difficulty[MAXSTR]; /*  string holding the difficulty */
 
 /*  NB, we must have UNFILLED,EMPTY,MINE<UNAVAIL<0 */
-#define UNFILLED    -100
 #define NOINTERSECT -99
+#define NOVALUE -101
+
+#define UNFILLED    -100
 #define EMPTY       -3
 #define MINE				-2
 #define UNAVAIL			-1
@@ -294,12 +296,12 @@ static int level2tryallinterference() {
 		for(d=e=0;d<8;d++) {
 			x2=i+dx8[d]; y2=j+dy8[d];
 			if(x2<0 || y2<0 || x2>=x || y2>=y || m[x2][y2]!=UNFILLED) continue;
-			ex[e]=dx8[d]; ey[e++]=dy8[d];
+			ex[e]=x2; ey[e++]=y2;
 		}
 		while(mask<(1<<unfilled)) {
 			curm=cure=0;
 			for(d=0;d<e;d++) {
-				x2=i+ex[d]; y2=j+ey[d];
+				x2=ex[d]; y2=ey[d];
 				if(mask&(1<<d)) domove(x2,y2,MINE,0),curm|=1<<d;
 				else domove(x2,y2,EMPTY,0),cure|=1<<d;
 			}
@@ -320,8 +322,8 @@ static int level2tryallinterference() {
 			mask=snoob(mask);
 		}
 		if(minemask|emptymask) {
-			for(d=0;d<e;d++) if(minemask&(1<<d)) addmovetoqueue(i+ex[d],j+ey[d],MINE);
-			else if(emptymask&(1<<d)) addmovetoqueue(i+ex[d],j+ey[d],EMPTY);
+			for(d=0;d<e;d++) if(minemask&(1<<d)) addmovetoqueue(ex[d],ey[d],MINE);
+			else if(emptymask&(1<<d)) addmovetoqueue(ex[d],ey[d],EMPTY);
 			return 1;
 		}
 	next:
@@ -375,7 +377,7 @@ static int level5tryallways() {
 		if(m[i][j]<0) goto next;
 		count(i,j,&unfilled,&empty,&mine);
 		if(!unfilled) goto next;
-		for(k=0;k<x;k++) for(l=0;l<y;l++) lev5m[k][l]=UNFILLED;
+		for(k=0;k<x;k++) for(l=0;l<y;l++) lev5m[k][l]=NOVALUE;
 		for(d=e=0;d<8;d++) {
 			x2=i+dx8[d]; y2=j+dy8[d];
 			if(x2<0 || y2<0 || x2>=x || y2>=y || m[x2][y2]!=UNFILLED) continue;
@@ -391,14 +393,14 @@ static int level5tryallways() {
 				else domove(x2,y2,EMPTY,0);
 			}
 			if(dogreedy(4)>-1) for(k=0;k<x;k++) for(l=0;l<y;l++) {
-				if(lev5m[k][l]==UNFILLED) lev5m[k][l]=m[k][l];
+				if(lev5m[k][l]==NOVALUE) lev5m[k][l]=m[k][l];
 				else if(lev5m[k][l]!=m[k][l]) lev5m[k][l]=NOINTERSECT;
 			}
 			while(getstackpos()>oldsp) undo(0);
 			mask=snoob(mask);
 		}
 		for(k=0;k<x;k++) for(l=0;l<y;l++) {
-			if(lev5m[k][l]!=UNFILLED && lev5m[k][l]!=NOINTERSECT && lev5m[k][l]!=m[k][l])
+			if(lev5m[k][l]!=NOVALUE && lev5m[k][l]!=NOINTERSECT && lev5m[k][l]!=m[k][l])
 				addmovetoqueue(k,l,lev5m[k][l]),ok=1;
 		}
 		if(ok) return 1;

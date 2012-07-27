@@ -13,7 +13,10 @@ hint() - hint system
 levelnhint() - call hints for levels n=1,2,3,4,5
 - for level 5 (or possibly other levels) hints that modify the board: use
   domove() and undo() with visible=0 instead of writing directly to m[][]
-  and creating total backups
+  and creating total backups. initially fill the board with NOVALUE, and for
+  each alternative fill lev5m[][] with values from m[][] that aren't UNFILLED.
+  see mine for an example. NB, don't look at yajilin, it doesn't have regular
+  UNFILLED, so UNFILLED is used instead of NOVALUE there.
 - use addmovetoqueue to let the hint system add a move
 executemovequeue(), executeonemovefromqueue(), movequeueisempty(),
   addmovetoqueue() - add and execute moves in hint system

@@ -249,6 +249,9 @@ level 5
 * try all ways of placing mines around a number, then do greedy and
   apply intersection or reach contradiction
 
+consider using this:
+http://en.wikipedia.org/wiki/Board_puzzles_with_algebra_of_binary_variables
+
 NURIKABE (NP-complete)
 
 level 1 (trivial, immediate)
