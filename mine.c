@@ -196,8 +196,106 @@ static void domove(int cellx,int celly,int val,int visible) {
   applymove(cellx,celly,val,visible);
 }
 
+/* trivial overestimate: return sum of unsatisfied numbers */
+/* overestimate doesn't care about unfilled cells not adjacent to
+   numbers! */
+/* keep this code in case the better overestimate is incorrect */
+static int trivialoverestimate() {
+	int est=0,i,j,unfilled,empty,mine;
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]>-1) {
+		count(i,j,&unfilled,&empty,&mine);
+		est+=m[i][j]-mine;
+	}
+	return est;
+}
+
+/* trivial underestimate: return max of unsatisfied numbers */
+/* keep this code in case the better underestimate is incorrect */
+static int trivialunderestimate() {
+	int maks=0,i,j,unfilled,empty,mine;
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]>-1) {
+		count(i,j,&unfilled,&empty,&mine);
+		if(maks<m[i][j]-mine) maks=m[i][j]-mine;
+	}
+	return maks;
+}
+
+/* overestimate: find the sum of all unsatisfied numbered cells,
+   then find the number of numbered neighbours of each unfilled cell.
+	 sort them in nondecreasing order, and pick cells greedily until
+	 picking a new cell causes the sum of the picked cells to exceed the
+	 sum of all unsatisfied numbered cells. */
+static int overestimate() {
+	static int a[MAXS*MAXS];
+	int n=0,i,j,sum,unfilled,empty,mine,d,x2,y2,cur;
+	/* find sum */
+	for(sum=i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]>-1) {
+		count(i,j,&unfilled,&empty,&mine);
+		sum+=m[i][j]-mine;
+	}
+	/* find all unfilled cells with only unsatisfied neighbours */
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]==UNFILLED) {
+		for(cur=d=0;d<8;d++) {
+			x2=i+dx8[d]; y2=j+dy8[d];
+			if(x2<0 || y2<0 || x2>=x || y2>=y || m[x2][y2]<0) continue;
+			count(x2,y2,&unfilled,&empty,&mine);
+			if(mine==m[x2][y2]) goto next;
+			cur++;
+		}
+		if(!cur) continue;
+		a[n++]=cur;
+	next:;
+	}
+	qsort(a,n,sizeof(int),compi);
+	for(i=0;i<n;i++) {
+		sum-=a[i];
+		if(sum<1) return i+1;
+	}
+	return 0;
+}
+
+static int compirev(const void *A,const void *B) {
+	const int *a=A,*b=B;
+	if(*a>*b) return -1;
+	if(*a<*b) return 1;
+	return 0;
+}
+
+/* underestimate: find the sum of all unsatisfied numbered cells,
+   then find the number of numbered neighbours of each unfilled cell.
+	 sort them in nonincreasing order, and pick cells greedily until
+	 the sum of picked cells exceed sum of unsatisfied numbered cells. */
+static int underestimate() {
+	static int a[MAXS*MAXS];
+	int n=0,i,j,sum,unfilled,empty,mine,d,x2,y2,cur;
+	/* find sum */
+	for(sum=i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]>-1) {
+		count(i,j,&unfilled,&empty,&mine);
+		sum+=m[i][j]-mine;
+	}
+	/* find all unfilled cells with only unsatisfied neighbours */
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]==UNFILLED) {
+		for(cur=d=0;d<8;d++) {
+			x2=i+dx8[d]; y2=j+dy8[d];
+			if(x2<0 || y2<0 || x2>=x || y2>=y || m[x2][y2]<0) continue;
+			count(x2,y2,&unfilled,&empty,&mine);
+			if(mine==m[x2][y2]) goto next;
+			cur++;
+		}
+		a[n++]=cur;
+	next:;
+	}
+	qsort(a,n,sizeof(int),compirev);
+	for(i=0;i<n;i++) {
+		sum-=a[i];
+		if(!sum) return i;
+		if(sum<0) return i+1;
+	}
+	return 0;
+}
+
 static int verifyboard() {
-	int totmines=0,i,j,unfilled,empty,mine,incomplete=0;
+	int totmines=0,i,j,unfilled,empty,mine,incomplete=0,isolate,x2,y2,d;
 	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]==MINE) totmines++;
 	else if(m[i][j]==UNFILLED) incomplete=1;
 	else if(m[i][j]>-1) {
@@ -207,6 +305,29 @@ static int verifyboard() {
 	}
 	if(maxmines && totmines>maxmines) return -1;
 	if(totmines<maxmines) incomplete=1;
+	/* apply estimates for puzzles with mines left defined!
+	   find over- and underestimates for the number of mines that can fit
+		 on the current board. we want the underestimate to be as high as
+		 possible (without exceeding the correct amount) and the overestimate
+		 to be as low as possible.
+	   if mines placed + underestimate < maxmines then board is illegal
+	   if mines placed + overestimate > maxmines then board is illegal */
+	if(maxmines && incomplete) {
+		/* need to calculate number of unfilled cells not touching any
+		   numbered cells */
+		isolate=0;
+		for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]==UNFILLED) {
+			for(d=0;d<8;d++) {
+				x2=i+dx8[d],y2=j+dy8[d];
+				if(x2<0 || y2<0 || x2>=x || y2>=y) continue;
+				if(m[x2][y2]>-1) goto next;
+			}
+			isolate++;
+		next:;
+		}
+		if(totmines+isolate+overestimate()<maxmines) return -1;
+		if(totmines+underestimate()>maxmines) return -1;
+	}
 	return 1-incomplete;
 }
 
@@ -221,7 +342,7 @@ static int movequeueisempty() {
   return mqs==mqe;
 }
 
-/*  return 0:no moves in queue, 1:move successfully executed */
+-/*  return 0:no moves in queue, 1:move successfully executed */
 static int executeonemovefromqueue(int visible) {
 loop:
   if(movequeueisempty()) return 0;
@@ -267,8 +388,23 @@ static int level1forced() {
 	return ok;
 }
 
+static int level1restisemptyormine() {
+	int i,j,mines=0,unfilled=0,fill=UNFILLED;
+	if(!maxmines) return 0;
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]==MINE) mines++;
+	else if(m[i][j]==UNFILLED) unfilled++;
+	if(!unfilled) return 0;
+	if(mines==maxmines) fill=EMPTY;
+	else if(mines+unfilled==maxmines) fill=MINE;
+	else return 0;
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]==UNFILLED)
+		addmovetoqueue(i,j,fill);
+	return 1;
+}
+
 static int level1hint() {
 	if(level1forced()) return 1;
+	if(level1restisemptyormine()) return 1;
 	return 0;
 }
 
@@ -393,7 +529,7 @@ static int level5tryallways() {
 				else domove(x2,y2,EMPTY,0);
 			}
 			if(dogreedy(4)>-1) for(k=0;k<x;k++) for(l=0;l<y;l++) {
-				if(lev5m[k][l]==NOVALUE) lev5m[k][l]=m[k][l];
+				if(lev5m[k][l]==NOVALUE && m[k][l]!=UNFILLED) lev5m[k][l]=m[k][l];
 				else if(lev5m[k][l]!=m[k][l]) lev5m[k][l]=NOINTERSECT;
 			}
 			while(getstackpos()>oldsp) undo(0);

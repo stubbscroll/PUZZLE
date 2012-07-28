@@ -1,0 +1,5 @@
+remember to include the following file in the released binary:
+
+sdl.dll
+libsasl.dll
+the dll file that came with curl
