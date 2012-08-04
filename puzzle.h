@@ -51,6 +51,7 @@ extern int controlscheme_picross;
 extern int controlscheme_slitherlink;
 extern int controlscheme_masyu;
 extern int controlscheme_mine;
+extern int controlscheme_kuromasu;
 
 extern Uint32 unfilledcol;
 extern Uint32 mustprocesscol;
@@ -140,5 +141,6 @@ void masyu(char *,int);
 void hashiwokakero(char *,int);
 void yajilin(char *,int);
 void mine(char *,int);
+void kuromasu(char *,int);
 
 #endif  /*  PUZZLE_H */

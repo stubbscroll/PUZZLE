@@ -342,7 +342,7 @@ static int movequeueisempty() {
   return mqs==mqe;
 }
 
--/*  return 0:no moves in queue, 1:move successfully executed */
+/*  return 0:no moves in queue, 1:move successfully executed */
 static int executeonemovefromqueue(int visible) {
 loop:
   if(movequeueisempty()) return 0;

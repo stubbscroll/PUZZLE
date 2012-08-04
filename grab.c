@@ -515,6 +515,7 @@ int supportedjanko(char *s) {
   if(!strcmp(s,"has")) return 1;
   if(!strcmp(s,"yaj")) return 1;
   if(!strcmp(s,"min")) return 1;
+  if(!strcmp(s,"kur")) return 1;
   return 0;
 }
 
@@ -532,6 +533,7 @@ void find3(char *s,char *t) {
     strcpy(s,"picross");
   } else if(!strcmp(s,"yajilin")) strcpy(t,"yaj");
   else if(!strcmp(s,"minesweeper")) strcpy(t,"min");
+  else if(!strcmp(s,"kuromasu")) strcpy(t,"kur");
   else printf("[%s] not found\n",s);
 }
 
@@ -716,6 +718,25 @@ void parsejankohas(FILE *f,char *p3,int x,int y) {
   }
 }
 
+void parsejankokur(FILE *f,char *p3,int x,int y) {
+  char find[256],*p=buffer;
+  int i,j;
+  for(i=1;i<=y;i++) {
+    sprintf(find,"name=\"p%d\" value=\"",i);
+    p=strstr(p,find);
+    if(!p) { printf("error parsing kuromasu %s\n",find); exit(1); }
+    p+=strlen(find);
+    for(j=0;j<x;j++) {
+      if(*p=='-') fprintf(f,"."),p+=2;
+      else {
+        fprintf(f,"%s",numcode(parsenum(p)));
+        p=afternum(p)+1;
+      }
+    }
+    fprintf(f,"\n");
+  }
+}
+
 void parsejankopic(FILE *f,char *p3,int x,int y) {
   static char g[256][256];
   char find[256],*p=buffer;
@@ -875,6 +896,7 @@ void parsejankopuzzle(FILE *f,char *p3,int x,int y) {
   else if(!strcmp(p3,"has")) parsejankohas(f,p3,x,y);
   else if(!strcmp(p3,"yaj")) parsejankoyaj(f,p3,x,y);
   else if(!strcmp(p3,"min")) parsejankomin(f,p3,x,y);
+  else if(!strcmp(p3,"kur")) parsejankokur(f,p3,x,y);
   else return;
   num++;
 }

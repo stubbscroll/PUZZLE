@@ -150,7 +150,7 @@ HITORI
 level 1
 
 - if a value occurs once in its row and column, it's never blocked
-- if there are three equal values in a row/column, 1 and 3 must be
+- if there are three adjacent equal values in a row/column, 1 and 3 must be
   blocked, while 2 must be empty
 - all cells adjacent to a wall must be empty
 
@@ -170,6 +170,31 @@ level 5
 - assume that a cell is empty or wall, then fill in greedily (using heuristics
   up to level 3) and take intersection or hope for contradiction.
 - same as above, but can use level 4 heuristics
+
+KUROMASU
+
+level 1
+- all cells next to blocked must be empty
+
+level 2
+- if placing blocked tightly in all 4 directions results in the number being
+  satisfied, then fill in blocked like this
+- if placing empty as far as possible in all 4 directions results in the
+  number being satisfied, then fill in empty like this
+- if three sides of a number are done (streak of empty/other numbers, followed
+  by blocked or wall) then the fourth side is given
+
+level 3
+- if placing empty or blocked causes illegal board (according to veribyboard),
+  then the cell must be filled in the other way (by contradiction)
+
+level 4
+- try all ways of extending from a number in all directions. take intersection
+  of all legal positions (according to verifyboard)
+
+level 5
+- try all ways of extending from a number in all directions, do greedy and
+  take intersection or achieve contradiction
 
 MASYU
 
@@ -422,6 +447,12 @@ level ? (unformalized heuristics)
   and the isolated island. (?)
 
 unsolved situations
+
+check out these detailed walkthroughs:
+056 http://fabpedigree.com/nurikabe/nuriks01.htm
+060 http://fabpedigree.com/nurikabe/nuriks05.htm
+063 064 http://fabpedigree.com/nurikabe/nuriks08.htm
+066 http://fabpedigree.com/nurikabe/nuriks11.htm
 
 PICROSS (NP-complete)
 

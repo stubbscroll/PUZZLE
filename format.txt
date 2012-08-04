@@ -1,0 +1,126 @@
+COMMON FOR ALL PUZZLES
+
+% comment line, to be ignored. line must have % at first column.
+
+it is recommended to have a comment containing credits
+if larger numbers are needed (or if you for some reason don't
+want to use letters), use {num}
+
+AKARI
+
+first line: one string, puzzle name: akari
+next line: one string, difficulty
+next line: two integers x y
+then, y lines containing x chars
+. blank
+# wall
+0-4 numbered wall
+
+FILLOMINO
+
+first line: one string, puzzle name: fillomino
+next line: one string, difficulty
+next line: two integers x y
+then, y lines containing x chars
+. blank
+1-9 cell numbered 1-9
+a-z cell numbered 10-35
+A-Z cell numbered 36-61
+
+HASHIWOKAKERO
+
+first line: one string, puzzle name: hashiwokakero
+next line: one string, difficulty
+next line: two integers x y
+then, y lines containing x chars
+. blank (0 is also accepted)
+1-8 node containing 1-8
+
+MASYU
+
+first line: one string, puzzle name: masyu
+next line: one string, difficulty
+next line: two integers x y
+then, y lines containing x chars
+. blank
+o white node
+* black node
+
+NURIKABE
+
+first line: one string: puzzle name: nurikabe
+next line: one string, difficulty (easy, medium, hard, extreme
+next line: two integers x y
+then, y lines containing x chars.
+. water
+1-9 tall 1-9
+a-z tall 10-35
+A-Z tall 36-61
+(after auto-grabbing, remember to replace ? with {number})
+
+SHIKAKU
+
+first line: one string, puzzle name: shikaku
+next line: one string, difficulty
+next line: two integers x y
+then, y lines containing x chars
+. blank
+1-9 node numbered 1-9
+a-z node numbered 10-35
+A-Z node numbered 36-61
+(after auto-grabbing, remember to replace ? with {number})
+
+SLITHERLINK
+
+first line: one string, puzzle name: slitherlink
+next line: one string, difficulty
+next line: two integers x y
+then, y lines containing x chars
+. blank
+0-3: numbered cell
+
+YAJILIN
+
+first line: one string, puzzle name: yajilin
+next line: one string, difficulty
+next line: two integers x y
+then, y lines containing x*2 chars
+for each tile, 2 chars:
+.. blank tile
+first char: 0-9 node numbered 0-9
+            a-u node numbered 10-30
+            w-z node numbered 31-34
+            A-Z node numbered 35-60
+TODO add v as a legal number
+second char:[<>^v] dir (left,right,up,down)
+** x'ed out cell
+
+HEYAWAKE
+
+first line: one string, puzzle name: heyawake
+next line: one string, difficulty
+next line: two integers x y
+then, y*2+1 lines containing x*2+1 chars
+. blank
+0-9: numbered cell 0-9
+a-z: numbered cell 10-35
+A-Z: numbered cell 36-61
++-|: border (can really be any char, except space.0-9a-zA-Z)
+
+HITORI
+
+first line: one string, puzzle name: hitori
+next line: one string, difficulty
+next line: two integers x y
+then, y lines containing x chars:
+1-9 node numbered 1-9
+a-z node numbered 10-35
+A-Z node numbered 36-61
+
+PICROSS
+
+first line: one string, puzzle name: picross
+next line: one string, difficulty
+next line: two integers x y
+y lines with clues (comma-separated list of numbers, or 0 if no blocks in row/column)
+x lines with clues

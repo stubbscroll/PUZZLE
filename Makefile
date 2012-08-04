@@ -2,8 +2,8 @@ CC=gcc
 CFLAGS=-Wall -O2
 LIBS = $(shell sdl-config --libs)
 
-puzzle: puzzle.o graphic.o akari.o nurikabe.o heyawake.o hitori.o picross.o slither.o masyu.o hashi.o yajilin.o mine.o sdlfont.o
-	$(CC) puzzle.o graphic.o akari.o nurikabe.o heyawake.o hitori.o picross.o slither.o masyu.o hashi.o yajilin.o mine.o sdlfont.o -o puzzle $(LIBS)
+puzzle: puzzle.o graphic.o akari.o nurikabe.o heyawake.o hitori.o picross.o slither.o masyu.o hashi.o yajilin.o mine.o kuromasu.o sdlfont.o
+	$(CC) puzzle.o graphic.o akari.o nurikabe.o heyawake.o hitori.o picross.o slither.o masyu.o hashi.o yajilin.o mine.o kuromasu.o sdlfont.o -o puzzle $(LIBS)
 
 puzzle.o: puzzle.c
 	$(CC) $(CFLAGS) -c puzzle.c
@@ -39,7 +39,10 @@ yajilin.o: yajiin.c
 	$(CC) $(CFLAGS) -c yajilin.c
 
 mine.o: mine.c
-	$(CC) $(CFLAGS) -c yajilin.c
+	$(CC) $(CFLAGS) -c mine.c
+
+kuromasu.o: kuromasu.c
+	$(CC) $(CFLAGS) -c kuromasu.c
 
 sdlfont.o: sdlfont.c
 	$(CC) $(CFLAGS) -c sdlfont.c

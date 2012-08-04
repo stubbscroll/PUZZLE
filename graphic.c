@@ -43,6 +43,7 @@ int controlscheme_picross=0;
 int controlscheme_slitherlink=0;
 int controlscheme_masyu=0;
 int controlscheme_mine=0;
+int controlscheme_kuromasu=0;
 
 /*  keyboard settings */
 
@@ -173,6 +174,7 @@ static void initinifile() {
     else if(!strcmp(t,"controlscheme_slitherlink")) controlscheme_slitherlink=strtol(u,0,10);
     else if(!strcmp(t,"controlscheme_masyu")) controlscheme_masyu=strtol(u,0,10);
     else if(!strcmp(t,"controlscheme_mine")) controlscheme_mine=strtol(u,0,10);
+    else if(!strcmp(t,"controlscheme_kuromasu")) controlscheme_kuromasu=strtol(u,0,10);
     /*  colour options */
     else if(!strcmp(t,"unfilledcol")) unfilledcol=parsecolour(u);
     else if(!strcmp(t,"mustprocesscol")) mustprocesscol=parsecolour(u);

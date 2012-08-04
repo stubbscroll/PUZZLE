@@ -12,6 +12,10 @@ yajilin (0 unsolved!)
 - playable, done
 - solver is perfect!
 
+kuromasu (0 unsolved!)
+- playable, done
+- solver is perfect!
+
 akari: (1 unsolved)
 - playable, done
 - solver is fantastic and fast (not solved: X01)
@@ -27,17 +31,18 @@ minesweeper (5/119 unsolved)
 
 heyawake (6 unsolved)
 - playable, done
-- solver is fantastic, but slow (not solved: R0108 R0128 R0129 R0154 R0250 R0297)
-
-nurikabe (10 unsolved)
-- playable, done
-- solver is great, but slow (not solved: 003 005 047 055 R0029 R0400 R0499
-  R0500 R0559 R0583)
+- solver is fantastic, but slow (not solved: R0108 R0128 R0129 R0154 R0250
+  R0297)
 
 hitori (14 unsolved)
 - playable, done
 - solver is poor, but fast (not solved: C008 C014 C019 C032 C045 C059 C118
   C135 R0077 R0078 R0599 R0609 S08 S10)
+
+nurikabe (16 unsolved)
+- playable, done
+- solver is decent (not solved: 003 005 047 055 056 059 065 066 069 076
+  R0029 R0400 R0499 R0500 R0559 R0583)
 
 masyu:
 - playable, done
@@ -46,3 +51,24 @@ masyu:
 slitherlink:
 - playable, done
 - solver is good and fast (not solved: C024, and a bunch of R)
+
+NOTES ON SOME UNSOLVED LEVELS
+
+akari
+- X01 is a special level encoding a boolean expression, which is part of an
+  NP-completeness proof. we cannot expect to solve with level with human-
+  like heuristics
+
+nurikabe
+- 003 is just very hard, solved needs to see that the 51 island must be
+  compacted to allow the upper left wall to connect along upper/right border
+- 005 is extremely hard, need some advanced heuristics that are beyond me as
+  for now
+- 047 is not too hard, but solver needs to be able to handle very large
+  islands, and maybe a "negative" heuristic that considers leftmost walls
+  if there are only a few left to place
+- 055 is very easy, but silly
+- 056 has a detailed walkthrough: http://fabpedigree.com/nurikabe/nuriks01.htm
+- 066 has a detailed walkthrough: http://fabpedigree.com/nurikabe/nuriks11.htm
+- R0029 is very easy, but silly
+
