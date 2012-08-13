@@ -1,1 +1,1 @@
-gcc -mtune=pentium4 -Wall -std=c99 -pedantic -o puzzle.exe puzzle.c graphic.c dir.c menu.c kuromasu.c nurikabe.c akari.c heyawake.c hitori.c picross.c slither.c masyu.c hashi.c yajilin.c mine.c sdlfont.c -lmingw32 -lsdlmain -lsdl -Wl,--subsystem,windows
+gcc -O3 -mtune=pentium4 -Wall -std=c99 -pedantic -o puzzle.exe puzzle.c graphic.c dir.c menu.c kuromasu.c nurikabe.c akari.c heyawake.c hitori.c picross.c slither.c masyu.c hashi.c yajilin.c mine.c sdlfont.c -lmingw32 -lsdlmain -lsdl -Wl,--subsystem,windows

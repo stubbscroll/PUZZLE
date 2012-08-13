@@ -62,6 +62,8 @@ static void loadpuzzle(char *path) {
       break;
     case 2:
       sscanf(s,"%d %d",&x,&y);
+			for(i=0;i<x;i++) cluecn[i]=0;
+			for(i=0;i<y;i++) cluern[i]=0;
       z++;
       break;
     case 3:
@@ -545,6 +547,7 @@ static int dogreedy(int lev) {
 static int level5contradiction(int lev) {
   static int i=0,j=0;
   int z=x*y,r,oldsp=getstackpos(),k,l;
+	if(i>=x) i=0; if(j>=y) j=0;
   while(z--) {
     if(m[i][j]==UNFILLED) {
       /*  assume blocked */

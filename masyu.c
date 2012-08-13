@@ -889,6 +889,7 @@ static int dogreedy(int lev) {
 static int level5intersection(int lev) {
   static int i=0,j=0;
   int z=x*y,oldsp=getstackpos(),k,l,d,count,d2,x2,y2,h,r=0;
+	if(i>=x) i=0; if(j>=y) j=0;
   while(z--) {
     if(numedges(i,j)!=1) goto increase;
     for(count=d=0;d<4;d++) {
@@ -935,6 +936,7 @@ static int level5intersection(int lev) {
 static int level5tryall2linewhite(int lev) {
   static int i=0,j=0;
   int z=x*y,oldsp=getstackpos(),k,l,d,d2,x2,y2,h,r=0;
+	if(i>=x) i=0; if(j>=y) j=0;
   while(z--) {
     /*  find o with no edges adjacent */
     if(mn[i][j]!='o' || numedges(i,j)) goto increase;
@@ -985,6 +987,7 @@ static int level5tryall2linewhite(int lev) {
 static int level5tryallblack(int lev) {
   static int i=0,j=0;
   int z=x*y,oldsp=getstackpos(),k,l,d,dd[4],xx[4],yy[4],e,r,h;
+	if(i>=x) i=0; if(j>=y) j=0;
   while(z--) {
     /*  find incomplete * */
     if(mn[i][j]!='*' || numedges(i,j)>1) goto increase;
@@ -1033,6 +1036,7 @@ static int level5tryallblack(int lev) {
     - try all 4 ways of fulfilling a black
     - try all 8 ways of fulfilling a white (including turn on each side)  */
 static int level5hint() {
+	logprintf("whee level 5\n");
   if(level5intersection(4)) return 1;
   if(level5tryall2linewhite(4)) return 1;
   if(level5tryallblack(4)) return 1;
@@ -1113,6 +1117,20 @@ static void processkeydown(int key) {
     } else if(!res) messagebox(1,"Sorry, no moves found.");
     else messagebox(1,"Sorry, hint will not work on an illegal board.");
   }
+	else if(key==SDLK_d) {
+		int i,j;
+		logprintf("dump m0 (horizontal)\n");
+		for(j=0;j<y;j++) {
+			for(i=0;i<x;i++) logprintf("%d",m[0][i][j]);
+			logprintf("\n");
+		}
+		logprintf("dump m1 (vertical)\n");
+		for(j=0;j<y;j++) {
+			for(i=0;i<x;i++) logprintf("%d",m[1][i][j]);
+			logprintf("\n");
+		}
+		logprintf("--------------\n");
+	}
 }
 
 static int togglecell(int val) {

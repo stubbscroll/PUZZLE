@@ -547,6 +547,7 @@ static int dogreedy(int lev) {
 static int level5brutemin(int lev) {
   static int i=0,j=0;
   int z=x*y,a[4],k,a1,a2,a3,a0,num,r,l,v,ok=0,oldsp=getstackpos();
+	if(i>=x) i=0; if(j>=y) j=0;
   while(z--) {
     if(!mn[i][j] || mn[i][j]==numedges(i,j)) goto increase;
     num=numedges(i,j);

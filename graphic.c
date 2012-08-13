@@ -72,8 +72,8 @@ static char s[GRAPHIC_FS];
 static char t[GRAPHIC_FS];
 static char u[GRAPHIC_FS];
 
-/*  let's supply dx/dy arrays */
-/*  dx is right, down, left, up, center */
+/* let's supply dx/dy arrays */
+/* dx is right, down, left, up, center */
 int dx[]={1,0,-1,0,0},dy[]={0,1,0,-1,0};
 int dx8[]={1,0,-1,0,1,1,-1,-1},dy8[]={0,1,0,-1,1,-1,1,-1};
 

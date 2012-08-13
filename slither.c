@@ -736,6 +736,7 @@ static int dogreedy(int lev) {
 static int level5contradiction(int lev) {
   static int i=0,j=0,dir=0;
   int z=2*(x+1)*(y+1),r,k,l,oldsp=getstackpos(),q;
+	if(i>x) i=0; if(j>y) j=0;
   while(z--) {
     if(m[dir][i][j]==UNFILLED) {
       /*  assume blocked */

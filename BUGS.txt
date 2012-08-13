@@ -4,32 +4,12 @@ general:
 - when a messagebox is active, redraw events are not processed, so resizing
   (for example) is messed up.
 
-heyawake:
-- solver doesn't clean up after itself. solve hey005.txt and hey004.txt in
-  order and solver will reach an illegal position early in hey004.txt.
-  another manifestation: solve heyR0290, then heyR0291, then heyR0289 and
-  program crashes
-- not a bug as such, but a weakness: the solver can't solve heyR0296 which is
-  supposed to be a very easy level
-
-minesweeper:
-- solver or game doesn't clean up. solve mineR0090.txt and mineR0091.txt in
-  order and solver cannot find any move in R0091.txt. check if minesleft has
-  something to do with it
-
 picross:
 - solver freezes on illegal boards
 - investigate why solver is slow in the presence of yellow on R0806
 
-kuromasu:
-- solver can't solve R0234 after solving some of the previous levels. it needs
-  not be related to the other solver bugs which seem to be a problem with
-  reentrance. this solver has some tricky routines
+masyu:
+- solver bugs on R0006 if certain other levels (like C141) are solved first
 
-akari:
-- solver fails on R0031 if R0030 is solved first
-- easier case: solve C132 first, then it fails to do R0005 even though there's
-  an easy unfilled at 10,2
-
-hashiwokakero:
-- solver fails hard on any second solver attempt on the C levels
+slitherlink
+- R294 not solved if attempted first, but solved if R293 is done before

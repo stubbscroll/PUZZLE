@@ -1502,6 +1502,7 @@ static int dogreedy(int lev) {
 static int level5contradiction(int lev) {
   int z,r,l,k,oldsp=getstackpos();
   static int i=0,j=0;
+	if(i>=x) i=0; if(j>=y) j=0;
   for(z=0;z<x*y;z++) {
     if(m[i][j]==UNFILLED) {
       /*  assume wall */
@@ -1707,6 +1708,7 @@ static int level5tryallislands() {
   static int i=0,j=0;
   int iter,k,l,tot,num,islands,has,ok=0;
   static int coords[LEVEL5MAXSIZE*2];
+	if(i>=x) i=0; if(j>=y) j=0;
   for(iter=0;iter<x*y;iter++) {
     i++; if(i==x) {
       i=0; j++;

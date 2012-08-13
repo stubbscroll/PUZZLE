@@ -491,6 +491,7 @@ static int dogreedy(int lev) {
 static int level5contradiction(int lev) {
   static int i=0,j=0;
   int z=x*y,old,r,k,l,oldsp=getstackpos();
+	if(i>=x) i=0; if(j>=y) j=0;
   while(z--) {
     if(m[i][j]==UNFILLED && !st[i][j]) {
       /*  assume bulb */
