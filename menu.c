@@ -255,9 +255,13 @@ typedef struct {
 	int next; /* pointer to next linked widget, or -1 if none */
 } widget_t;
 
-#define MAXWIDGET 256
-widget_t widget[MAXWIDGET];
-int widgetnum;
+#define MAXWIDGET 1024
+static widget_t widget[MAXWIDGET];
+static int widgetnum;
+
+static int selected=0; /* index of selected entry in list */
+static int ypos=0; /* index of topmost shown entry, cannot exceed puzzlenum-numentries */
+static int widgetix; /* index to first widget containing table element */
 
 #define TABLE_PUZZLE "Puzzle"
 #define TABLE_DIFF "Difficulty"
@@ -268,6 +272,7 @@ int widgetnum;
 
 static void addwidget(int x1,int y1,int x2,int y2,int tx,int ty,int hasborder,Uint32 col,Uint32 bkcol,
 	Uint32 border,Uint32 hicol,char *s,int adjust,int id,int type,int next) {
+	if(widgetnum>=MAXWIDGET) error("too many widgets on-screen");
 	widget[widgetnum].x1=x1;
 	widget[widgetnum].y1=y1;
 	widget[widgetnum].x2=x2;
@@ -287,8 +292,34 @@ static void addwidget(int x1,int y1,int x2,int y2,int tx,int ty,int hasborder,Ui
 	widgetnum++;
 }
 
+static char *shortenleft(sdl_font *font,char *s,int avail) {
+	static char t[65536];
+	int endw=sdl_font_width(font,"...")-1,i,p=0;
+	/* be sneaky and assume that the hidden value padw in sdlfont is always 1 */
+	for(i=0;s[i];i++) if((uchar)s[i]>31) {
+		if(endw+font->w[(uchar)s[i]-32]+1<=avail) t[p++]=s[i],endw+=1+font->w[(uchar)s[i]-32];
+		else break;
+	}
+	t[p++]='.'; t[p++]='.'; t[p++]='.';
+	t[p]=0;
+	return t;
+}
+
+static char *shortenright(sdl_font *font,char *s,int avail) {
+	static char t[65536];
+	int endw=sdl_font_width(font,"...")-1,p=65535,i;
+	t[p--]=0;
+	for(i=strlen(s)-1;i>=0;i--) if((uchar)s[i]>31) {
+		if(endw+font->w[(uchar)s[i]-32]+1<=avail) t[p--]=s[i],endw+=1+font->w[(uchar)s[i]-32];
+		else break;
+	}
+	t[p--]='.'; t[p--]='.'; t[p]='.'; 
+	return t+p;
+}
+
 static void drawwidget(widget_t *w,int mouse) {
-	int v;
+	int v,avail;
+	char *s=w->s;
 	if(w->hasborder) {
 		drawrectangle32(w->x1+1,w->y1+1,w->x2-1,w->y2-1,mouse?w->hicol:w->bkcol);
 		drawhorizontalline32(w->x1,w->x2,w->y1,w->border);
@@ -297,19 +328,56 @@ static void drawwidget(widget_t *w,int mouse) {
 		drawverticalline32(w->x2,w->y1+1,w->y2-1,w->border);
 	} else drawrectangle32(w->x1,w->y1,w->x2,w->y2,mouse?w->hicol:w->bkcol);
 	if(w->s[0]) {
-		if(w->adjust==A_LEFT) sdl_font_printf(screen,font,w->x1+w->tx,w->y1+w->ty,w->col,w->col,"%s",w->s);
+		avail=w->x2-w->x1-2*w->tx-1;
+		if(w->adjust==A_LEFT) {
+			if(sdl_font_width(font,s)>avail) s=shortenleft(font,s,avail);
+			sdl_font_printf(screen,font,w->x1+w->tx,w->y1+w->ty,w->col,w->col,"%s",s);
+		}
 		else {
-			v=sdl_font_width(font,w->s);
-			if(w->adjust==A_CENTER) sdl_font_printf(screen,font,
-				w->x1+w->tx+(w->x2-w->x1-v-1)/2,w->y1+w->ty,w->col,w->col,"%s",w->s);
-			else sdl_font_printf(screen,font,
-				w->x2-w->tx-1-v,w->y1+w->ty,w->col,w->col,"%s",w->s);
+			if(w->adjust==A_CENTER) {
+				if(sdl_font_width(font,s)>avail) s=shortenleft(font,s,avail);
+				v=sdl_font_width(font,s);
+				sdl_font_printf(screen,font,
+					w->x1+w->tx+(w->x2-w->x1-v-1)/2,w->y1+w->ty,w->col,w->col,"%s",s);
+			} else {
+				if(sdl_font_width(font,s)>avail) s=shortenright(font,s,avail);
+				v=sdl_font_width(font,s);
+				sdl_font_printf(screen,font,
+					w->x2-w->tx-1-v,w->y1+w->ty,w->col,w->col,"%s",s);
+			}
 		}
 	}
 }
 
+static void updatetablecol(int n) {
+	int i=n,k=widgetix+n*6,l;
+	for(l=0;l<6;l++) {
+		widget[k+l].bkcol=(i==selected)?GREEN32:WHITE32;
+		widget[k+l].hicol=(i==selected)?BLUE32:YELLOW32;
+	}
+}
+
+static void updatetable(int n) {
+	int j=ypos+n,k=widgetix+n*6;
+	entry_t *e;
+	e=puzzlelist+j;
+	strcpy(widget[k].s,e->display);
+	strcpy(widget[k+1].s,e->difficulty);
+	sprintf(widget[k+2].s,"%dx%d",e->xsize,e->ysize);
+	if(e->year) {
+		sprintf(widget[k+3].s,"%04d-%02d-%02d %02d:%02d",
+			e->year,e->month,e->date,e->hour,e->minute);
+		if(e->hundredths<6000) sprintf(widget[k+4].s,"%d:%02d",e->hundredths/100,e->hundredths%100);
+		else if(e->hundredths<6000*60) sprintf(widget[k+4].s,"%d.%02d:%02d",e->hundredths/6000,e->hundredths/100%60,e->hundredths%100);
+		else sprintf(widget[k+4].s,"%d.%02d.%02d:%02d",e->hundredths/6000/60,e->hundredths/6000%60,e->hundredths/100%60,e->hundredths%100);
+		sprintf(widget[k+5].s,"%d",e->clicks);
+	} else widget[k+3].s[0]=widget[k+4].s[0]=widget[k+5].s[0]=0;
+	/* update colours for selected entry */
+	updatetablecol(n);
+}
+
 static void placement() {
-	int h,solved=0,i,w,neww;
+	int h,solved=0,i,w,neww,cur;
 	int xx[8],yy;
 	char s[MAXSTR];
 	startx=10;
@@ -323,26 +391,42 @@ static void placement() {
 	h=buttony+buttonheight;
 	bottomair=20;
 	rightair=10;
-	numentries=(resy-starty-logoy-font->height-1*(bottomy+font->height)-5-bottomair)/(font->height+2);
+	numentries=(resy-starty-logoy-1*font->height-1*(buttonheight)-5-bottomair)/(font->height+2);
 	tablex=buttonwidth+buttonheight;
-	tablebottomy=starty+logoy+font->height+bottomy+numentries*(font->height+2);
+	tablebottomy=starty+logoy+buttonheight+numentries*(font->height+2)+2;
 	widgetnum=0;
+	if(numentries>puzzlenum) numentries=puzzlenum;
+	/* take care or cursor and list position */
+	if(selected>=numentries) {
+		logprintf("selected too large: %d !<= %d (ypos %d)\n",selected,numentries);
+		cur=selected-numentries+1;
+		ypos+=cur;
+		selected-=cur;
+		logprintf("new selected %d ypos %d\n",selected,ypos);
+	}
+	if(ypos+numentries>puzzlenum) {
+		cur=puzzlenum-numentries-1;
+		logprintf("ypos too large: %d, diff %d (sel %d)\n",ypos,cur,selected);
+		selected+=ypos-cur-1;
+		ypos=cur+1;
+		logprintf("new ypos %d selected %d numentries %d\n",ypos,selected,numentries);
+	}
 	addwidget(tablex,starty,resx-1,starty+logoy-1,0,0,0,
 		BLACK32,WHITE32,WHITE32,WHITE32,"The Puzzle Game",A_LEFT,-1,W_NOTHING,-1);
 	addwidget(startx,starty+logoy,startx+buttonwidth-1,starty+logoy+buttonheight-1,
-		3,3,1,BLACK32,WHITE32,BLACK32,YELLOW32,"(P)lay",A_CENTER,-1,W_BUTTON,-1);
+		3,3,1,BLACK32,WHITE32,BLACK32,YELLOW32,"(P)lay",A_CENTER,0,W_BUTTON,-1);
 	addwidget(startx,starty+logoy+h,startx+buttonwidth-1,starty+logoy+buttonheight-1+h,
-		3,3,1,BLACK32,GRAY32,BLACK32,GRAY32,"Credits",A_CENTER,-1,W_NOTHING,-1);
+		3,3,1,BLACK32,GRAY32,BLACK32,GRAY32,"Credits",A_CENTER,1,W_NOTHING,-1);
 	addwidget(startx,starty+logoy+2*h,startx+buttonwidth-1,starty+logoy+buttonheight-1+2*h,
-		3,3,1,BLACK32,GRAY32,BLACK32,GRAY32,"How to play",A_CENTER,-1,W_NOTHING,-1);
+		3,3,1,BLACK32,GRAY32,BLACK32,GRAY32,"How to play",A_CENTER,2,W_NOTHING,-1);
 	addwidget(startx,starty+logoy+3*h,startx+buttonwidth-1,starty+logoy+buttonheight-1+3*h,
-		3,3,1,BLACK32,GRAY32,BLACK32,GRAY32,"Achievements",A_CENTER,-1,W_NOTHING,-1);
+		3,3,1,BLACK32,GRAY32,BLACK32,GRAY32,"Achievements",A_CENTER,3,W_NOTHING,-1);
 	addwidget(startx,starty+logoy+4*h,startx+buttonwidth-1,starty+logoy+buttonheight-1+4*h,
-		3,3,1,BLACK32,GRAY32,BLACK32,GRAY32,"Options",A_CENTER,-1,W_NOTHING,-1);
+		3,3,1,BLACK32,GRAY32,BLACK32,GRAY32,"Options",A_CENTER,4,W_NOTHING,-1);
 	addwidget(startx,tablebottomy-buttonheight+1-h,startx+buttonwidth-1,tablebottomy-h,
-		3,3,1,BLACK32,WHITE32,BLACK32,YELLOW32,"(S)can for new puzzles",A_CENTER,-1,W_BUTTON,-1);
+		3,3,1,BLACK32,WHITE32,BLACK32,YELLOW32,"(S)can for new puzzles",A_CENTER,98,W_BUTTON,-1);
 	addwidget(startx,tablebottomy-buttonheight+1,startx+buttonwidth-1,tablebottomy,
-		3,3,1,BLACK32,WHITE32,BLACK32,YELLOW32,"(Q)uit",A_CENTER,-1,W_BUTTON,-1);
+		3,3,1,BLACK32,WHITE32,BLACK32,YELLOW32,"(Q)uit",A_CENTER,99,W_BUTTON,-1);
 	addwidget(startx,tablebottomy+1+bottomair,startx+buttonwidth,tablebottomy+font->height+2+bottomair,
 		2,2,0,BLACK32,WHITE32,BLACK32,WHITE32,VERSION_STRING,A_LEFT,-1,W_NOTHING,-1);
 	for(i=0;i<puzzlenum;i++) if(puzzlelist[i].year) solved++;
@@ -353,10 +437,10 @@ static void placement() {
 	xx[0]=tablex;
 	xx[7]=resx-rightair;
 	xx[6]=xx[7]-20;
-	xx[5]=xx[6]-6-sdl_font_width(font,TABLE_CLICKS);
-	xx[4]=xx[5]-6-sdl_font_width(font,TABLE_SPENT);
-	xx[3]=xx[4]-6-sdl_font_width(font,TABLE_DATE);
-	xx[2]=xx[3]-6-sdl_font_width(font,"999x999");
+	xx[5]=xx[6]-5-sdl_font_width(font,"9999999");
+	xx[4]=xx[5]-5-sdl_font_width(font,"999.59.59:99");
+	xx[3]=xx[4]-5-sdl_font_width(font,"2999-12-22 22:22 ");
+	xx[2]=xx[3]-5-sdl_font_width(font,"999x999");
 	w=sdl_font_width(font,TABLE_DIFF);
 	for(i=0;i<puzzlenum;i++) {
 		neww=sdl_font_width(font,puzzlelist[i].difficulty);
@@ -368,27 +452,40 @@ static void placement() {
 	for(i=0;i<8;i++) addwidget(xx[i],yy,xx[i],tablebottomy,0,0,0,BLACK32,BLACK32,BLACK32,BLACK32,"",0,-1,W_NOTHING,-1);
 	addwidget(xx[0],tablebottomy,xx[7],tablebottomy,0,0,0,BLACK32,BLACK32,BLACK32,BLACK32,"",0,-1,W_NOTHING,-1);
 	/* column headers */
-	addwidget(xx[0]+1,yy+1,xx[1]-1,yy+1+buttonheight-1,2,2,0,
+	addwidget(xx[0]+1,yy+1,xx[1]-1,yy+1+buttonheight-1,1,2,0,
 		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_PUZZLE,A_LEFT,-1,W_BUTTON,-1);
-	addwidget(xx[1]+1,yy+1,xx[2]-1,yy+1+buttonheight-1,2,2,0,
+	addwidget(xx[1]+1,yy+1,xx[2]-1,yy+1+buttonheight-1,1,2,0,
 		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_DIFF,A_LEFT,-1,W_BUTTON,-1);
-	addwidget(xx[2]+1,yy+1,xx[3]-1,yy+1+buttonheight-1,2,2,0,
-		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_SIZE,A_LEFT,-1,W_BUTTON,-1);
-	addwidget(xx[3]+1,yy+1,xx[4]-1,yy+1+buttonheight-1,2,2,0,
+	addwidget(xx[2]+1,yy+1,xx[3]-1,yy+1+buttonheight-1,1,2,0,
+		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_SIZE,A_CENTER,-1,W_BUTTON,-1);
+	addwidget(xx[3]+1,yy+1,xx[4]-1,yy+1+buttonheight-1,1,2,0,
 		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_DATE,A_LEFT,-1,W_BUTTON,-1);
-	addwidget(xx[4]+1,yy+1,xx[5]-1,yy+1+buttonheight-1,2,2,0,
+	addwidget(xx[4]+1,yy+1,xx[5]-1,yy+1+buttonheight-1,1,2,0,
 		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_SPENT,A_RIGHT,-1,W_BUTTON,-1);
-	addwidget(xx[5]+1,yy+1,xx[6]-1,yy+1+buttonheight-1,2,2,0,
+	addwidget(xx[5]+1,yy+1,xx[6]-1,yy+1+buttonheight-1,1,2,0,
 		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_CLICKS,A_RIGHT,-1,W_BUTTON,-1);
 	yy+=buttonheight+1;
 	addwidget(xx[0],yy,xx[7],yy,0,0,0,BLACK32,BLACK32,BLACK32,BLACK32,"",0,-1,W_NOTHING,-1);
 	yy++;
+	widgetix=widgetnum;
+	for(i=0;i<numentries;i++) {
+		/* create empty entries for each cell */
+		cur=widgetnum;
+		addwidget(xx[0]+1,yy,xx[1]-1,yy+font->height+1,1,1,0,BLACK32,WHITE32,BLACK32,YELLOW32,"",A_LEFT,100+i,W_BUTTON,cur+1);
+		addwidget(xx[1]+1,yy,xx[2]-1,yy+font->height+1,1,1,0,BLACK32,WHITE32,BLACK32,YELLOW32,"",A_LEFT,100+i,W_BUTTON,cur+2);
+		addwidget(xx[2]+1,yy,xx[3]-1,yy+font->height+1,1,1,0,BLACK32,WHITE32,BLACK32,YELLOW32,"",A_CENTER,100+i,W_BUTTON,cur+3);
+		addwidget(xx[3]+1,yy,xx[4]-1,yy+font->height+1,1,1,0,BLACK32,WHITE32,BLACK32,YELLOW32,"",A_LEFT,100+i,W_BUTTON,cur+4);
+		addwidget(xx[4]+1,yy,xx[5]-1,yy+font->height+1,1,1,0,BLACK32,WHITE32,BLACK32,YELLOW32,"",A_RIGHT,100+i,W_BUTTON,cur+5);
+		addwidget(xx[5]+1,yy,xx[6]-1,yy+font->height+1,1,1,0,BLACK32,WHITE32,BLACK32,YELLOW32,"",A_RIGHT,100+i,W_BUTTON,cur);
+		yy+=font->height+2;
+		updatetable(i);
+	}
 }
 
 static void drawmenu() {
 	int i;
   if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
-	if(resx<830 || resy<300) {
+	if(resx<800 || resy<300) {
 		clear32(RED32);
 		sdl_font_printf(screen,font,0,0,BLACK32,BLACK32,"please resize window");
 	} else {
@@ -399,9 +496,95 @@ static void drawmenu() {
   SDL_UpdateRect(screen,0,0,resx,resy);
 }
 
+static void redrawtableline(int n) {
+	int ix=n*6+widgetix,j;
+	for(j=0;j<6;j++) drawwidget(widget+j+ix,0);
+}
+
+static void redrawtable() {
+	int i;
+	for(i=0;i<numentries;i++) redrawtableline(i);
+}
+
+static void play(int n) {
+	static char fn[MAXSTRING];
+	strcpy(fn,puzzlepath);
+	strcat(fn,puzzlelist[n].puzzleid);
+	launch(fn,0);
+	memset(keys,0,sizeof(keys));
+	placement();
+	drawmenu();
+}
+
+#define GOUP if(selected+ypos) { --selected; if(selected<0) selected=0,ypos--,scroll=1; }
+#define GODOWN if(selected+ypos+1<puzzlenum) { ++selected; if(selected==numentries) selected--,ypos++,scroll=1; }
+static void processkeydown(int key) {
+	int scroll=0,i,oldsel=selected;
+	switch(key) {
+	case SDLK_UP:
+		GOUP
+		break;
+	case SDLK_DOWN:
+		GODOWN
+		break;
+	case SDLK_PAGEUP:
+	case SDLK_KP9:
+		for(i=1;i<numentries;i++) GOUP
+		break;
+	case SDLK_PAGEDOWN:
+	case SDLK_KP3:
+		for(i=1;i<numentries;i++) GODOWN
+		break;
+	case SDLK_p:
+	case SDLK_RETURN:
+		play(selected+ypos);
+		break;
+	case SDLK_HOME:
+	case SDLK_KP7:
+		if(ypos) selected=ypos=0,scroll=1;
+		if(selected) selected=0;
+		break;
+	case SDLK_END:
+	case SDLK_KP1:
+		if(ypos<puzzlenum-numentries) ypos=puzzlenum-numentries,scroll=1;
+		if(selected<numentries-1) selected=numentries-1;
+		break;
+	case SDLK_s:
+		messagebox(0,"Wait, scanning for new puzzles");
+		scanfornewpuzzles();
+		selected=ypos=0;
+		placement();
+		drawmenu();
+		break;
+	}
+	if(scroll) {
+		if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+		for(i=0;i<numentries;i++) updatetable(i);
+		redrawtable();
+		if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+		SDL_UpdateRect(screen,tablex,starty+logoy,resx-tablex,tablebottomy+1-starty-logoy);
+	} else if(selected!=oldsel) {
+		if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+		updatetablecol(oldsel);
+		updatetablecol(selected);
+		redrawtableline(oldsel);
+		redrawtableline(selected);
+		if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+		/* laziness: refresh entire table. if this leads to performance problems,
+		   only update the two actual lines */
+		SDL_UpdateRect(screen,tablex,starty+logoy,resx-tablex,tablebottomy+1-starty-logoy);
+	}
+}
+#undef GOUP
+#undef GODOWN
+
 void menu() {
 	int event;
 	loadcache();
+	if(!puzzlenum) {
+		scanfornewpuzzles();
+		if(!puzzlenum) error("error, no puzzles found");
+	}
 	placement();
 	drawmenu();
   do {
@@ -410,6 +593,11 @@ void menu() {
     case EVENT_RESIZE:
 			placement();
       drawmenu();
-    }
-  } while(event!=EVENT_QUIT && !keys[SDLK_ESCAPE]);
+			break;
+    default:
+      if(event>=EVENT_KEYDOWN && event<EVENT_KEYUP) {
+				processkeydown(event-EVENT_KEYDOWN);
+			}
+		}
+  } while(event!=EVENT_QUIT && !keys[SDLK_ESCAPE] && !keys[SDLK_q]);
 }

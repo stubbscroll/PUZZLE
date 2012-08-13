@@ -552,48 +552,75 @@ void anykeypress(void (*drawgrid)()) {
   }
 }
 
-/*  TODO make a more advanced messagebox with support for multiple lines */
+/* TODO make a more advanced messagebox with support for multiple lines */
+/* wait=1: wait for input, 0:display message and quit */
 #define RAMME 16
 #define SDL_FONT_S 65536
-void messagebox(char *fmt,...) {
-  static char t[SDL_FONT_S];
-  int w,i,j,x,y,h=font->height,R=RAMME+RAMME;
-  Uint32 *backup,*p;
-  va_list argptr;
-  va_start(argptr,fmt);
-  vsprintf(t,fmt,argptr);
-  va_end(argptr);
-  w=sdl_font_width(font,t);
-  backup=(Uint32 *)malloc((w+R)*(h+R)*4);
-  x=(resx-w-R)/2;
-  y=(resy-font->height-R)/2;
-  if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
-  for(i=0;i<font->height+R;i++) {
-    p=pixels+(i+y)*pitch+x;
-    for(j=0;j<w+R;j++) backup[(w+R)*i+j]=p[j];
-  }
-  /*  green interior */
-  drawrectangle32(x,y,x+w+R-1,y+h+R-1,GREEN32);
-  /*  big white outline */
-  drawrectangle32(x,y,x+w+R-1,y+3,WHITE32);
-  drawrectangle32(x,y+h+R-4,x+w+R-1,y+h+R-1,WHITE32);
-  drawrectangle32(x,y,x+3,y+h+R-1,WHITE32);
-  drawrectangle32(x+w+R-3,y,x+w+R-1,y+h+R-1,WHITE32);
-  /*  tiny black outline */
-  drawhorizontalline32(x,x+w+R-1,y,BLACK32);
-  drawhorizontalline32(x,x+w+R-1,y+h+R-1,BLACK32);
-  drawverticalline32(x,y,y+h+R-1,BLACK32);
-  drawverticalline32(x+w+R-1,y,y+h+R-1,BLACK32);
-  sdl_font_printf(screen,font,x+RAMME,y+RAMME,WHITE32,WHITE32,t);
-  if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-  SDL_UpdateRect(screen,x,y,w+R,h+R);
-  anykeypress(0);
-  if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
-  for(i=0;i<font->height+R;i++) {
-    p=pixels+(i+y)*pitch+x;
-    for(j=0;j<w+R;j++) p[j]=backup[(w+R)*i+j];
-  }
-  if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-  SDL_UpdateRect(screen,x,y,w+R,h+R);
-  free(backup);
+void messagebox(int wait,char *fmt,...) {
+	static char t[SDL_FONT_S];
+	int w,i,j,x,y,h=font->height,R=RAMME+RAMME;
+	Uint32 *backup=0,*p;
+	va_list argptr;
+	va_start(argptr,fmt);
+	vsprintf(t,fmt,argptr);
+	va_end(argptr);
+	w=sdl_font_width(font,t);
+	if(wait) backup=(Uint32 *)malloc((w+R)*(h+R)*4);
+	x=(resx-w-R)/2;
+	y=(resy-font->height-R)/2;
+	if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+	if(wait) for(i=0;i<font->height+R;i++) {
+		p=pixels+(i+y)*pitch+x;
+		for(j=0;j<w+R;j++) backup[(w+R)*i+j]=p[j];
+	}
+	/*  green interior */
+	drawrectangle32(x,y,x+w+R-1,y+h+R-1,GREEN32);
+	/*  big white outline */
+	drawrectangle32(x,y,x+w+R-1,y+3,WHITE32);
+	drawrectangle32(x,y+h+R-4,x+w+R-1,y+h+R-1,WHITE32);
+	drawrectangle32(x,y,x+3,y+h+R-1,WHITE32);
+	drawrectangle32(x+w+R-3,y,x+w+R-1,y+h+R-1,WHITE32);
+	/*  tiny black outline */
+	drawhorizontalline32(x,x+w+R-1,y,BLACK32);
+	drawhorizontalline32(x,x+w+R-1,y+h+R-1,BLACK32);
+	drawverticalline32(x,y,y+h+R-1,BLACK32);
+	drawverticalline32(x+w+R-1,y,y+h+R-1,BLACK32);
+	sdl_font_printf(screen,font,x+RAMME,y+RAMME,WHITE32,WHITE32,t);
+	if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+	SDL_UpdateRect(screen,x,y,w+R,h+R);
+	if(wait) {
+		anykeypress(0);
+		if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+		for(i=0;i<font->height+R;i++) {
+			p=pixels+(i+y)*pitch+x;
+			for(j=0;j<w+R;j++) p[j]=backup[(w+R)*i+j];
+		}
+		if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+		SDL_UpdateRect(screen,x,y,w+R,h+R);
+		free(backup);
+	}
+}
+
+/* launch game! */
+
+static char *getid(char *s) {
+  int i;
+  for(i=strlen(s)-1;i>=0 && s[i]!='/' && s[i]!='\\';--i);
+  return s+i+1;
+}
+
+void launch(char *s,int autosolve) {
+  char *t=getid(s);
+	setstackpos(0);
+  if     (t[0]=='n' && t[1]=='u' && t[2]=='r') nurikabe(s,autosolve);
+  else if(t[0]=='a' && t[1]=='k' && t[2]=='a') akari(s,autosolve);
+  else if(t[0]=='h' && t[1]=='e' && t[2]=='y') heyawake(s,autosolve);
+  else if(t[0]=='h' && t[1]=='i' && t[2]=='t') hitori(s,autosolve);
+  else if(t[0]=='p' && t[1]=='i' && t[2]=='c') picross(s,autosolve);
+  else if(t[0]=='s' && t[1]=='l' && t[2]=='i') slitherlink(s,autosolve);
+  else if(t[0]=='m' && t[1]=='a' && t[2]=='s') masyu(s,autosolve);
+  else if(t[0]=='h' && t[1]=='a' && t[2]=='s') hashiwokakero(s,autosolve);
+  else if(t[0]=='y' && t[1]=='a' && t[2]=='j') yajilin(s,autosolve);
+  else if(t[0]=='m' && t[1]=='i' && t[2]=='n') mine(s,autosolve);
+  else if(t[0]=='k' && t[1]=='u' && t[2]=='r') kuromasu(s,autosolve);
 }

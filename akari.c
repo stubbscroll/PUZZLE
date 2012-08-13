@@ -397,7 +397,7 @@ static int level2diagonallight() {
     /*  check for diagonally adjacent numbered wall */
     for(k=4;k<8;k++) {
       cx=i+dx8[k]; cy=j+dy8[k];
-      if(cx<0 || cy<0 || cx>=x || cy>=y || m[cx][cy]>=WALL0) {
+      if(cx>=0 && cy>=0 && cx<x && cy<y && m[cx][cy]>=WALL0) {
         lights=free=0;
         val=m[cx][cy]-WALL0;
         for(l=0;l<4;l++) {
@@ -555,18 +555,37 @@ static void processkeydown(int key) {
     if(!executeonemovefromqueue(1)) {
       res=hint();
       if(res>0) executeonemovefromqueue(1);
-      else if(!res) messagebox("Sorry, no moves found.");
-      else messagebox("Sorry, hint will not work on an illegal board.");
+      else if(!res) messagebox(1,"Sorry, no moves found.");
+      else messagebox(1,"Sorry, hint will not work on an illegal board.");
     }
   } else if(key==SDLK_j) {  /*  temporary: superhintkey */
     res=hint();
     if(res>0) {
       executemovequeue();
       while(hint()>0) executemovequeue();
-      if(verifyboard()<1) messagebox("Sorry, no more moves found.");
-    } else if(!res) messagebox("Sorry, no moves found.");
-    else messagebox("Sorry, hint will not work on an illegal board.");
+      if(verifyboard()<1) messagebox(1,"Sorry, no more moves found.");
+    } else if(!res) messagebox(1,"Sorry, no moves found.");
+    else messagebox(1,"Sorry, hint will not work on an illegal board.");
   }
+	else if(key==SDLK_d) {
+		int i,j;
+		logprintf("dump m\n");
+		for(j=0;j<y;j++) {
+			for(i=0;i<x;i++) if(m[i][j]==UNFILLED) logprintf("?");
+			else if(m[i][j]==EMPTY) logprintf(".");
+			else if(m[i][j]==LIGHT) logprintf("*");
+			else if(m[i][j]==WALLNO) logprintf("#");
+			else logprintf("%d",m[i][j]-WALL0);
+			logprintf("\n");
+		}
+		logprintf("dump st\n");
+		for(j=0;j<y;j++) {
+			for(i=0;i<x;i++) {
+				logprintf("%d ",st[i][j]);
+			}
+			logprintf("\n");
+		}
+	}
 }
 
 static void autosolver(char *s) {
@@ -607,7 +626,7 @@ void akari(char *path,int solve) {
     case EVENT_MOUSEDOWN:
       processmousedown();
       if(verifyboard()>0) {
-        messagebox("You are winner!");
+        messagebox(1,"You are winner!");
         return;
       }
       break;
@@ -616,7 +635,7 @@ void akari(char *path,int solve) {
       if(event>=EVENT_KEYDOWN && event<EVENT_KEYUP) {
         processkeydown(event-EVENT_KEYDOWN);
         if(verifyboard()>0) {
-          messagebox("You are winner!");
+          messagebox(1,"You are winner!");
           return;
         }
       }

@@ -671,17 +671,17 @@ static void processkeydown(int key) {
     if(!executeonemovefromqueue(1)) {
       res=hint();
       if(res>0) executeonemovefromqueue(1);
-      else if(!res) messagebox("Sorry, no moves found.");
-      else messagebox("Sorry, hint will not work on an illegal board.");
+      else if(!res) messagebox(1,"Sorry, no moves found.");
+      else messagebox(1,"Sorry, hint will not work on an illegal board.");
     }
   } else if(key==SDLK_j) {
     res=hint();
     if(res>0) {
       executemovequeue();
       while(hint()>0) executemovequeue();
-      if(verifyboard()<1) messagebox("Sorry, no more moves found.");
-    } else if(!res) messagebox("Sorry, no moves found.");
-    else messagebox("Sorry, hint will not work on an illegal board.");
+      if(verifyboard()<1) messagebox(1,"Sorry, no more moves found.");
+    } else if(!res) messagebox(1,"Sorry, no moves found.");
+    else messagebox(1,"Sorry, hint will not work on an illegal board.");
   }
 }
 
@@ -722,7 +722,7 @@ void kuromasu(char *path,int solve) {
     case EVENT_MOUSEDOWN:
       processmousedown();
       if(verifyboard()>0) {
-        messagebox("You are winner!");
+        messagebox(1,"You are winner!");
         return;
       }
       break;
@@ -730,7 +730,7 @@ void kuromasu(char *path,int solve) {
       if(event>=EVENT_KEYDOWN && event<EVENT_KEYUP) {
         processkeydown(event-EVENT_KEYDOWN);
         if(verifyboard()>0) {
-          messagebox("You are winner!");
+          messagebox(1,"You are winner!");
           return;
         }
       }

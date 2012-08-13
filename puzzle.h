@@ -122,7 +122,7 @@ void sdlrefreshcell(int,int);
 
 int dummyevent();
 
-void messagebox(char *,...);
+void messagebox(int,char *,...);
 
 /* stack */
 
@@ -137,10 +137,9 @@ int getevent();
 void anykeypress(void (*)());
 
 /* menu system */
-
 void menu();
 
-/* ntry point for every game */
+/* entry point for every game */
 void nurikabe(char *,int);
 void akari(char *,int);
 void heyawake(char *,int);
@@ -152,5 +151,8 @@ void hashiwokakero(char *,int);
 void yajilin(char *,int);
 void mine(char *,int);
 void kuromasu(char *,int);
+
+/* launcher */
+void launch(char *,int);
 
 #endif  /*  PUZZLE_H */
