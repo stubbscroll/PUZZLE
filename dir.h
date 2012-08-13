@@ -1,16 +1,32 @@
 #ifndef DIR_H
 #define DIR_H
 
-int findfirstfile(const char *);
-int findnextfile(const char *);
-void findclose();
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <sys/types.h>
+#include <dirent.h>
+#endif
+
+typedef long long ll;
+typedef unsigned long long ull;
 
 typedef struct {
-  char *filename;   /*  file name */
-  int dir;          /*  1 if directory, 0 if file */
-  unsigned int losize;  /*  file size low part */
-  unsigned int hisize;  /*  file size high part */
-  int y,m,d,hh,mm,ss;   /*  file date and time */
-} dirfileinfo_t;
+#ifdef _WIN32
+	HANDLE hfind;
+	WIN32_FIND_DATA f;
+#else
+	DIR *d;
+	struct dirent *f;
+#endif
+	int dir;	/* 1: dir, 0: no dir, -1: not supported */
+	ull len;
+	int nolen;	/* 1 if no support for filelen */
+	char *s;
+} dir_t;
+
+int findfirst(char *const,dir_t *);
+int findnext(dir_t *);
+void findclose(dir_t *);
 
 #endif

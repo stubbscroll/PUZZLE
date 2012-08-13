@@ -1,46 +1,50 @@
 STUFF TO BE ADDED, IN DECREASING ORDER OF MOST DESIRED
 
 - kuromasu: add red colour when empty>number
-- BUGFIX in messagebox, add callback to a redraw routine
 - scoring
 - menu system with score tracking and puzzle selector
 
 COMPLETE LIST OF STUFF TO BE ADDED
 
 - general:
-  - for extremely time intensive solving heuristics: estimate the number
-    of combinations needed to investigate for a given move and try moves
-    in order of increasing work
   - make a menu system for selecting puzzles. it should cache, and only
     reload upon the user issuing a refresh command. in addition, add score 
     tracking. in the menu, display whether the puzzle is solved, along with
     the best time and lowest amount of mouse clicks. the puzzle cache and the
     scores should be stored in a text file. file format: one puzzle per line.
-    filename, puzzle name, author, difficulty (int), size, best time, best
-    score (number of clicks).
+    filename, puzzle name, [author,] difficulty, size, date solved, best time
+    (in hundredths of a second), best score (number of clicks)
   - in accordance with the above, add a visible timer and mouse clicks. while
     doing that, also add some info about the puzzle, as the credits,
-    difficulty and puzzle name.
+    difficulty and puzzle name. at the top left, display static info such as
+    puzzle name, id and author. at the top right, display time spent and
+    number of clicks done.
+  - for extremely time intensive solving heuristics: estimate the number
+    of combinations needed to investigate for a given move and try moves
+    in order of increasing work
   - nice resizing of numbers
   - add achievements! for instance:
     - for each puzzle type, achievement for completing one puzzle without using
       hints
     - complete at least one puzzle of each type without using hints
-    - complete one puzzle of difficulty "extra" without using hints
+    - complete one puzzle of difficulty "extra"/"extreme" without using hints
     - complete one puzzle using the hint function only
     - complete a puzzle using no unnecessary moves, without using hints
-    - complete a puzzle in under 10 seconds without using hints
+    - complete a puzzle in less than 10 seconds without using hints
     - complete 1000 puzzles without using hints
     - complete at least 50% of all puzzles of any kind
+    - complete a level with the fewest possible clicks
   - print error message (at least into log.txt or error.txt) when something
     bad happens
-  - processmousedown() is hideous, improve it
-  - allow resizing when messagebox is shown, use callback to update or
-    something like that
+  - change difficulty from string to int (can be done by changing the grabber
+    programs, changing each loadpuzzle() (use table lookup to display string)
+    and change all files (don't regrab them, but make a program to go through
+    all files and replace string with int)
   - make fancy controls:
     - hold mouse button and mark all unfilled cells
   - automatic puzzle generation
-  - serious refactoring: remove all common code between games
+  - the code is very messy with lots of duplication, but i've decided against
+    refactoring
 
 - kuromasu
   - number in round cell within square
@@ -76,63 +80,20 @@ COMPLETE LIST OF STUFF TO BE ADDED
     the direction is in another layer
 
 - add games (higher up => more likely to be implemented, either because it's
-  easy to implement or the game looks more interesting/fun to me)
-  - numberlink (arukone) http://www.janko.at/Raetsel/Arukone/index.htm
+  easy to implement or the game looks more interesting/fun to me). number in
+  brackets indicate the number of puzzles at janko.
+  - numberlink (arukone) [210] http://www.janko.at/Raetsel/Arukone/index.htm
     - normal edge dragging, easily stolen from masyu
     - also check the variants arukone^2 and arukone^3
-  - gokigen naname http://www.janko.at/Raetsel/Gokigen/index.htm
+  - gokigen naname [380] http://www.janko.at/Raetsel/Gokigen/index.htm
     - tri-state as nurikabe: unfilled, backslash, slash
-  - kuromasu http://www.janko.at/Raetsel/Kuromasu/index.htm
-    - mark cells as empty or wall, empty cells must form a connected region
-  - corral http://www.janko.at/Raetsel/Corral/index.htm
-    - mark cells as empty or wall, a single closed loop must enclose the
-      empty cells
-  - mochikoro http://www.janko.at/Raetsel/Mochikoro/index.htm
-    - similar to nurikabe, only islands are diagonally connected
-  - leuchttürme (lighthouse) http://www.janko.at/Raetsel/Leuchttuerme/index.htm
-    - place ships so that lighthouses are satisfied
-  - lampion http://www.janko.at/Raetsel/Lampions/index.htm
-    - a mix of minesweeper and akari, mark cells as black/white
-  - mosaik http://www.janko.at/Raetsel/Mosaik/index.htm
-    - mark cells black/white, somewhat similar to minesweeper
-  - norinori http://www.janko.at/Raetsel/Norinori/index.htm
-    - mark two cells in each region black so that the black regions form
-      1x2 or 2x1 dominoes
-  - linesweeper http://www.janko.at/Raetsel/Linesweeper/index.htm
-    - make a closed loop so that each number is adjacent to that many cells
-      containing segments of the loop
-    - steal routines from masyu
-  - tohu wa vohu http://www.janko.at/Raetsel/Tohu-Wa-Vohu/index.htm
-    - place T or V so that an equal number of each occur on each row/col
-      and no ver/hor run of 3 similar symbols exist
-  - grand tour http://www.janko.at/Raetsel/Grand-Tour/index.htm
-    - make a single loop through all dots, must use existing line segments
-    - similar to slitherlink, steal routines from it
-  - türen (doors) http://www.janko.at/Raetsel/Tueren/index.htm
-    - similar to kuromasu, steal edge routines from slitherlink
-  - magnete http://www.janko.at/Raetsel/Magnete/index.htm
-    - place plus/minus signs according to hints, two adjacent cells cannot
-      contain same sign
-  - mauerbau http://www.janko.at/Raetsel/Mauerbau/index.htm
-    - place vertical/horizontal lines so that the numbered cells indicate
-      the number of lines emanating from it. similar to corral and
-      kuromasu
-  - vier winde http://www.janko.at/Raetsel/Vier-Winde/index.htm
-    - similar to mauerbau
-  - sternenhaufen http://www.janko.at/Raetsel/Sternenhaufen/index.htm
-    - place block and star in each row/column so that the moons are lit
-      as indicated
-  - sternenhimmel http://www.janko.at/Raetsel/Sternenhimmel/index.htm
-    - place stars so that numbers and arrows are satisfied
-  - dominos http://www.janko.at/Raetsel/Dominos/index.htm
+  - dominos [380] http://www.janko.at/Raetsel/Dominos/index.htm
     - beware of different board sizes with different bound on max number
       on a domino
-  - tapa http://www.janko.at/Raetsel/Tapa/index.htm
-    - place black cells so that numbers are satisfied
-  - trace numbers http://www.janko.at/Raetsel/Trace-Numbers/index.htm
-    - make several paths, each going through each number in increasing
-      order, while leaving no cell empty
-  - shikaku http://www.janko.at/Raetsel/Sikaku/index.htm
+  - magnete [150] http://www.janko.at/Raetsel/Magnete/index.htm
+    - place plus/minus signs according to hints, two adjacent cells cannot
+      contain same sign
+  - shikaku [240] http://www.janko.at/Raetsel/Sikaku/index.htm
     - implement the controls in the following way: at the beginning, there
       will be 1x1 rectangles on top of every number. the size of a rectangle
       is changed by holding the mouse button an edge cell and moving the
@@ -141,120 +102,162 @@ COMPLETE LIST OF STUFF TO BE ADDED
       inwards, the size decreases by one in that direction. mouse dragging
       routines are easily stolen from masyu.
     - how to show current size?
-  - fillomino
+  - lampions [130] http://www.janko.at/Raetsel/Lampions/index.htm
+    - a mix of minesweeper and akari, mark cells as black/white
+  - tohu wa vohu [120] http://www.janko.at/Raetsel/Tohu-Wa-Vohu/index.htm
+    - place T or V so that an equal number of each occur on each row/col
+      and no ver/hor run of 3 similar symbols exist
+  - grand tour [130] http://www.janko.at/Raetsel/Grand-Tour/index.htm
+    - make a single loop through all dots, must use existing line segments
+    - similar to slitherlink, steal routines from it
+  - sternenhaufen [90] http://www.janko.at/Raetsel/Sternenhaufen/index.htm
+    - place block and star in each row/column so that the moons are lit
+      as indicated
+  - corral [30] http://www.janko.at/Raetsel/Corral/index.htm
+    - mark cells as empty or wall, a single closed loop must enclose the
+      empty cells
+  - mochikoro [50] http://www.janko.at/Raetsel/Mochikoro/index.htm
+    - similar to nurikabe, only islands are diagonally connected
+  - leuchttürme (lighthouse) [70] http://www.janko.at/Raetsel/Leuchttuerme/index.htm
+    - place ships so that lighthouses are satisfied
+  - mosaik [30] http://www.janko.at/Raetsel/Mosaik/index.htm
+    - mark cells black/white, somewhat similar to minesweeper
+  - norinori [30] http://www.janko.at/Raetsel/Norinori/index.htm
+    - mark two cells in each region black so that the black regions form
+      1x2 or 2x1 dominoes
+  - linesweeper [40] http://www.janko.at/Raetsel/Linesweeper/index.htm
+    - make a closed loop so that each number is adjacent to that many cells
+      containing segments of the loop
+    - steal routines from masyu
+  - türen (doors) [20] http://www.janko.at/Raetsel/Tueren/index.htm
+    - similar to kuromasu, steal edge routines from slitherlink
+  - mauerbau [40] http://www.janko.at/Raetsel/Mauerbau/index.htm
+    - place vertical/horizontal lines so that the numbered cells indicate
+      the number of lines emanating from it. similar to corral and
+      kuromasu
+  - vier winde [30] http://www.janko.at/Raetsel/Vier-Winde/index.htm
+    - similar to mauerbau
+  - sternenhimmel [17] http://www.janko.at/Raetsel/Sternenhimmel/index.htm
+    - place stars so that numbers and arrows are satisfied
+  - tapa [70] http://www.janko.at/Raetsel/Tapa/index.htm
+    - place black cells so that numbers are satisfied
+  - trace numbers [36] http://www.janko.at/Raetsel/Trace-Numbers/index.htm
+    - make several paths, each going through each number in increasing
+      order, while leaving no cell empty
+  - fillomino [330] http://www.janko.at/Raetsel/Fillomino/index.htm
     - suggested controls: drag number from numbered cell to non-numbered cell
       to populate cell with new value. weakness with this: impossible to
       directly enter the value of non-adjacent cells. also, click in cell
       (another button) to remove number. use thickness-routines from heyawake.
-  - zeltlager (tents and trees) http://www.janko.at/Raetsel/Zeltlager/index.htm
+  - zeltlager (tents and trees) [430] http://www.janko.at/Raetsel/Zeltlager/index.htm
     - place tents so that each tent is close to a tree, each tent is assigned
       to exactly one tree and the number of tents in each row/col is as
       indicated
-  - zeltlager^2 http://www.janko.at/Raetsel/Zeltlager2/index.htm
+  - zeltlager^2 [230] http://www.janko.at/Raetsel/Zeltlager2/index.htm
     - mix between zeltlager and picross
-  - nachbarn http://www.janko.at/Raetsel/Nachbarn/index.htm
+  - nachbarn [50] http://www.janko.at/Raetsel/Nachbarn/index.htm
     - define regions between cells so that the numbers indicate the number of
       adjacent regions
-  - pfeilzahlen http://www.janko.at/Raetsel/Pfeilzahlen/index.htm
+  - pfeilzahlen [230] http://www.janko.at/Raetsel/Pfeilzahlen/index.htm
     - place arrows so that each number is pointed to by the indicated number
       of arrows
-  - spotlight http://www.janko.at/Raetsel/Spotlight/index.htm
+  - spotlight [110] http://www.janko.at/Raetsel/Spotlight/index.htm
     - mark arrows black or white
-  - pillen http://www.janko.at/Raetsel/Pillen/index.htm
+  - pillen [60] http://www.janko.at/Raetsel/Pillen/index.htm
     - place 1x3 or 3x1 white regions so that sum of black cells is
       satisfied
-  - seek numbers http://www.janko.at/Raetsel/Seek-Numbers/index.htm
+  - seek numbers [27] http://www.janko.at/Raetsel/Seek-Numbers/index.htm
     - create path from S to Z that goes through all cells, numbers indicate
       how many turns are done between this cell and the next number
-  - shakashaka http://www.janko.at/Raetsel/Shakashaka/index.htm
-  - masyu^2 http://www.janko.at/Raetsel/Masyu2/index.htm
+  - shakashaka [60] http://www.janko.at/Raetsel/Shakashaka/index.htm
+  - masyu^2 [143] http://www.janko.at/Raetsel/Masyu2/index.htm
     - same as masyu, but make path instead of loop, and path must pass through
       all cells and start/end at designated spots. also, more lax restrictions
       on black/white cells
-  - ripple effect (hakyuu) http://www.janko.at/Raetsel/Hakyuu/index.htm
+  - ripple effect (hakyuu) [260] http://www.janko.at/Raetsel/Hakyuu/index.htm
     - how to do controls?
-  - patchwork http://www.janko.at/Raetsel/Patchwork/index.htm
+  - patchwork [210] http://www.janko.at/Raetsel/Patchwork/index.htm
     - mix of ripple effect and latin-ish square
-  - battleships, bimaru http://www.janko.at/Raetsel/Battleships/index.htm
-  - polyominos http://www.janko.at/Raetsel/Polyominos/index.htm
+  - battleships, bimaru [420] http://www.janko.at/Raetsel/Battleships/index.htm
+  - polyominos [23] http://www.janko.at/Raetsel/Polyominos/index.htm
     - make polyominos so that the sum of each cell in a polyomino is 10
     - minimize the number of unused cells (this requirement looks dubious,
       how to check this computationally?)
-  - sternenschlacht (star battle) http://www.janko.at/Raetsel/Sternenschlacht/index.htm
+  - sternenschlacht (star battle) [40] http://www.janko.at/Raetsel/Sternenschlacht/index.htm
     - place one star in each region,row,column so that no two stars are
       8-adjacent
-  - galaxien http://www.janko.at/Raetsel/Galaxien/index.htm
+  - galaxien [250] http://www.janko.at/Raetsel/Galaxien/index.htm
     - make symmetrical blocks with dot in centroid
-  - anglers http://www.janko.at/Raetsel/Anglers/index.htm
-  - burokku http://www.janko.at/Raetsel/Burokku/index.htm
-  - country road http://www.janko.at/Raetsel/Country-Road/index.htm
-  - doughnut http://www.janko.at/Raetsel/Doughnut/index.htm
+  - anglers [30] http://www.janko.at/Raetsel/Anglers/index.htm
+  - burokku [100] http://www.janko.at/Raetsel/Burokku/index.htm
+  - country road [30] http://www.janko.at/Raetsel/Country-Road/index.htm
+  - doughnut [18] http://www.janko.at/Raetsel/Doughnut/index.htm
     - on a torus, create a path through all cells, through all numeric cells
       in increasing order
-  - zahlenschlange http://www.janko.at/Raetsel/Zahlenschlange/index.htm
+  - zahlenschlange [27] http://www.janko.at/Raetsel/Zahlenschlange/index.htm
     - make a path from upper left to lower right so that every number
       from 1 to MAX is passed exactly once
-  - ebony and ivory http://www.janko.at/Raetsel/Ebony-Ivory/index.htm
+  - ebony and ivory [130] http://www.janko.at/Raetsel/Ebony-Ivory/index.htm
     - similar to picross, except there's one numbered hint which indicates
       the longest sequence of consecutive black blocks
-  - pentominos http://www.janko.at/Raetsel/Pentominos/index.htm
+  - pentominos [100] http://www.janko.at/Raetsel/Pentominos/index.htm
     - place pentominoes in grid so that no pair of pentominoes are adjacent
       diagonally
-  - haunted mirror maze http://www.janko.at/Raetsel/Spukschloss/index.htm
+  - haunted mirror maze [33] http://www.janko.at/Raetsel/Spukschloss/index.htm
     - place ghosts, vampires, zombies so that number of seen things are
       satisfied.
     - hard to implement because of special graphics
-  - detective chess http://www.janko.at/Raetsel/Detektivschach/index.htm
+  - detective chess [90] http://www.janko.at/Raetsel/Detektivschach/index.htm
     - hard to create because of graphics and user interface
-  - suraromu (slalom) http://www.janko.at/Raetsel/Suraromu/index.htm
+  - suraromu (slalom) [40] http://www.janko.at/Raetsel/Suraromu/index.htm
     - make closed loop that passes through gates according to rules
-  - LITS http://www.janko.at/Raetsel/LITS/index.htm
+  - LITS [110] http://www.janko.at/Raetsel/LITS/index.htm
     - place tetrominoes according to some restrictions
-  - zipline http://www.janko.at/Raetsel/Zipline/index.htm
+  - zipline [35] http://www.janko.at/Raetsel/Zipline/index.htm
     - place numbers so that each blue number is equal to the sum of all
       neighbouring cells. similar to minesweeper where mines have
       values
-  - eulero http://www.janko.at/Raetsel/Eulero/index.htm
+  - eulero [150] http://www.janko.at/Raetsel/Eulero/index.htm
     - latin square thingy
-  - nanbaboru http://www.janko.at/Raetsel/Nanbaboru/index.htm
+  - nanbaboru [20] http://www.janko.at/Raetsel/Nanbaboru/index.htm
     - latin square variant
-  - wolkenkratzer (skyscrapers) http://www.janko.at/Raetsel/Wolkenkratzer/index.htm
+  - wolkenkratzer (skyscrapers) [270] http://www.janko.at/Raetsel/Wolkenkratzer/index.htm
     - place numbers (representing height) so that the indicated number of
       distinct skyscrapers can be seen from a given row/column
-  - mathrax http://www.janko.at/Raetsel/Mathrax/index.htm
+  - mathrax [100] http://www.janko.at/Raetsel/Mathrax/index.htm
     - make latin square of numbers so that arithmetic is satisfied
-  - hidoku http://www.janko.at/Raetsel/Hidoku/index.htm
+  - hidoku [130] http://www.janko.at/Raetsel/Hidoku/index.htm
     - place numbers in grid so that consecutive numbers are 8-connected
     - warning, diagonal edges, additional graphics code needed
-  - pfeilpfad http://www.janko.at/Raetsel/Pfeilpfad/index.htm
+  - pfeilpfad [170] http://www.janko.at/Raetsel/Pfeilpfad/index.htm
     - place numbers in grid so that arrows point to larger number
-  - yakuso http://www.janko.at/Raetsel/Yakuso/index.htm
+  - yakuso [30] http://www.janko.at/Raetsel/Yakuso/index.htm
     - place numbers in grid so that they sum up as desired, and so that
       each number n>0 occurs n times (0 can occur any number of times)
-  - zehnergitter http://www.janko.at/Raetsel/Zehnergitter/index.htm
+  - zehnergitter [250] http://www.janko.at/Raetsel/Zehnergitter/index.htm
     - place numbers 0-9 in each row so that sum is satisfied and no digit
       is 8-adjacent to the same digit
-  - hashiwokakero^2 http://www.janko.at/Raetsel/Hashi2/index.htm
+  - hashiwokakero^2 [46] http://www.janko.at/Raetsel/Hashi2/index.htm
     - substitution ciphered version of hashiwokakero, steal routines from it
-  - kakuro
-  - sukrouro http://www.janko.at/Raetsel/Sukrokuro/index.htm
+  - kakuro [670]
+  - sukrokuro [80] http://www.janko.at/Raetsel/Sukrokuro/index.htm
     - kakuro with additional constraints
-  - straights (str8ts) http://www.janko.at/Raetsel/Straights/index.htm
+  - straights (str8ts) [80] http://www.janko.at/Raetsel/Straights/index.htm
     - similar-ish to kakuro
-  - karurasu (bokkusu) http://www.janko.at/Raetsel/Kakurasu/index.htm
+  - karurasu (bokkusu) [380] http://www.janko.at/Raetsel/Kakurasu/index.htm
     - fill in black/white such that cells satisfy certain numerical rules
-  - japanese sums http://www.janko.at/Raetsel/Japanische-Summen/index.htm
+  - japanese sums [50] http://www.janko.at/Raetsel/Japanische-Summen/index.htm
     - similar-ish to kakuro
-  - sudoku (generalised size) + variants
+  - sudoku [810] (generalised size) + variants
     - samunamupure (killer-sudoku) http://www.janko.at/Raetsel/Samunamupure/index.htm
-  - mastermind http://www.janko.at/Raetsel/Mastermind/index.htm
-  - kendoku (mathdoku, calcudoku) http://www.janko.at/Raetsel/Kendoku/index.htm
+  - mastermind [98] http://www.janko.at/Raetsel/Mastermind/index.htm
+  - kendoku (mathdoku, calcudoku) [230] http://www.janko.at/Raetsel/Kendoku/index.htm
     - fill in numbers so that the arithmetic is satisfied
-  - miss lupun http://www.janko.at/Raetsel/Miss-Lupun/index.htm
+  - miss lupun [110] http://www.janko.at/Raetsel/Miss-Lupun/index.htm
     - fill in numbers so that the arithmetic is satisfied
-  - futoshiki http://www.janko.at/Raetsel/Futoshiki/index.htm
+  - futoshiki [270] http://www.janko.at/Raetsel/Futoshiki/index.htm
     - fill in numbers so that inequalities are satisfied
-  - rechengitter http://www.janko.at/Raetsel/Rechengitter/index.htm
+  - rechengitter [30] http://www.janko.at/Raetsel/Rechengitter/index.htm
     - fill in numbers so that inequalities are satisfied
   - probably some more games
 

@@ -5,6 +5,8 @@
 
 typedef unsigned char uchar;
 
+#define VERSION_STRING "v0.0"
+
 /*  events */
 #define EVENT_NOEVENT   -1
 #define EVENT_KEYDOWN   0
@@ -81,6 +83,9 @@ extern int event_mousefromy;
 
 extern int dx[],dy[],dx8[],dy8[];
 
+#define MAXPATH 65536
+extern char puzzlepath[MAXPATH];
+
 /*  system stuff */
 void error(char *,...);
 void logprintf(char *,...);
@@ -92,7 +97,7 @@ int compi(const void *,const void *);
 
 /*  init/shutdown */
 void initgr();
-void shutdown();
+void shutdowngr();
 
 /*  non-graphic helper stuff */
 void updatescale(int,int,int,int,int);
@@ -100,11 +105,12 @@ void getcell(int,int,int *,int *);
 void getborder(int,int,int *,int *,int *);
 int manhattandist(int,int,int,int);
 
-/*  graphics routines */
+/* graphics routines */
 void clear32(Uint32);
 void drawpixel32(int,int,Uint32);
 void drawrectangle32(int,int,int,int,Uint32);
 void drawhorizontalline32(int,int,int,Uint32);
+void drawverticalline32(int,int,int,Uint32);
 void drawsolidcell32(int,int,Uint32);
 void drawsolidcell32w(int,int,Uint32,int,int,int,int);
 void drawcross(int,int,Uint32,Uint32);
@@ -118,7 +124,7 @@ int dummyevent();
 
 void messagebox(char *,...);
 
-/*  stack */
+/* stack */
 
 void stackpush(int);
 int stackempty();
@@ -126,11 +132,15 @@ int stackpop();
 int getstackpos();
 void setstackpos(int);
 
-/*  events */
+/* events */
 int getevent();
 void anykeypress(void (*)());
 
-/*  entry point for every game */
+/* menu system */
+
+void menu();
+
+/* ntry point for every game */
 void nurikabe(char *,int);
 void akari(char *,int);
 void heyawake(char *,int);

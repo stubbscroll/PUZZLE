@@ -43,6 +43,9 @@ nurikabe (16 unsolved)
 - playable, done
 - solver is decent (not solved: 003 005 047 055 056 059 065 066 069 076
   R0029 R0400 R0499 R0500 R0559 R0583)
+- number of unsolved levels is high since i've gone out of my way to find hard
+  puzzles on the net. this does not necessarily mean that this solver is worse
+  than the other games' solvers
 
 masyu:
 - playable, done

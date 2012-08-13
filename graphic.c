@@ -77,6 +77,9 @@ static char u[GRAPHIC_FS];
 int dx[]={1,0,-1,0,0},dy[]={0,1,0,-1,0};
 int dx8[]={1,0,-1,0,1,1,-1,-1},dy8[]={0,1,0,-1,1,-1,1,-1};
 
+/* path for puzzles */
+char puzzlepath[MAXPATH];
+
 void error(char *s,...) {
   static char t[GRAPHIC_FS];
   va_list argptr;
@@ -123,10 +126,10 @@ static void split(char *s,char *t,char *u) {
     return;
   }
   while(isspace(*s)) s++;
-  while(isalnum(*s) || *s=='_') *t++=*s++;
+  while(*s!='=' && !isspace(*s)) *t++=*s++;
   s=q+1;
   while(isspace(*s)) s++;
-  while(isalnum(*s) || *s=='.' || *s=='_') *u++=*s++;
+  while(!isspace(*s) && *s!='%') *u++=*s++;
   *t=*u=0;
 }
 
@@ -151,7 +154,8 @@ static Uint32 parsecolour(char *s) {
 
 static void initinifile() {
   FILE *f=fopen("puzzle.ini","r");
-  if(!f) return;
+	int maks;
+	if(!f) return;
   while(fgets(s,GRAPHIC_FS,f)) if(s[0]!='%') {
     split(s,t,u);
     if(!strcmp(t,"x")) resx=strtol(u,0,10);
@@ -188,6 +192,13 @@ static void initinifile() {
     else if(!strcmp(t,"darkererrorcol")) darkererrorcol=parsecolour(u);
     else if(!strcmp(t,"lightcol")) lightcol=parsecolour(u);
     else if(!strcmp(t,"edgecol")) edgecol=parsecolour(u);
+		/* path */
+		else if(!strcmp(t,"puzzlepath")) {
+			maks=strlen(u);
+			if(maks>MAXPATH-1) maks=MAXPATH-1;
+			strncpy(puzzlepath,u,maks);
+			puzzlepath[maks]=0;
+		}
   }
   fclose(f);
 }
@@ -231,7 +242,7 @@ void initgr() {
   if(!(font=sdl_font_load("font.bmp"))) error("error loading font.");
 }
 
-void shutdown() {
+void shutdowngr() {
   sdl_font_free(font);
   SDL_Quit();
 }
@@ -353,7 +364,9 @@ void clear32(Uint32 col) {
     p=pixels+j*pitch;
     for(i=0;i<resx;i++) p[i]=col;
   }
-  SDL_UpdateRect(screen,0,0,resx,resy);
+	/* the next line should not be there, updaterect is the caller's
+	   responsibility */
+/*  SDL_UpdateRect(screen,0,0,resx,resy);*/
 }
 
 /*  determine the size of each cell */
@@ -515,7 +528,7 @@ int dummyevent() {
       updatevideoinfo();
       ret=1;
     } else if(event.type==SDL_QUIT) {
-      shutdown();
+      shutdowngr();
       exit(0);
     } else SDL_PushEvent(&event);
   }
