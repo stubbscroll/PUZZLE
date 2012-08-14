@@ -11,10 +11,10 @@ more desired stuff:
 COMPLETE LIST OF STUFF TO BE ADDED
 
 - general:
+  - nice resizing of numbers
   - for extremely time intensive solving heuristics: estimate the number
     of combinations needed to investigate for a given move and try moves
     in order of increasing work
-  - nice resizing of numbers
   - add keyboard repeat to arrow keys in table
   - add achievements! for instance:
     - complete at least one puzzle of each type without using hints

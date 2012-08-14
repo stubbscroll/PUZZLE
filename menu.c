@@ -631,8 +631,6 @@ static void processkeydown(int key) {
 		updatetworowsintable(oldsel,selected);
 	}
 }
-#undef GOUP
-#undef GODOWN
 
 /* find id of first element in a chain of gui elements */
 static int findfirstinchain(int ix) {
@@ -743,8 +741,9 @@ static int compcustomlist(const void *A,const void *B) {
 
 static void processmousedown() {
 	int x=event_mousex,y=event_mousey,oldsel=selected,i,curix;
+	int scroll=0;
 	widget_t *w;
-	for(i=0;i<widgetnum;i++) {
+	if(mousebuttons[0]) for(i=0;i<widgetnum;i++) {
 		w=widget+i;
 		if(x>=w->x1 && y>=w->y1 && x<=w->x2 && y<=w->y2 && w->id>-1) {
 			if(w->type==W_BUTTON) {
@@ -769,10 +768,26 @@ static void processmousedown() {
 					selected=w->id-100;
 					if(selected!=oldsel) updatetworowsintable(oldsel,selected);
 				}
+				return;
 			}
 		}
+	} else if(mousebuttons[4]) {
+		for(i=1;i<numentries;i++) GOUP
+	} else if(mousebuttons[3]) {
+		for(i=1;i<numentries;i++) GODOWN
+	}
+	if(scroll) {
+		if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+		for(i=0;i<numentries;i++) updatetable(i);
+		redrawtable();
+		if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+		SDL_UpdateRect(screen,tablex,starty+logoy,resx-tablex,tablebottomy+1-starty-logoy);
+	} else if(selected!=oldsel) {
+		updatetworowsintable(oldsel,selected);
 	}
 }
+#undef GOUP
+#undef GODOWN
 
 void menu() {
 	int event;
