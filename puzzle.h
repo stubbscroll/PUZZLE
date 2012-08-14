@@ -143,6 +143,9 @@ void setstackpos(int);
 int getevent();
 void anykeypress(void (*)());
 
+/* difficulty */
+int getnumericdiff(const char *);
+
 /* timer and score */
 void resetscore();
 void displayscore(int,int);

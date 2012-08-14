@@ -11,6 +11,10 @@
 #define MAXDISP 32
 #define MAXDIFF 32
 
+/* minimum resolution for menu */
+#define MINRESX 800
+#define MINRESY 300
+
 #define MAXSTRING 65536
 
 static int logox,logoy; /* logo size */
@@ -41,6 +45,9 @@ typedef struct {
 #define STARTNUM 1000
 static entry_t *puzzlelist=NULL;
 static int puzzlenum,puzzlealloc;
+
+static int sortcolumn=0; /* id, diff, date, time, clicks */
+static int sortorder=0; /* 0 increasing, 1 decreasing */
 
 static entry_t *newentry() {
 	if(puzzlenum==puzzlealloc) {
@@ -380,6 +387,21 @@ static void updatetable(int n) {
 	updatetablecol(n);
 }
 
+/* place widgets. list of ids:
+   0: play
+	 1: credits
+	 2: how to play
+	 3: achievements
+	 4: options
+	 48: scan for new puzzles
+	 49: quit
+	 50-55: column headers
+	 100-105: row 0
+	 106-111: row 1
+	 ...
+	 100+i*6-105+i*6: row i
+*/
+
 static void placement() {
 	int h,solved=0,i,w,neww,cur;
 	int xx[8],yy;
@@ -489,7 +511,7 @@ static void placement() {
 static void drawmenu() {
 	int i;
   if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
-	if(resx<800 || resy<300) {
+	if(resx<MINRESX || resy<MINRESY) {
 		clear32(RED32);
 		sdl_font_printf(screen,font,0,0,BLACK32,BLACK32,"please resize window");
 	} else {
@@ -526,7 +548,6 @@ static void play(int n) {
 		e=puzzlelist+n;
 		if(!e->hundredths || e->hundredths>timespent) e->hundredths=timespent,improve=1;
 		if(!e->clicks || e->clicks>numclicks) e->clicks=numclicks,improve=1;
-		/* TODO get date */
 		if(improve) {
 			time(&tid);
 			t=localtime(&tid);
@@ -538,8 +559,29 @@ static void play(int n) {
 			writecache();
 		}
 	}
+	if(resx>=MINRESX && resy>=MINRESY) placement();
+	else widgetnum=0;
+	drawmenu();
+}
+
+static void scanforpuzzlesgui() {
+	messagebox(0,"Wait, scanning for new puzzles");
+	scanfornewpuzzles();
+	selected=ypos=0;
 	placement();
 	drawmenu();
+}
+
+static void updatetworowsintable(int oldsel,int selected) {
+	if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+	updatetablecol(oldsel);
+	updatetablecol(selected);
+	redrawtableline(oldsel);
+	redrawtableline(selected);
+	if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+	/* laziness: refresh entire table. if this leads to performance problems,
+		 only update the two actual lines */
+	SDL_UpdateRect(screen,tablex,starty+logoy,resx-tablex,tablebottomy+1-starty-logoy);
 }
 
 #define GOUP if(selected+ypos) { --selected; if(selected<0) selected=0,ypos--,scroll=1; }
@@ -576,11 +618,7 @@ static void processkeydown(int key) {
 		if(selected<numentries-1) selected=numentries-1;
 		break;
 	case SDLK_s:
-		messagebox(0,"Wait, scanning for new puzzles");
-		scanfornewpuzzles();
-		selected=ypos=0;
-		placement();
-		drawmenu();
+		scanforpuzzlesgui();
 		break;
 	}
 	if(scroll) {
@@ -590,15 +628,7 @@ static void processkeydown(int key) {
 		if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
 		SDL_UpdateRect(screen,tablex,starty+logoy,resx-tablex,tablebottomy+1-starty-logoy);
 	} else if(selected!=oldsel) {
-		if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
-		updatetablecol(oldsel);
-		updatetablecol(selected);
-		redrawtableline(oldsel);
-		redrawtableline(selected);
-		if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-		/* laziness: refresh entire table. if this leads to performance problems,
-		   only update the two actual lines */
-		SDL_UpdateRect(screen,tablex,starty+logoy,resx-tablex,tablebottomy+1-starty-logoy);
+		updatetworowsintable(oldsel,selected);
 	}
 }
 #undef GOUP
@@ -651,6 +681,97 @@ static void processmousemotion() {
 			return;
 		}
 	}
+	if(focusix>-1) drawguielements(focusix,0);
+	focusix=focusid=-1;
+}
+
+/* set focus on element in table with the given ix */
+static void setfocus(int ix) {
+	int i;
+	for(i=0;i<puzzlenum;i++) if(ix==puzzlelist[i].ix) break;
+	if(i==puzzlenum) error("internal error, ix not found in setfocus");
+	ypos=i;
+	selected=0;
+	while(ypos+numentries>puzzlenum) selected++,ypos--;
+	while(selected+selected<numentries && ypos+numentries<puzzlenum && ypos>0)
+		selected++,ypos--;
+}
+
+static int compcustomlist(const void *A,const void *B) {
+	const entry_t *a=A,*b=B;
+	int sign=sortorder?-1:1,r,s;
+	switch(sortcolumn) {
+	case 0: /* puzzle id */
+		r=strcmp(a->puzzleid,b->puzzleid);
+		if(r) return r*sign;
+		break;
+	case 1: /* difficulty */
+		r=getnumericdiff(a->difficulty);
+		s=getnumericdiff(b->difficulty);
+		if(r<s) return -sign;
+		if(r>s) return sign;
+		break;
+	case 2: /* size */
+		if(a->xsize*a->ysize<b->xsize*b->ysize) return -sign;
+		if(a->xsize*a->ysize>b->xsize*b->ysize) return sign;
+		if(a->xsize<b->xsize) return -sign;
+		if(a->xsize>b->xsize) return sign;
+		break;
+	case 3: /* date solved */
+		if(a->year<b->year) return -sign;
+		if(a->year>b->year) return sign;
+		if(a->month<b->month) return -sign;
+		if(a->month>b->month) return sign;
+		if(a->date<b->date) return -sign;
+		if(a->date>b->date) return sign;
+		if(a->hour<b->hour) return -sign;
+		if(a->hour>b->hour) return sign;
+		if(a->minute<b->minute) return -sign;
+		if(a->minute>b->minute) return sign;
+		break;
+	case 4: /* time solved */
+		if(a->hundredths<b->hundredths) return -sign;
+		if(a->hundredths>b->hundredths) return sign;
+		break;
+	case 5: /* clicks */
+		if(a->clicks<b->clicks) return -sign;
+		if(a->clicks>b->clicks) return sign;
+	}
+	if(a->ix<b->ix) return -1;
+	return 1;
+}
+
+static void processmousedown() {
+	int x=event_mousex,y=event_mousey,oldsel=selected,i,curix;
+	widget_t *w;
+	for(i=0;i<widgetnum;i++) {
+		w=widget+i;
+		if(x>=w->x1 && y>=w->y1 && x<=w->x2 && y<=w->y2 && w->id>-1) {
+			if(w->type==W_BUTTON) {
+				/* we clicked on something */
+				if(w->id==0) play(selected+ypos);
+				/* TODO 1 (credits) 2 (how to play) 3 (achievements) 4 (options) */
+				else if(w->id==48) scanforpuzzlesgui();
+				else if(w->id==49) keys[SDLK_ESCAPE]=1;
+				else if(w->id>49 && w->id<56) {
+					if(w->id-50==sortcolumn) sortorder^=1;
+					else sortorder=0,sortcolumn=w->id-50;
+					for(i=0;i<puzzlenum;i++) puzzlelist[i].ix=i;
+					curix=selected+ypos;
+					qsort(puzzlelist,puzzlenum,sizeof(entry_t),compcustomlist);
+					setfocus(curix);
+					if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+					for(i=0;i<numentries;i++) updatetable(i);
+					redrawtable();
+					if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+					SDL_UpdateRect(screen,tablex,starty+logoy,resx-tablex,tablebottomy+1-starty-logoy);
+				} else if(w->id>99) {
+					selected=w->id-100;
+					if(selected!=oldsel) updatetworowsintable(oldsel,selected);
+				}
+			}
+		}
+	}
 }
 
 void menu() {
@@ -668,6 +789,9 @@ void menu() {
     case EVENT_RESIZE:
 			placement();
       drawmenu();
+			break;
+    case EVENT_MOUSEDOWN:
+			processmousedown();
 			break;
 		case EVENT_MOUSEMOTION:
 			processmousemotion();

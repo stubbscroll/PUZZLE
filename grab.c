@@ -618,6 +618,7 @@ void parsejankoaka(FILE *f,char *p3,int x,int y) {
     for(j=0;j<x;j++) {
       if(*p=='-') fprintf(f,"."),p+=2;
       else if(*p=='x') fprintf(f,"#"),p+=2;
+			else if(*p=='ß') fprintf(f,"0"),p+=2;
       else {
         fprintf(f,"%c",*p);
         p+=2;

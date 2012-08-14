@@ -520,6 +520,24 @@ int getevent() {
   return EVENT_NOEVENT;
 }
 
+/* convert difficulty to number */
+int getnumericdiff(const char *s) {
+	if(!strcmp(s,"Trivial")) return 0;
+	if(!strcmp(s,"Very easy")) return 1;
+	if(!strcmp(s,"Easy")) return 2;
+	if(!strcmp(s,"Easy+")) return 3;
+	if(!strcmp(s,"Medium-")) return 4;
+	if(!strcmp(s,"Medium")) return 5;
+	if(!strcmp(s,"Hard-")) return 6;
+	if(!strcmp(s,"Hard")) return 7;
+	if(!strcmp(s,"Very hard")) return 8;
+	if(!strcmp(s,"Extreme")) return 9;
+	if(!strcmp(s,"Extra")) return 9;
+	if(!strcmp(s,"Super hard")) return 9;
+	if(!strcmp(s,"Near-impossible")) return 10;
+	return -1;
+}
+
 /* scoring: timer and clicks */
 static Uint32 starttime;	/* start time (ticks) */
 int numclicks;	/* number of clicks */
@@ -536,7 +554,7 @@ void resetscore() {
 
 void displayscore(int x,int y) {
 	Uint32 cur=(SDL_GetTicks()-starttime)/10;
-	int w,right=startx+width*x,left,texty=starty-font->height;
+	int w,right=startx+width*x,left,texty=starty-font->height,ll;
 	static char s[65536];
 	if(cur<6000) sprintf(s,"Time: %d:%02d Clicks: %d",cur/100,cur%100,numclicks);
 	else if(cur<6000*60) sprintf(s,"Time: %d.%02d:%02d Clicks: %d",cur/6000,cur/100%60,cur%100,numclicks);
@@ -544,11 +562,13 @@ void displayscore(int x,int y) {
 	w=sdl_font_width(font,s);
 	left=right-w;
 	if(left<0) left=0;
+	ll=left-30;
+	if(ll<0) ll=0;
   if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
-	drawrectangle32(left,texty,resx-1,starty-1,WHITE32);
+	drawrectangle32(ll,texty,resx-1,starty-1,WHITE32);
 	sdl_font_printf(screen,font,left,texty,BLACK32,GRAY32,"%s",s);
   if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-	SDL_UpdateRect(screen,left,texty,resx-left,font->height);
+	SDL_UpdateRect(screen,ll,texty,resx-ll,font->height);
 }
 
 /* calculate final time for game */

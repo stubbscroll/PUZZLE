@@ -40,10 +40,14 @@ level 3 (intermediate)
 * if putting a bulb on a cell makes it impossible to light up
   some cell on the board, that cell must be empty.
   (level 5 contradiction also accomplishes this, only slower)
-* check if there exists two walls each having two possible light sites,
+* check if there exist two walls each having two possible light sites,
   forcing all other cells in two lanes to be empty
 
 level 4
+
+* if there are multiple ways of placing bulb and all of them light up the same
+  cells and none are next to numbers, then none of these cells can contain bulb
+  (must be empty) or the unique solution rule is violated
 
 level 5 (advanced)
 

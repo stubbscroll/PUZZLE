@@ -1,35 +1,28 @@
 STUFF TO BE ADDED, IN DECREASING ORDER OF MOST DESIRED
 
+the following stuff is necessary for v1.0:
+- display puzzle type and author during in-game
+- add scroll bar for table
+
+more desired stuff:
 - kuromasu: add red colour when empty>number
-- scoring
-- menu system with score tracking and puzzle selector
+- kuromasu: centered number in circle
 
 COMPLETE LIST OF STUFF TO BE ADDED
 
 - general:
-  - make a menu system for selecting puzzles. it should cache, and only
-    reload upon the user issuing a refresh command. in addition, add score 
-    tracking. in the menu, display whether the puzzle is solved, along with
-    the best time and lowest amount of mouse clicks. the puzzle cache and the
-    scores should be stored in a text file. file format: one puzzle per line.
-    filename, puzzle name, [author,] difficulty, size, date solved, best time
-    (in hundredths of a second), best score (number of clicks)
-  - in accordance with the above, add a visible timer and mouse clicks. while
-    doing that, also add some info about the puzzle, as the credits,
-    difficulty and puzzle name. at the top left, display static info such as
-    puzzle name, id and author. at the top right, display time spent and
-    number of clicks done.
   - for extremely time intensive solving heuristics: estimate the number
     of combinations needed to investigate for a given move and try moves
     in order of increasing work
   - nice resizing of numbers
+  - add keyboard repeat to arrow keys in table
   - add achievements! for instance:
     - complete at least one puzzle of each type without using hints
-    - complete one puzzle of difficulty "extra"/"extreme" without using hints
+    - complete one puzzle of difficulty "extra"/"extreme" or higher without using hints
     - complete one puzzle using the hint function only
     - complete a puzzle using no unnecessary moves, without using hints, no undo
-    - complete a puzzle in less than 10 seconds without using hints
-    - complete 1000 puzzles without using hints
+    - complete a puzzle in less than 1 minute/30 seconds/10 seconds/5 seconds without using hints
+    - complete 1/10/100/1000 puzzles without using hints
     - complete at least 50% of all puzzles of any kind
   - print error message (at least into log.txt or error.txt) when something
     bad happens
@@ -37,8 +30,8 @@ COMPLETE LIST OF STUFF TO BE ADDED
     programs, changing each loadpuzzle() (use table lookup to display string)
     and change all files (don't regrab them, but make a program to go through
     all files and replace string with int)
-  - make fancy controls:
-    - hold mouse button and mark all unfilled cells
+  - make better controls:
+    - hold mouse button and mark multiple cells in one motion
   - automatic puzzle generation
   - the code is very messy with lots of duplication, but i've decided against
     refactoring
