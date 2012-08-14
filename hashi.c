@@ -589,6 +589,7 @@ static int level5hint() {
 }
 
 static int hint() {
+	usedhint=1;
   if(verifyboard()<0) return -1;
   if(level1hint()) return 1;
   if(level2hint()) return 1;
@@ -658,7 +659,7 @@ static void showverify() {
 
 static void processkeydown(int key) {
   int res;
-  if(key==undokey) undo(1);
+  if(key==undokey) undo(1),usedundo=1;
   else if(key==verifykey) showverify();
   else if(key==hintkey) {
     if(!executeonemovefromqueue(1)) {
@@ -704,6 +705,7 @@ static void processmousemotion() {
             it's vertical (celld=1). it is allowed that one of these points
             are on a numbered cell (but in this case, don't follow the pointer */
         domove(celld,prevcellx,prevcelly,cellx,celly,(m[prevcellx][prevcelly][celld]+1)%3);
+				numclicks++; normalmove=1;
         updatetoscreen(1);
         mousestate=1;
       }
@@ -740,8 +742,10 @@ void hashiwokakero(char *path,int solve) {
   initbfs();
   drawgrid();
   if(solve) { autosolver(path); return; }
+	resetscore();
   do {
     event=getevent();
+		displayscore(x,y);
     switch(event) {
     case EVENT_RESIZE:
       drawgrid();
@@ -750,6 +754,7 @@ void hashiwokakero(char *path,int solve) {
     case EVENT_MOUSEMOTION:
       processmousemotion();
       if(verifyboard()>0) {
+				finalizetime(); displayscore(x,y);
         messagebox(1,"You are winner!");
         return;
       }
@@ -759,6 +764,7 @@ void hashiwokakero(char *path,int solve) {
       if(event>=EVENT_KEYDOWN && event<EVENT_KEYUP) {
         processkeydown(event-EVENT_KEYDOWN);
         if(verifyboard()>0) {
+					finalizetime(); displayscore(x,y);
           messagebox(1,"You are winner!");
           return;
         }

@@ -309,27 +309,27 @@ static void processmousedown() {
     getcell(event_mousex,event_mousey,&cellx,&celly);
     if(cellx<0 || celly<0 || cellx>=x || celly>=y || m[cellx][celly]>0) return;
     if(!v) {
-      domove(cellx,celly,togglecell(m[cellx][celly])); up=1;
+      domove(cellx,celly,togglecell(m[cellx][celly])); up=1; normalmove=1; numclicks++;
     } else if(v==1 && m[cellx][celly]!=EMPTY) {
-      domove(cellx,celly,EMPTY); up=1;
+      domove(cellx,celly,EMPTY); up=1; normalmove=1; numclicks++;
     } else if(v==2 && m[cellx][celly]!=BLOCKED) {
-      domove(cellx,celly,BLOCKED); up=1;
+      domove(cellx,celly,BLOCKED); up=1; normalmove=1; numclicks++;
     }
   } else if(event_mousebutton==SDL_BUTTON_RIGHT) {
     getcell(event_mousex,event_mousey,&cellx,&celly);
     if(cellx<0 || celly<0 || cellx>=x || celly>=y || m[cellx][celly]>0) return;
     if(!v && m[cellx][celly]!=UNFILLED) {
-      domove(cellx,celly,UNFILLED); up=1;
+      domove(cellx,celly,UNFILLED); up=1; normalmove=1; numclicks++;
     } else if(v==1 && m[cellx][celly]!=BLOCKED) {
-      domove(cellx,celly,BLOCKED); up=1;
+      domove(cellx,celly,BLOCKED); up=1; normalmove=1; numclicks++;
     } else if(v==2 && m[cellx][celly]!=EMPTY) {
-      domove(cellx,celly,EMPTY); up=1;
+      domove(cellx,celly,EMPTY); up=1; normalmove=1; numclicks++;
     }
   } else if(event_mousebutton==SDL_BUTTON_MIDDLE) {
     getcell(event_mousex,event_mousey,&cellx,&celly);
     if(cellx<0 || celly<0 || cellx>=x || celly>=y || m[cellx][celly]>0) return;
     if(v && m[cellx][celly]!=UNFILLED) {
-      domove(cellx,celly,UNFILLED); up=1;
+      domove(cellx,celly,UNFILLED); up=1; normalmove=1; numclicks++;
     }
   }
   if(up) updatetoscreen(cellx,celly,1);
@@ -1764,6 +1764,7 @@ static int level5hint() {
 }
 
 static int hint() {
+	usedhint=1;
   if(verifyboard()<0) return -1;
   if(level1hint()) return 1;
   if(level2hint()) return 1;
@@ -1818,7 +1819,7 @@ static void showverify() {
 
 static void processkeydown(int key) {
   int res;
-  if(key==undokey) undo(1);
+  if(key==undokey) undo(1),usedundo=1;
   else if(key==hintkey) {
     if(!executeonemovefromqueue(1)) {
       res=hint();
@@ -1868,8 +1869,10 @@ void nurikabe(char *path,int solve) {
   cleanupbfs();
   drawgrid();
   if(autosolve) { autosolver(path); return; }
+	resetscore();
   do {
     event=getevent();
+		displayscore(x,y);
     switch(event) {
     case EVENT_RESIZE:
       drawgrid();
@@ -1878,6 +1881,7 @@ void nurikabe(char *path,int solve) {
     case EVENT_MOUSEDOWN:
       processmousedown();
       if(verifyboard()==1) {
+				finalizetime(); displayscore(x,y);
         messagebox(1,"You are winner!");
         return;
       }
@@ -1887,6 +1891,7 @@ void nurikabe(char *path,int solve) {
       if(event>=EVENT_KEYDOWN && event<EVENT_KEYUP) {
         processkeydown(event-EVENT_KEYDOWN);
         if(verifyboard()==1) {
+					finalizetime(); displayscore(x,y);
           messagebox(1,"You are winner!");
           return;
         }

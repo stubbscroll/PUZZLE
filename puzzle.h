@@ -75,6 +75,13 @@ extern int verifykey;
 extern int width,height;
 extern int startx,starty;
 
+/* score stuff */
+extern int numclicks;
+extern int usedundo;
+extern int usedhint;
+extern int normalmove;
+extern int timespent;
+
 extern int event_mousebutton;
 extern int event_mousex;
 extern int event_mousey;
@@ -135,6 +142,11 @@ void setstackpos(int);
 /* events */
 int getevent();
 void anykeypress(void (*)());
+
+/* timer and score */
+void resetscore();
+void displayscore(int,int);
+void finalizetime();
 
 /* menu system */
 void menu();

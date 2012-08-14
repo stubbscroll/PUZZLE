@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <time.h>
 #include "SDL/SDL.h"
 #include "dir.h"
 #include "puzzle.h"
@@ -263,6 +264,9 @@ static int selected=0; /* index of selected entry in list */
 static int ypos=0; /* index of topmost shown entry, cannot exceed puzzlenum-numentries */
 static int widgetix; /* index to first widget containing table element */
 
+static int focusid; /* id of gui element in focus */
+static int focusix; /* index to widget of above element */
+
 #define TABLE_PUZZLE "Puzzle"
 #define TABLE_DIFF "Difficulty"
 #define TABLE_SIZE "Size"
@@ -424,9 +428,9 @@ static void placement() {
 	addwidget(startx,starty+logoy+4*h,startx+buttonwidth-1,starty+logoy+buttonheight-1+4*h,
 		3,3,1,BLACK32,GRAY32,BLACK32,GRAY32,"Options",A_CENTER,4,W_NOTHING,-1);
 	addwidget(startx,tablebottomy-buttonheight+1-h,startx+buttonwidth-1,tablebottomy-h,
-		3,3,1,BLACK32,WHITE32,BLACK32,YELLOW32,"(S)can for new puzzles",A_CENTER,98,W_BUTTON,-1);
+		3,3,1,BLACK32,WHITE32,BLACK32,YELLOW32,"(S)can for new puzzles",A_CENTER,48,W_BUTTON,-1);
 	addwidget(startx,tablebottomy-buttonheight+1,startx+buttonwidth-1,tablebottomy,
-		3,3,1,BLACK32,WHITE32,BLACK32,YELLOW32,"(Q)uit",A_CENTER,99,W_BUTTON,-1);
+		3,3,1,BLACK32,WHITE32,BLACK32,YELLOW32,"(Q)uit",A_CENTER,49,W_BUTTON,-1);
 	addwidget(startx,tablebottomy+1+bottomair,startx+buttonwidth,tablebottomy+font->height+2+bottomair,
 		2,2,0,BLACK32,WHITE32,BLACK32,WHITE32,VERSION_STRING,A_LEFT,-1,W_NOTHING,-1);
 	for(i=0;i<puzzlenum;i++) if(puzzlelist[i].year) solved++;
@@ -453,17 +457,17 @@ static void placement() {
 	addwidget(xx[0],tablebottomy,xx[7],tablebottomy,0,0,0,BLACK32,BLACK32,BLACK32,BLACK32,"",0,-1,W_NOTHING,-1);
 	/* column headers */
 	addwidget(xx[0]+1,yy+1,xx[1]-1,yy+1+buttonheight-1,1,2,0,
-		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_PUZZLE,A_LEFT,-1,W_BUTTON,-1);
+		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_PUZZLE,A_LEFT,50,W_BUTTON,-1);
 	addwidget(xx[1]+1,yy+1,xx[2]-1,yy+1+buttonheight-1,1,2,0,
-		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_DIFF,A_LEFT,-1,W_BUTTON,-1);
+		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_DIFF,A_LEFT,51,W_BUTTON,-1);
 	addwidget(xx[2]+1,yy+1,xx[3]-1,yy+1+buttonheight-1,1,2,0,
-		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_SIZE,A_CENTER,-1,W_BUTTON,-1);
+		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_SIZE,A_CENTER,52,W_BUTTON,-1);
 	addwidget(xx[3]+1,yy+1,xx[4]-1,yy+1+buttonheight-1,1,2,0,
-		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_DATE,A_LEFT,-1,W_BUTTON,-1);
+		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_DATE,A_LEFT,53,W_BUTTON,-1);
 	addwidget(xx[4]+1,yy+1,xx[5]-1,yy+1+buttonheight-1,1,2,0,
-		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_SPENT,A_RIGHT,-1,W_BUTTON,-1);
+		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_SPENT,A_RIGHT,54,W_BUTTON,-1);
 	addwidget(xx[5]+1,yy+1,xx[6]-1,yy+1+buttonheight-1,1,2,0,
-		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_CLICKS,A_RIGHT,-1,W_BUTTON,-1);
+		BLACK32,WHITE32,BLACK32,YELLOW32,TABLE_CLICKS,A_RIGHT,55,W_BUTTON,-1);
 	yy+=buttonheight+1;
 	addwidget(xx[0],yy,xx[7],yy,0,0,0,BLACK32,BLACK32,BLACK32,BLACK32,"",0,-1,W_NOTHING,-1);
 	yy++;
@@ -494,6 +498,7 @@ static void drawmenu() {
 	}
   if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
   SDL_UpdateRect(screen,0,0,resx,resy);
+	focusid=focusix=-1;
 }
 
 static void redrawtableline(int n) {
@@ -508,10 +513,31 @@ static void redrawtable() {
 
 static void play(int n) {
 	static char fn[MAXSTRING];
+	int improve=0;
+	time_t tid;
+	struct tm *t;
+	entry_t *e;
 	strcpy(fn,puzzlepath);
 	strcat(fn,puzzlelist[n].puzzleid);
 	launch(fn,0);
 	memset(keys,0,sizeof(keys));
+	/* level is solved using no hints: success */
+	if(timespent && !usedhint) {
+		e=puzzlelist+n;
+		if(!e->hundredths || e->hundredths>timespent) e->hundredths=timespent,improve=1;
+		if(!e->clicks || e->clicks>numclicks) e->clicks=numclicks,improve=1;
+		/* TODO get date */
+		if(improve) {
+			time(&tid);
+			t=localtime(&tid);
+			e->year=t->tm_year+1900;
+			e->month=t->tm_mon+1;
+			e->date=t->tm_mday;
+			e->hour=t->tm_hour;
+			e->minute=t->tm_min;
+			writecache();
+		}
+	}
 	placement();
 	drawmenu();
 }
@@ -578,6 +604,55 @@ static void processkeydown(int key) {
 #undef GOUP
 #undef GODOWN
 
+/* find id of first element in a chain of gui elements */
+static int findfirstinchain(int ix) {
+	int min=ix,old=ix;
+	ix=widget[ix].next;
+	if(ix<0) return min;
+	while(ix>-1 && old!=ix) {
+		if(min>ix) min=ix;
+		ix=widget[ix].next;
+	}
+	return min;
+}
+
+/* redraw an entire chain of gui elements */
+/* must never be called with invalid ix like -1 */
+static void drawguielements(int ix,int mouse) {
+	int old=ix,minx=widget[ix].x1,miny=widget[ix].y1,maxx=widget[ix].x2;
+	int maxy=widget[ix].y2;
+	if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+	drawwidget(widget+ix,mouse);
+	ix=widget[ix].next;
+	while(ix>-1 && ix!=old) {
+		drawwidget(widget+ix,mouse);
+		if(minx>widget[ix].x1) minx=widget[ix].x1;
+		if(miny>widget[ix].y1) miny=widget[ix].y1;
+		if(maxx<widget[ix].x2) maxx=widget[ix].x2;
+		if(maxy<widget[ix].y2) maxy=widget[ix].y2;
+		ix=widget[ix].next;
+	}
+	if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+	SDL_UpdateRect(screen,minx,miny,maxx-minx+1,maxy-miny+1);
+}
+
+static void processmousemotion() {
+	int i,x=event_mousex,y=event_mousey;
+	widget_t *w;
+	for(i=0;i<widgetnum;i++) {
+		w=widget+i;
+		if(x>=w->x1 && y>=w->y1 && x<=w->x2 && y<=w->y2) {
+			if(w->id==focusid) return;
+			/* draw previous element without focus */
+			if(focusix>-1) drawguielements(focusix,0);
+			focusid=w->id;
+			focusix=findfirstinchain(i);
+			if(focusid>-1) drawguielements(i,1);
+			return;
+		}
+	}
+}
+
 void menu() {
 	int event;
 	loadcache();
@@ -593,6 +668,9 @@ void menu() {
     case EVENT_RESIZE:
 			placement();
       drawmenu();
+			break;
+		case EVENT_MOUSEMOTION:
+			processmousemotion();
 			break;
     default:
       if(event>=EVENT_KEYDOWN && event<EVENT_KEYUP) {

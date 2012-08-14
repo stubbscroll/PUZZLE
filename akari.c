@@ -291,23 +291,23 @@ static void processmousedown() {
   old=m[cellx][celly];
   if(event_mousebutton==SDL_BUTTON_LEFT) {
     if(!v) {
-      domove(cellx,celly,togglecell(m[cellx][celly])); up=1;
+      domove(cellx,celly,togglecell(m[cellx][celly])); up=1; normalmove=1; numclicks++;
     } else if(v==1 && m[cellx][celly]!=LIGHT) {
-      domove(cellx,celly,LIGHT); up=1;
+      domove(cellx,celly,LIGHT); up=1; normalmove=1; numclicks++;
     } else if(v==2 && m[cellx][celly]!=EMPTY) {
-      domove(cellx,celly,EMPTY); up=1;
+      domove(cellx,celly,EMPTY); up=1; normalmove=1; numclicks++;
     }
   } else if(event_mousebutton==SDL_BUTTON_RIGHT) {
     if(!v && m[cellx][celly]!=UNFILLED) {
-      domove(cellx,celly,UNFILLED); up=1;
+      domove(cellx,celly,UNFILLED); up=1; normalmove=1; numclicks++;
     } else if(v==1 && m[cellx][celly]!=EMPTY) {
-      domove(cellx,celly,EMPTY); up=1;
+      domove(cellx,celly,EMPTY); up=1; normalmove=1; numclicks++;
     } else if(v==2 && m[cellx][celly]!=LIGHT) {
-      domove(cellx,celly,LIGHT); up=1;
+      domove(cellx,celly,LIGHT); up=1; normalmove=1; numclicks++;
     }
   } else if(event_mousebutton==SDL_BUTTON_MIDDLE) {
     if(v && m[cellx][celly]!=UNFILLED) {
-      domove(cellx,celly,UNFILLED); up=1;
+      domove(cellx,celly,UNFILLED); up=1; normalmove=1; numclicks++;
     }
   }
   if(up) updatetoscreen(cellx,celly,old,1);
@@ -540,6 +540,7 @@ static int level5hint() {
 }
 
 static int hint() {
+	usedhint=1;
   if(verifyboard()<0) return -1;
   if(level1hint()) return 1;
   if(level2hint()) return 1;
@@ -551,7 +552,7 @@ static int hint() {
 
 static void processkeydown(int key) {
   int res;
-  if(key==undokey) undo(1);
+  if(key==undokey) undo(1),usedundo=1;
   else if(key==hintkey) {
     if(!executeonemovefromqueue(1)) {
       res=hint();
@@ -617,8 +618,10 @@ void akari(char *path,int solve) {
   for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]>=WALL0) updatewall(i,j);
   drawgrid();
   if(solve) { autosolver(path); return; }
+	resetscore();
   do {
     event=getevent();
+		displayscore(x,y);
     switch(event) {
     case EVENT_RESIZE:
       drawgrid();
@@ -627,6 +630,7 @@ void akari(char *path,int solve) {
     case EVENT_MOUSEDOWN:
       processmousedown();
       if(verifyboard()>0) {
+				finalizetime(); displayscore(x,y);
         messagebox(1,"You are winner!");
         return;
       }
@@ -636,6 +640,7 @@ void akari(char *path,int solve) {
       if(event>=EVENT_KEYDOWN && event<EVENT_KEYUP) {
         processkeydown(event-EVENT_KEYDOWN);
         if(verifyboard()>0) {
+					finalizetime(); displayscore(x,y);
           messagebox(1,"You are winner!");
           return;
         }

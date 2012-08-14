@@ -479,42 +479,81 @@ int getbuttonnumber(int ix) {
 }
 
 int getevent() {
-  while(SDL_WaitEvent(&event)) {
-    switch(event.type) {
-    case SDL_VIDEORESIZE:
-      screen=SDL_SetVideoMode(resx=event.resize.w,resy=event.resize.h,GRAPHIC_BPP,videoflags);
-      if(!screen) exit(1);
-      updatevideoinfo();
-      return EVENT_RESIZE;
-    case SDL_KEYDOWN:
-      keys[event.key.keysym.sym]=1;
-      return event.key.keysym.sym+EVENT_KEYDOWN;
-    case SDL_KEYUP:
-      keys[event.key.keysym.sym]=0;
-      return event.key.keysym.sym+EVENT_KEYUP;
-    case SDL_MOUSEBUTTONDOWN:
-      event_mousebutton=event.button.button;
-      mousebuttons[getbuttonnumber(event_mousebutton)]=1;
-      event_mousex=event.button.x;
-      event_mousey=event.button.y;
-      return EVENT_MOUSEDOWN;
-    case SDL_MOUSEBUTTONUP:
-      event_mousebutton=event.button.button;
-      mousebuttons[getbuttonnumber(event_mousebutton)]=0;
-      event_mousex=event.button.x;
-      event_mousey=event.button.y;
-      return EVENT_MOUSEUP;
-    case SDL_MOUSEMOTION:
-      event_mousex=event.motion.x;
-      event_mousey=event.motion.y;
-      event_mousefromx=event.motion.x-event.motion.xrel;
-      event_mousefromy=event.motion.y-event.motion.yrel;
-      return EVENT_MOUSEMOTION;
-    case SDL_QUIT:
-      return EVENT_QUIT;
-    }
-  }
+	Uint32 start=SDL_GetTicks(),cur;
+	while(!SDL_PollEvent(&event)) {
+		cur=SDL_GetTicks();
+		if(cur-start>9) return EVENT_NOEVENT;
+	}
+	switch(event.type) {
+	case SDL_VIDEORESIZE:
+		screen=SDL_SetVideoMode(resx=event.resize.w,resy=event.resize.h,GRAPHIC_BPP,videoflags);
+		if(!screen) exit(1);
+		updatevideoinfo();
+		return EVENT_RESIZE;
+	case SDL_KEYDOWN:
+		keys[event.key.keysym.sym]=1;
+		return event.key.keysym.sym+EVENT_KEYDOWN;
+	case SDL_KEYUP:
+		keys[event.key.keysym.sym]=0;
+		return event.key.keysym.sym+EVENT_KEYUP;
+	case SDL_MOUSEBUTTONDOWN:
+		event_mousebutton=event.button.button;
+		mousebuttons[getbuttonnumber(event_mousebutton)]=1;
+		event_mousex=event.button.x;
+		event_mousey=event.button.y;
+		return EVENT_MOUSEDOWN;
+	case SDL_MOUSEBUTTONUP:
+		event_mousebutton=event.button.button;
+		mousebuttons[getbuttonnumber(event_mousebutton)]=0;
+		event_mousex=event.button.x;
+		event_mousey=event.button.y;
+		return EVENT_MOUSEUP;
+	case SDL_MOUSEMOTION:
+		event_mousex=event.motion.x;
+		event_mousey=event.motion.y;
+		event_mousefromx=event.motion.x-event.motion.xrel;
+		event_mousefromy=event.motion.y-event.motion.yrel;
+		return EVENT_MOUSEMOTION;
+	case SDL_QUIT:
+		return EVENT_QUIT;
+	}
   return EVENT_NOEVENT;
+}
+
+/* scoring: timer and clicks */
+static Uint32 starttime;	/* start time (ticks) */
+int numclicks;	/* number of clicks */
+int usedundo;	/* 1: undo was used */
+int usedhint;	/* 1: hints were used */
+int normalmove; /* 1: did normal moves */
+int timespent; /* time spent for game in hundredths, or 0 if not won */
+
+void resetscore() {
+	starttime=SDL_GetTicks();
+	numclicks=usedundo=usedhint=normalmove=0;
+	timespent=0;
+}
+
+void displayscore(int x,int y) {
+	Uint32 cur=(SDL_GetTicks()-starttime)/10;
+	int w,right=startx+width*x,left,texty=starty-font->height;
+	static char s[65536];
+	if(cur<6000) sprintf(s,"Time: %d:%02d Clicks: %d",cur/100,cur%100,numclicks);
+	else if(cur<6000*60) sprintf(s,"Time: %d.%02d:%02d Clicks: %d",cur/6000,cur/100%60,cur%100,numclicks);
+	else sprintf(s,"Time: %d.%02d.%02d:%02d Clicks: %d",cur/360000,cur/60000%60,cur/100%60,cur%100,numclicks);
+	w=sdl_font_width(font,s);
+	left=right-w;
+	if(left<0) left=0;
+  if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+	drawrectangle32(left,texty,resx-1,starty-1,WHITE32);
+	sdl_font_printf(screen,font,left,texty,BLACK32,GRAY32,"%s",s);
+  if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+	SDL_UpdateRect(screen,left,texty,resx-left,font->height);
+}
+
+/* calculate final time for game */
+void finalizetime() {
+	timespent=(SDL_GetTicks()-starttime)/10;
 }
 
 /*  allow the application to refresh */

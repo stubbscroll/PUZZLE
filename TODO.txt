@@ -24,16 +24,13 @@ COMPLETE LIST OF STUFF TO BE ADDED
     in order of increasing work
   - nice resizing of numbers
   - add achievements! for instance:
-    - for each puzzle type, achievement for completing one puzzle without using
-      hints
     - complete at least one puzzle of each type without using hints
     - complete one puzzle of difficulty "extra"/"extreme" without using hints
     - complete one puzzle using the hint function only
-    - complete a puzzle using no unnecessary moves, without using hints
+    - complete a puzzle using no unnecessary moves, without using hints, no undo
     - complete a puzzle in less than 10 seconds without using hints
     - complete 1000 puzzles without using hints
     - complete at least 50% of all puzzles of any kind
-    - complete a level with the fewest possible clicks
   - print error message (at least into log.txt or error.txt) when something
     bad happens
   - change difficulty from string to int (can be done by changing the grabber

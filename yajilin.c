@@ -1110,6 +1110,7 @@ static int level5hint() {
 }
 
 static int hint() {
+	usedhint=1;
   if(verifyboard()<0) return -1;
   if(level1hint()) return 1;
   if(level2hint()) return 1;
@@ -1187,6 +1188,7 @@ static void processmousedown() {
       }
     }
     updatetoscreen(1);
+		normalmove=1; numclicks++;
   }
 }
 
@@ -1205,13 +1207,14 @@ static void processmousemotion() {
       if(mn[x1][y1]>-1 || mn[x2][y2]>-1 || m[x1][y1][2] || m[x2][y2][2]) return;
       domove(x1,y1,d,togglecell(m[x1][y1][d]),1);
       updatetoscreen(1);
+			normalmove=1; numclicks++;
     }
   }
 }
 
 static void processkeydown(int key) {
   int res;
-  if(key==undokey) undo(1);
+  if(key==undokey) undo(1),usedundo=1;
   else if(key==verifykey) showverify();
   else if(key==hintkey) {
     if(!executeonemovefromqueue(1)) {
@@ -1262,8 +1265,10 @@ void yajilin(char *path,int solve) {
 	for(i=0;i<x;i++) for(j=0;j<y;j++) if(mn[i][j]>-1) updatearrow(i,j,1);
   drawgrid();
   if(solve) { autosolver(path); return; }
+	resetscore();
   do {
     event=getevent();
+		displayscore(x,y);
     switch(event) {
     case EVENT_RESIZE:
       drawgrid();
@@ -1272,6 +1277,7 @@ void yajilin(char *path,int solve) {
     case EVENT_MOUSEDOWN:
       processmousedown();
       if(verifyboard()>0) {
+				finalizetime(); displayscore(x,y);
         messagebox(1,"You are winner!");
         return;
       }
@@ -1280,6 +1286,7 @@ void yajilin(char *path,int solve) {
       if(mousebuttons[0]) {
         processmousemotion();
         if(verifyboard()>0) {
+					finalizetime(); displayscore(x,y);
           messagebox(1,"You are winner!");
           return;
         }
@@ -1290,6 +1297,7 @@ void yajilin(char *path,int solve) {
       if(event>=EVENT_KEYDOWN && event<EVENT_KEYUP) {
         processkeydown(event-EVENT_KEYDOWN);
         if(verifyboard()>0) {
+					finalizetime(); displayscore(x,y);
           messagebox(1,"You are winner!");
           return;
         }

@@ -558,6 +558,7 @@ static int level5hint() {
 }
 
 static int hint() {
+	usedhint=1;
   if(verifyboard()<0) return -1;
   if(level1hint()) return 1;
   if(level2hint()) return 1;
@@ -606,12 +607,12 @@ static void processmousedown() {
       domove(cellx,celly,UNFILLED,1); up=1;
     }
   }
-  if(up) updatetoscreen(1);
+  if(up) updatetoscreen(1),numclicks++,normalmove=1;
 }
 
 static void processkeydown(int key) {
   int res;
-  if(key==undokey) undo(1);
+  if(key==undokey) undo(1),usedundo=1;
   else if(key==hintkey) {
     if(!executeonemovefromqueue(1)) {
       res=hint();
@@ -657,8 +658,10 @@ void mine(char *path,int solve) {
 	loadpuzzle(path);
 	drawgrid();
   if(solve) { autosolver(path); return; }
+	resetscore();
 	do {
 		event=getevent();
+		displayscore(x,y);
 		switch(event) {
     case EVENT_RESIZE:
       drawgrid();
@@ -667,6 +670,7 @@ void mine(char *path,int solve) {
     case EVENT_MOUSEDOWN:
       processmousedown();
       if(verifyboard()>0) {
+				finalizetime(); displayscore(x,y);
         messagebox(1,"You are winner!");
         return;
       }
@@ -676,6 +680,7 @@ void mine(char *path,int solve) {
       if(event>=EVENT_KEYDOWN && event<EVENT_KEYUP) {
         processkeydown(event-EVENT_KEYDOWN);
         if(verifyboard()>0) {
+					finalizetime(); displayscore(x,y);
           messagebox(1,"You are winner!");
           return;
         }

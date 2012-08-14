@@ -3,6 +3,8 @@ bugs and setbacks
 general:
 - when a messagebox is active, redraw events are not processed, so resizing
   (for example) is messed up.
+- when moving off a gui element in the menu, the previous element isn't
+  un-highlighted
 
 picross:
 - solver freezes on illegal boards

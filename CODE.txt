@@ -37,3 +37,14 @@ visit[][], qs, qe, q[] - bfs stuff
 m[][], mn[][] (and possible more) - board 
 st[][] - internal helper array (counts etc)
 touched[][] - indicate that a cell should be redrawn
+
+how to add scoring:
+
+- before event loop, add resetscore()
+- after getevent, add displayscore(x,y)
+- whenever game is won, add finalizetime() and displayscore(x,y) before messagebox
+- in hint(), add usedhint=1 at top
+- in processkeydown, add usedundo=1 to if(key==undokey)
+- when a move is performed by the user, add normalmove=1, numclicks++
+  (preferably to if(up), otherwise to all instances of domove trigged by
+  the user)
