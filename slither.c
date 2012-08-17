@@ -48,6 +48,7 @@ static void loadpuzzle(char *path) {
   FILE *f=fopen(path,"r");
   int z=0,ln=0,i,j;
   if(!f) error("couldn't open the file %s\n",path);
+	gameinfo[0]=0;
   while(fgets(s,MAXSTR,f)) if(s[0]!='%') {
     switch(z) {
     case 1:
@@ -63,9 +64,9 @@ static void loadpuzzle(char *path) {
       for(i=j=0;j<x;j++) mn[j][ln]=convchar(s,&i);
       ln++;
     }
-  }
+  } else if(!gameinfo[0]) strcpy(gameinfo,s+2);
   fclose(f);
-  startx=10,starty=30;
+  startx=10,starty=(int)(font->height*2.5);
   mqs=mqe=0;
   for(i=0;i<x;i++) for(j=0;j<y;j++) touched[2][i][j]=0;
   for(i=0;i<=x;i++) for(j=0;j<=y;j++) m[0][i][j]=m[1][i][j]=EMPTY;

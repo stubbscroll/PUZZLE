@@ -274,6 +274,8 @@ static int widgetix; /* index to first widget containing table element */
 static int focusid; /* id of gui element in focus */
 static int focusix; /* index to widget of above element */
 
+static int scrollbarix; /* index to scrollbar */
+
 #define TABLE_PUZZLE "Puzzle"
 #define TABLE_DIFF "Difficulty"
 #define TABLE_SIZE "Size"
@@ -329,9 +331,17 @@ static char *shortenright(sdl_font *font,char *s,int avail) {
 }
 
 static void drawwidget(widget_t *w,int mouse) {
-	int v,avail;
+	int v,avail,barrange,listrange,top,bottom;
 	char *s=w->s;
-	if(w->hasborder) {
+	if(w->type==W_VSCROLL && puzzlenum>numentries) {
+		drawrectangle32(w->x1,w->y1,w->x2,w->y2,mouse?w->hicol:w->bkcol);
+		barrange=w->y2-w->y1;
+		listrange=puzzlenum-numentries+1;
+		top=w->y1+ypos*barrange*3/listrange/4;
+		bottom=top+barrange-barrange*3/4;
+		if(bottom>=w->y2) bottom=w->y2;
+		drawrectangle32(w->x1,top,w->x2,bottom,mouse?w->border:w->col);
+	} else if(w->hasborder) {
 		drawrectangle32(w->x1+1,w->y1+1,w->x2-1,w->y2-1,mouse?w->hicol:w->bkcol);
 		drawhorizontalline32(w->x1,w->x2,w->y1,w->border);
 		drawhorizontalline32(w->x1,w->x2,w->y2,w->border);
@@ -506,6 +516,12 @@ static void placement() {
 		yy+=font->height+2;
 		updatetable(i);
 	}
+	scrollbarix=widgetnum;
+	addwidget(xx[6]+1,starty+logoy+2*buttonheight+3,xx[7]-1,tablebottomy-buttonheight-2,0,0,0,WHITE32,GRAY32,YELLOW32,GRAY32,"",0,80,W_VSCROLL,-1);
+	addwidget(xx[6]+1,starty+logoy+2*buttonheight+2,xx[7]-1,starty+logoy+2*buttonheight+2,0,0,0,BLACK32,BLACK32,BLACK32,BLACK32,"",0,-1,W_NOTHING,-1);
+	addwidget(xx[6]+1,tablebottomy-buttonheight-1,xx[7]-1,tablebottomy-buttonheight-1,0,0,0,BLACK32,BLACK32,BLACK32,BLACK32,"",0,-1,W_NOTHING,-1);
+	addwidget(xx[6]+1,starty+logoy+buttonheight+2,xx[7]-1,starty+logoy+2*buttonheight+1,1,1,0,BLACK32,WHITE32,BLACK32,YELLOW32,"^",A_CENTER,81,W_BUTTON,-1);
+	addwidget(xx[6]+1,tablebottomy-buttonheight,xx[7]-1,tablebottomy-1,1,1,0,BLACK32,WHITE32,BLACK32,YELLOW32,"v",A_CENTER,82,W_BUTTON,-1);
 }
 
 static void drawmenu() {
@@ -526,6 +542,7 @@ static void drawmenu() {
 static void redrawtableline(int n) {
 	int ix=n*6+widgetix,j;
 	for(j=0;j<6;j++) drawwidget(widget+j+ix,0);
+	drawwidget(widget+scrollbarix,0);
 }
 
 static void redrawtable() {
@@ -665,12 +682,42 @@ static void drawguielements(int ix,int mouse) {
 }
 
 static void processmousemotion() {
-	int i,x=event_mousex,y=event_mousey;
+	int i,x=event_mousex,y=event_mousey,x1,y1;
+	int barrange,listrange,top,bottom,newypos,dy;
 	widget_t *w;
 	for(i=0;i<widgetnum;i++) {
 		w=widget+i;
 		if(x>=w->x1 && y>=w->y1 && x<=w->x2 && y<=w->y2) {
-			if(w->id==focusid) return;
+			if(w->id==focusid) {
+				/* we might be inside scrollbar here */
+				if(w->type==W_VSCROLL && puzzlenum>numentries && mousebuttons[0]) {
+					x1=event_mousefromx; y1=event_mousefromy;
+					/* calculate coordinates of scrollbar */
+					barrange=w->y2-w->y1;
+					listrange=puzzlenum-numentries+1;
+					top=w->y1+ypos*barrange*3/listrange/4;
+					bottom=top+barrange-barrange*3/4;
+					if(bottom>=w->y2) bottom=w->y2;
+					if(x1>=w->x1 && x1<=w->x2 && y1>=top && y1<=bottom) {
+						/* we're inside scroll bar box, change ypos */
+						dy=y-y1;
+						newypos=ypos+dy*(puzzlenum-numentries+1)/(barrange*3/4);
+						if(newypos==ypos) {
+							if(dy<0) newypos--;
+							else newypos++;
+						}
+						ypos=newypos;
+						if(ypos<0) ypos=0;
+						if(ypos>puzzlenum-numentries) ypos=puzzlenum-numentries;
+						if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+						for(i=0;i<numentries;i++) updatetable(i);
+						redrawtable();
+						if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+						SDL_UpdateRect(screen,tablex,starty+logoy,resx-tablex,tablebottomy+1-starty-logoy);
+					}
+				}
+				return;
+			}
 			/* draw previous element without focus */
 			if(focusix>-1) drawguielements(focusix,0);
 			focusid=w->id;
@@ -742,6 +789,9 @@ static int compcustomlist(const void *A,const void *B) {
 static void processmousedown() {
 	int x=event_mousex,y=event_mousey,oldsel=selected,i,curix;
 	int scroll=0;
+	int barrange,listrange,top,bottom;
+	static Uint32 lasttick=0;
+	Uint32 tick;
 	widget_t *w;
 	if(mousebuttons[0]) for(i=0;i<widgetnum;i++) {
 		w=widget+i;
@@ -766,16 +816,46 @@ static void processmousedown() {
 					SDL_UpdateRect(screen,tablex,starty+logoy,resx-tablex,tablebottomy+1-starty-logoy);
 				} else if(w->id>99) {
 					selected=w->id-100;
+					/* check for doubleclick */
+					tick=SDL_GetTicks();
+					if(selected==oldsel) {
+						if(tick-lasttick<500) play(selected+ypos);
+						lasttick=tick;
+						return;
+					}
+					lasttick=tick;
 					if(selected!=oldsel) updatetworowsintable(oldsel,selected);
+				} else if(w->id==81) {
+					/* scroll bar button up */
+					if(ypos) ypos--,scroll=1;
+					goto updategraphics;
+				} else if(w->id==82) {
+					/* scroll bar button down */
+					if(ypos<puzzlenum-numentries) ypos++,scroll=1;
+					goto updategraphics;
 				}
 				return;
+			} else if(w->type==W_VSCROLL) {
+				/* check if we clicked above or below scroll bar box */
+				barrange=w->y2-w->y1;
+				listrange=puzzlenum-numentries+1;
+				top=w->y1+ypos*barrange*3/listrange/4;
+				bottom=top+barrange-barrange*3/4;
+				if(bottom>=w->y2) bottom=w->y2;
+				if(y<top) {
+					for(i=1;i<numentries;i++) if(ypos) ypos--,scroll=1; else break;
+				} else if(y>bottom) {
+					for(i=1;i<numentries;i++) if(ypos<puzzlenum-numentries) ypos++,scroll=1; else break;
+				}
+				goto updategraphics;
 			}
 		}
 	} else if(mousebuttons[4]) {
-		for(i=1;i<numentries;i++) GOUP
+		for(i=1;i<numentries;i++) if(ypos) ypos--,scroll=1; else break;
 	} else if(mousebuttons[3]) {
-		for(i=1;i<numentries;i++) GODOWN
+		for(i=1;i<numentries;i++) if(ypos<puzzlenum-numentries) ypos++,scroll=1; else break;
 	}
+updategraphics:
 	if(scroll) {
 		if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
 		for(i=0;i<numentries;i++) updatetable(i);

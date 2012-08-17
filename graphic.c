@@ -9,6 +9,8 @@
 
 #define GRAPHIC_BPP 32
 
+char gameinfo[65536];                 /* name+credits for current game */
+
 int resx=800,resy=600;                /*  resolution (window size) */
 double aspectratio=1.0;               /*  >1=wider, 1=square <1=taller */
 int thick=1;                          /*  thickness of grid line */
@@ -235,6 +237,7 @@ static void initvideo() {
 }
 
 void initgr() {
+	gameinfo[0]=0;
   initinifile();
   initvideo();
   memset(keys,0,sizeof(keys));
@@ -483,6 +486,7 @@ int getevent() {
 	while(!SDL_PollEvent(&event)) {
 		cur=SDL_GetTicks();
 		if(cur-start>9) return EVENT_NOEVENT;
+		SDL_Delay(10);
 	}
 	switch(event.type) {
 	case SDL_VIDEORESIZE:
@@ -554,21 +558,20 @@ void resetscore() {
 
 void displayscore(int x,int y) {
 	Uint32 cur=(SDL_GetTicks()-starttime)/10;
-	int w,right=startx+width*x,left,texty=starty-font->height,ll;
-	static char s[65536];
-	if(cur<6000) sprintf(s,"Time: %d:%02d Clicks: %d",cur/100,cur%100,numclicks);
-	else if(cur<6000*60) sprintf(s,"Time: %d.%02d:%02d Clicks: %d",cur/6000,cur/100%60,cur%100,numclicks);
-	else sprintf(s,"Time: %d.%02d.%02d:%02d Clicks: %d",cur/360000,cur/60000%60,cur/100%60,cur%100,numclicks);
-	w=sdl_font_width(font,s);
-	left=right-w;
-	if(left<0) left=0;
-	ll=left-30;
-	if(ll<0) ll=0;
+	int buffer=4;
+	int texty1=starty-font->height-buffer,texty2=texty1-font->height;
+	static char s[65536],t[65536];
+	sprintf(t,"Clicks: %d",numclicks);
+	if(cur<6000) sprintf(s,"Time: %d:%02d",cur/100,cur%100);
+	else if(cur<6000*60) sprintf(s,"Time: %d.%02d:%02d",cur/6000,cur/100%60,cur%100);
+	else sprintf(s,"Time: %d.%02d.%02d:%02d",cur/360000,cur/6000%60,cur/100%60,cur%100);
   if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
-	drawrectangle32(ll,texty,resx-1,starty-1,WHITE32);
-	sdl_font_printf(screen,font,left,texty,BLACK32,GRAY32,"%s",s);
+	drawrectangle32(startx,texty2,resx-1,starty-buffer-1,WHITE32);
+	sdl_font_printf(screen,font,startx,texty2,BLACK32,GRAY32,"%s",gameinfo);
+	sdl_font_printf(screen,font,startx,texty1,BLACK32,GRAY32,"%s",s);
+	sdl_font_printf(screen,font,startx+200,texty1,BLACK32,GRAY32,"%s",t);
   if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-	SDL_UpdateRect(screen,ll,texty,resx-ll,font->height);
+	SDL_UpdateRect(screen,startx,texty2,resx-startx,font->height*2);
 }
 
 /* calculate final time for game */

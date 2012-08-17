@@ -11,5 +11,8 @@ picross:
 masyu:
 - solver bugs on R0006 if certain other levels (like C141) are solved first
 
+nurikabe:
+- solver can't solve 001 after playing for a while (reentrancy?)
+
 slitherlink
 - R294 not solved if attempted first, but solved if R293 is done before

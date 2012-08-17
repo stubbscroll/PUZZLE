@@ -5,7 +5,7 @@
 
 typedef unsigned char uchar;
 
-#define VERSION_STRING "v0.0"
+#define VERSION_STRING "v1.0"
 
 /*  events */
 #define EVENT_NOEVENT   -1
@@ -31,6 +31,8 @@ typedef unsigned char uchar;
 #define DARKERRED32     0x920000
 
 /*  global variables (from graphic, mainly) */
+extern char gameinfo[65536];
+
 extern int keys[512];
 extern int mousebuttons[6];
 extern int resx,resy;

@@ -1,73 +1,70 @@
-STUFF TO BE ADDED, IN DECREASING ORDER OF MOST DESIRED
+STUFF TO BE ADDED
 
-the following stuff is necessary for v1.0:
-- display puzzle type and author during in-game
-- add scroll bar for table
+planned stuff for v1.0:
+- credits
+- instructions (mouse controls, ask player to check wikipedia for rules)
 
-more desired stuff:
+planned stuff for v1.5:
+- resizable numbers for display in puzzles
+  - make a collection of non-horizontal line segments and circle arcs.
+    try to describe each letter with as few segments as possible. stupid
+    algorithm for rendering: for each pixel, loop through each segment
+    and count the number of segments to the left of the current pixel.
+    if there's an odd number of segments, the pixel is font, otherwise it's
+    background. warning, runtime is x*y*lines.
+    arrows for yajilin are also needed, as well as symbols for future games.
+    or maybe read in knuth-metafont and pick up ideas
+- some more games (see long list below)
+
+other stuff in order of desiredness:
 - kuromasu: add red colour when empty>number
 - kuromasu: centered number in circle
-
-COMPLETE LIST OF STUFF TO BE ADDED
-
-- general:
-  - nice resizing of numbers
-  - for extremely time intensive solving heuristics: estimate the number
-    of combinations needed to investigate for a given move and try moves
-    in order of increasing work
-  - add keyboard repeat to arrow keys in table
-  - add achievements! for instance:
-    - complete at least one puzzle of each type without using hints
-    - complete one puzzle of difficulty "extra"/"extreme" or higher without using hints
-    - complete one puzzle using the hint function only
-    - complete a puzzle using no unnecessary moves, without using hints, no undo
-    - complete a puzzle in less than 1 minute/30 seconds/10 seconds/5 seconds without using hints
-    - complete 1/10/100/1000 puzzles without using hints
-    - complete at least 50% of all puzzles of any kind
-  - print error message (at least into log.txt or error.txt) when something
-    bad happens
-  - change difficulty from string to int (can be done by changing the grabber
-    programs, changing each loadpuzzle() (use table lookup to display string)
-    and change all files (don't regrab them, but make a program to go through
-    all files and replace string with int)
-  - make better controls:
-    - hold mouse button and mark multiple cells in one motion
-  - automatic puzzle generation
-  - the code is very messy with lots of duplication, but i've decided against
-    refactoring
-
-- kuromasu
-  - number in round cell within square
-
-- nurikabe
-  - make fancy controls:
-    - enclose finalized island
-    - fill enclosed region with island
-  - improve solver, get those last puzzles!
-
-- heyawake
-  - improve solver speed, 8 hours on heyC138 is way too much. check if it has
-    anything to do with that rectangle with 16 cells, and rectify
-
-- picross
-  - make better legalrow,legalcolumn routines: given clues and partially
-    filled in cells, is it possible to finish correctly? use dp
-
-- hitori
-  - improve solver (it's not very good right now)
-
-- masyu
-  - improve solver (it's not very good right now)
-
-- slitherlink
-  - improve solver (it's not very good right now)
-
-- minesweeper
-  - improve solver
-
-- yajilin
-  - add v as legal number. don't know why it was removed in the first place,
-    the direction is in another layer
+- yajilin: nice resizable arrows
+- for extremely time intensive solving heuristics: estimate the number
+  of combinations needed to investigate for a given move and try moves
+  in order of increasing work
+- menu: add keyboard repeat to arrow keys in table
+- add achievements! for instance:
+  - complete at least one puzzle of each type without using hints
+  - complete one puzzle of difficulty "medium" or higher without using hints
+  - complete one puzzle of difficulty "hard" or higher without using hints
+  - complete one puzzle of difficulty "extra"/"extreme" or higher without
+    using hints
+  - complete one puzzle using the hint function only
+  - complete a puzzle using no unnecessary moves, without using hints, no
+    undo
+  - complete a puzzle in less than 1 minute/30 seconds/10 seconds/5 seconds
+    without using hints
+  - complete 1/10/100/1000 puzzles without using hints
+  - complete at least 50% of all puzzles of any type
+- randomly generated puzzles!
+- print error message (at least into log.txt or error.txt) when something
+  bad happens
+- add music! make algorithmic music with several separate channels that can be
+  shuffled and mixed in a lot of different ways. add real-time effects such as
+  filter and reverb.
+- change difficulty from string to int (can be done by changing the grabber
+  programs, changing each loadpuzzle() (use table lookup to display string)
+  and change all files (don't regrab them, but make a program to go through
+  all files and replace string with int)
+- make better controls:
+  - hold mouse button and mark multiple cells in one motion
+- automatic puzzle generation
+- the code is very messy with lots of duplication, but i've decided against
+  refactoring
+- nurikabe: make fancier controls such as enclose finalized island, fill
+  enclosed region with island
+- nurikabe: improve the solver, get those last puzzles!
+- heyawake: improve solver speed, 8 hours on heyC138 is way too much. check
+  if it has anything to do with that rectangle with 16 cells, and rectify
+- picross: make better legalrow,legalcolumn routines: given clues and
+  partially filled in cells, is it possible to finish correctly? use dp
+- hitori: improve solver (it's not very good right now)
+- masyu: improve solver (it's not very good right now)
+- slitherlink: improve solver (it's not very good right now)
+- minesweeper: improve solver, it struggles with mines left
+- yajilin: add v as legal number. don't know why it was removed in the first
+  place, the direction is in another layer
 
 - add games (higher up => more likely to be implemented, either because it's
   easy to implement or the game looks more interesting/fun to me). number in
@@ -169,6 +166,11 @@ COMPLETE LIST OF STUFF TO BE ADDED
   - patchwork [210] http://www.janko.at/Raetsel/Patchwork/index.htm
     - mix of ripple effect and latin-ish square
   - battleships, bimaru [420] http://www.janko.at/Raetsel/Battleships/index.htm
+    - remember to support the variant with ships shaped as arbitraty
+      polyomonies! see motris for examples
+    - both water and ship parts can be pre-specified
+    - another variant: digital battleship where each ship part has a value
+      and the clues indicate the sum
   - polyominos [23] http://www.janko.at/Raetsel/Polyominos/index.htm
     - make polyominos so that the sum of each cell in a polyomino is 10
     - minimize the number of unused cells (this requirement looks dubious,
