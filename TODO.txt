@@ -14,12 +14,11 @@ planned stuff for v1.5:
     background. warning, runtime is x*y*lines.
     arrows for yajilin are also needed, as well as symbols for future games.
     or maybe read in knuth-metafont and pick up ideas
+- kuromasu: centered number in circle
+- yajilin: nice resizable arrows
 - some more games (see long list below)
 
 other stuff in order of desiredness:
-- kuromasu: add red colour when empty>number
-- kuromasu: centered number in circle
-- yajilin: nice resizable arrows
 - for extremely time intensive solving heuristics: estimate the number
   of combinations needed to investigate for a given move and try moves
   in order of increasing work

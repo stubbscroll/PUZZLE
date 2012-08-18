@@ -108,23 +108,31 @@ static int hasneighbouringblocked(int u,int v) {
 	return 0;
 }
 
-static void updatecell(int u,int v) {
-	int seen;
+static void updatecell(int u,int v,int override) {
+	int seen,dummy,d,un;
 	Uint32 col=0;
-	if(m[u][v]==UNFILLED) drawsolidcell32(u,v,unfilledcol);
-	else if(m[u][v]==EMPTY) drawsolidcell32(u,v,blankcol);
+	if(m[u][v]==UNFILLED) drawsolidcell32(u,v,override>-1?override:unfilledcol);
+	else if(m[u][v]==EMPTY) drawsolidcell32(u,v,override>-1?override:blankcol);
 	else if(m[u][v]==BLOCKED) {
 		drawsolidcell32(u,v,hasneighbouringblocked(u,v)?darkererrorcol:filledcol);
 	} else if(m[u][v]>-1) {
-		/* only three colours:
-		   white - seen cells > number
-			 green - seen cells == number
-		   red   - seen cells < number */
+		/* white - seen cells > number
+			 yellow - seen cells == number, unfilled 
+			 green - seen cells == number, no unfilled
+		   red   - seen cells < number OR seen white cells > number */
+		for(seen=1,un=d=0;d<4;d++) {
+			seen+=countdir(u,v,d,0,&dummy);
+			if(dummy) un=1;
+		}
 		seen=count(u,v);
 		if(seen>m[u][v]) col=blankcol;
+		else if(seen==m[u][v] && un) col=almostokcol;
 		else if(seen==m[u][v]) col=okcol;
 		else col=errorcol;
-		drawnumbercell32(u,v,m[u][v],filledcol,filledcol,col);
+		for(d=0,seen=1;d<4;d++) seen+=countdir(u,v,d,1,&dummy);
+		if(seen>m[u][v]) col=errorcol;
+		else if(seen==m[u][v] && col==blankcol) col=almostokcol;
+		drawnumbercell32(u,v,m[u][v],filledcol,filledcol,override>-1?override:col);
 	}
 }
 
@@ -138,7 +146,7 @@ static void drawgrid() {
     for(i=0;i<=y;i++) for(j=0;j<thick;j++) drawhorizontalline32(startx,startx+width*x+thick-1,starty+i*height+j,BLACK32);
     for(i=0;i<=x;i++) drawrectangle32(startx+width*i,starty,startx+i*width+thick-1,starty+y*height+thick-1,BLACK32);
   }
-  for(i=0;i<x;i++) for(j=0;j<y;j++) updatecell(i,j);
+  for(i=0;i<x;i++) for(j=0;j<y;j++) updatecell(i,j,-1);
   if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
   SDL_UpdateRect(screen,0,0,resx,resy);
 }
@@ -146,7 +154,7 @@ static void drawgrid() {
 static void partialredraw() {
   int i,j;
   if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
-  for(i=0;i<x;i++) for(j=0;j<y;j++) if(touched[i][j]) updatecell(i,j);
+  for(i=0;i<x;i++) for(j=0;j<y;j++) if(touched[i][j]) updatecell(i,j,-1);
   if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
   for(i=0;i<x;i++) for(j=0;j<y;j++) if(touched[i][j]) {
     sdlrefreshcell(i,j);
@@ -669,9 +677,45 @@ static void processmousedown() {
   if(up) updatetoscreen(1),normalmove=1,numclicks++;
 }
 
+#define COLSIZE 6
+static Uint32 colarray[]={
+  0xFFDBFF, 0xFFFF00, 0xFFFFAA, 0xB6FF00, 0x92FFAA, 0xFFB600};
+
+static int forcefullredraw;
+
+static void drawverify() {
+  int i,j,col=0,k,qs2;
+  if(forcefullredraw) drawgrid();
+  if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+  for(i=0;i<x;i++) for(j=0;j<y;j++) if(!visit[i][j] && m[i][j]<BLOCKED) {
+    qs2=qs;
+    genericbfs(i,j,0);
+    for(k=qs2;k<qe;k+=2) updatecell(q[k],q[k+1],colarray[col]);
+    col=(col+1)%COLSIZE;
+  }
+  if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+  SDL_UpdateRect(screen,0,0,resx,resy);
+  cleanupbfs();
+}
+
+static void showverify() {
+  int i,j;
+  forcefullredraw=0;
+  drawverify();
+  forcefullredraw=1;
+  anykeypress(drawverify);
+  /*  display normal level */
+  if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+  for(i=0;i<x;i++) for(j=0;j<y;j++) updatecell(i,j,-1);
+  if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+  SDL_UpdateRect(screen,0,0,resx,resy);
+}
+#undef COLSIZE
+
 static void processkeydown(int key) {
   int res;
   if(key==undokey) undo(1),usedundo=1;
+  else if(key==verifykey) showverify();
   else if(key==hintkey) {
     if(!executeonemovefromqueue(1)) {
       res=hint();
