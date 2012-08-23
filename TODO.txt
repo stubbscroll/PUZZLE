@@ -1,10 +1,12 @@
 STUFF TO BE ADDED
 
 planned stuff for v1.0:
-- credits
-- instructions (mouse controls, ask player to check wikipedia for rules)
+- remove greyed-out buttons
+- add instructions and credits in readme
 
 planned stuff for v1.5:
+- in-game instructions
+- in-game credits
 - resizable numbers for display in puzzles
   - make a collection of non-horizontal line segments and circle arcs.
     try to describe each letter with as few segments as possible. stupid
@@ -34,8 +36,11 @@ other stuff in order of desiredness:
     undo
   - complete a puzzle in less than 1 minute/30 seconds/10 seconds/5 seconds
     without using hints
-  - complete 1/10/100/1000 puzzles without using hints
+  - complete 1/10/100/1000/10000 puzzles without using hints
   - complete at least 50% of all puzzles of any type
+  - complete all puzzles of any type
+  - complete a puzzle of size 45*31 or higher
+  - complete a puzzle of size 50*50 or higher
 - randomly generated puzzles!
 - print error message (at least into log.txt or error.txt) when something
   bad happens
