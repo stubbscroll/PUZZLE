@@ -1,6 +1,7 @@
 #ifndef PUZZLE_H
 #define PUZZLE_H
 
+#include <SDL/SDL.h>
 #include "sdlfont.h"
 
 typedef unsigned char uchar;

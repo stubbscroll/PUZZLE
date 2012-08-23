@@ -1,6 +1,7 @@
 /* small re-entrant dir library by me, which is a wrapper for os-specific
    routines */
 #include "dir.h"
+#include "puzzle.h"
 
 #ifdef _WIN32
 int dirwin(dir_t *h) {
@@ -33,6 +34,7 @@ int findfirst(char *const s,dir_t *h) {
 	return dirwin(h);
 #else
 	h->d=opendir(s);
+	logprintf("val %d\n",h->d);
 	if(!h->d) return 0;
 	return dirunix(h);
 #endif

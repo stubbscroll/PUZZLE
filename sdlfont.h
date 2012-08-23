@@ -1,6 +1,8 @@
 #ifndef SDLFONT_H
 #define SDLFONT_H
 
+#include <SDL/SDL.h>
+
 /*  font structure for chars with ascii codes [32,255] */
 typedef struct {
   int x[224],y[224];    /*  upper left coordinate for every char */

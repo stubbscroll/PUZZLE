@@ -134,7 +134,7 @@ static void getpuzzleline(FILE *f,char *s,int maks) {
 	int n;
 	while(fgets(s,maks,f) && s[0]=='%');
 	n=strlen(s);
-	while(n && s[n-1]=='\n') s[--n]=0;
+	while(n && (s[n-1]=='\n' || s[n-1]=='\r')) s[--n]=0;
 }
 
 static int compcleanup(const void *A,const void *B) {
@@ -158,8 +158,10 @@ static void refreshcache() {
 	/* scan for new files */
 	if(strlen(puzzlepath)+1>=MAXSTRING-1) error("path is too long");
 	strcpy(path,puzzlepath);
+#ifdef _WIN32
 	strcat(path,"*");
-	findfirst(path,&dir);
+#endif
+	if(!findfirst(path,&dir)) error("bad path, no files found\n");
 	do {
 		/* skip directories, including . .. */
 		if(dir.dir>0) continue;
@@ -878,23 +880,23 @@ void menu() {
 	}
 	placement();
 	drawmenu();
-  do {
-    event=getevent();
-    switch(event) {
-    case EVENT_RESIZE:
+	do {
+		event=getevent();
+		switch(event) {
+		case EVENT_RESIZE:
 			placement();
-      drawmenu();
+			drawmenu();
 			break;
-    case EVENT_MOUSEDOWN:
+		case EVENT_MOUSEDOWN:
 			processmousedown();
 			break;
 		case EVENT_MOUSEMOTION:
 			processmousemotion();
 			break;
-    default:
-      if(event>=EVENT_KEYDOWN && event<EVENT_KEYUP) {
+		default:
+			if(event>=EVENT_KEYDOWN && event<EVENT_KEYUP) {
 				processkeydown(event-EVENT_KEYDOWN);
 			}
 		}
-  } while(event!=EVENT_QUIT && !keys[SDLK_ESCAPE] && !keys[SDLK_q]);
+	} while(event!=EVENT_QUIT && !keys[SDLK_ESCAPE] && !keys[SDLK_q]);
 }
