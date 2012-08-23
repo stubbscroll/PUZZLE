@@ -49,7 +49,7 @@ o white node
 NURIKABE
 
 first line: one string: puzzle name: nurikabe
-next line: one string, difficulty (easy, medium, hard, extreme
+next line: one string, difficulty (easy, medium, hard, extreme)
 next line: two integers x y
 then, y lines containing x chars.
 . water
@@ -124,3 +124,24 @@ next line: one string, difficulty
 next line: two integers x y
 y lines with clues (comma-separated list of numbers, or 0 if no blocks in row/column)
 x lines with clues
+
+MINE
+
+first line: one string, puzzle name: minesweeper
+next line: one string, difficulty
+next line: two integers x y
+then, y lines containing x chars
+. blank
+0-8 number
+then, a line containing "mine n" where n is the number of mines to be placed, or 0 if no constraint
+
+KUROMASU
+
+first line: one string, puzzle name: kuromasu
+next line: one string, difficulty
+next line: two integers x y
+then, y lines containing x chars
+. blank
+1-9 node numbered 1-9
+a-z node numbered 10-35
+A-Z node numbered 36-61

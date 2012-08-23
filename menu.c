@@ -453,7 +453,8 @@ static void placement() {
 		BLACK32,WHITE32,WHITE32,WHITE32,"The Puzzle Game",A_LEFT,-1,W_NOTHING,-1);
 	addwidget(startx,starty+logoy,startx+buttonwidth-1,starty+logoy+buttonheight-1,
 		3,3,1,BLACK32,WHITE32,BLACK32,YELLOW32,"(P)lay",A_CENTER,0,W_BUTTON,-1);
-	addwidget(startx,starty+logoy+h,startx+buttonwidth-1,starty+logoy+buttonheight-1+h,
+	/* remove nonfunctional buttons until they actually function */
+/*	addwidget(startx,starty+logoy+h,startx+buttonwidth-1,starty+logoy+buttonheight-1+h,
 		3,3,1,BLACK32,GRAY32,BLACK32,GRAY32,"Credits",A_CENTER,1,W_NOTHING,-1);
 	addwidget(startx,starty+logoy+2*h,startx+buttonwidth-1,starty+logoy+buttonheight-1+2*h,
 		3,3,1,BLACK32,GRAY32,BLACK32,GRAY32,"How to play",A_CENTER,2,W_NOTHING,-1);
@@ -461,6 +462,7 @@ static void placement() {
 		3,3,1,BLACK32,GRAY32,BLACK32,GRAY32,"Achievements",A_CENTER,3,W_NOTHING,-1);
 	addwidget(startx,starty+logoy+4*h,startx+buttonwidth-1,starty+logoy+buttonheight-1+4*h,
 		3,3,1,BLACK32,GRAY32,BLACK32,GRAY32,"Options",A_CENTER,4,W_NOTHING,-1);
+*/
 	addwidget(startx,tablebottomy-buttonheight+1-h,startx+buttonwidth-1,tablebottomy-h,
 		3,3,1,BLACK32,WHITE32,BLACK32,YELLOW32,"(S)can for new puzzles",A_CENTER,48,W_BUTTON,-1);
 	addwidget(startx,tablebottomy-buttonheight+1,startx+buttonwidth-1,tablebottomy,

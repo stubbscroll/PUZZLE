@@ -54,7 +54,6 @@ extern int controlscheme_heyawake;
 extern int controlscheme_hitori;
 extern int controlscheme_picross;
 extern int controlscheme_slitherlink;
-extern int controlscheme_masyu;
 extern int controlscheme_mine;
 extern int controlscheme_kuromasu;
 

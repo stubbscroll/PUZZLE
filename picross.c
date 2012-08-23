@@ -306,18 +306,18 @@ static void processmousedown() {
   if(event_mousebutton==SDL_BUTTON_LEFT) {
     if(!v) {
       domove(cellx,celly,togglecell(m[cellx][celly])); up=1;
-    } else if(v==1 && m[cellx][celly]!=BLOCKED) {
-      domove(cellx,celly,BLOCKED); up=1;
-    } else if(v==2 && m[cellx][celly]!=EMPTY) {
-      domove(cellx,celly,EMPTY); up=1;
-    }
-  } else if(event_mousebutton==SDL_BUTTON_RIGHT) {
-    if(!v && m[cellx][celly]!=UNFILLED) {
-      domove(cellx,celly,UNFILLED); up=1;
     } else if(v==1 && m[cellx][celly]!=EMPTY) {
       domove(cellx,celly,EMPTY); up=1;
     } else if(v==2 && m[cellx][celly]!=BLOCKED) {
       domove(cellx,celly,BLOCKED); up=1;
+    }
+  } else if(event_mousebutton==SDL_BUTTON_RIGHT) {
+    if(!v && m[cellx][celly]!=UNFILLED) {
+      domove(cellx,celly,UNFILLED); up=1;
+    } else if(v==1 && m[cellx][celly]!=BLOCKED) {
+      domove(cellx,celly,BLOCKED); up=1;
+    } else if(v==2 && m[cellx][celly]!=EMPTY) {
+      domove(cellx,celly,EMPTY); up=1;
     }
   } else if(event_mousebutton==SDL_BUTTON_MIDDLE) {
     if(v && m[cellx][celly]!=UNFILLED) {

@@ -1,0 +1,12 @@
+v1.5 will not be released until the following is in place:
+
+- nice resizing of fonts
+
+further version numbers will be the harmonic numbers H_2, H_3 etc. the number
+of digits after the decimal point will be the least possible such that only
+one harmonic number exists in the interval [v-0.5*10^-d, v+0.5*10^-d] where v is the
+version number and d is the number of digits after the decimal point in the
+version number. in addition, the version should be correctly rounded to the
+required number of digits after the decimal point. for instance v1 is illegal
+as both and 1.5 fits in [0.5, 1.5]. The first few legal version numbers are
+v1.0, v1.5, v1.8 and v2.1.

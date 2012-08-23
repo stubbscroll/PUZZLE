@@ -1,7 +1,6 @@
 PROGRAM PROGRESS
 
 general:
-- no menu system
 - last known status on *n?x: program works!
 
 hashiwokakero (0 unsolved!)

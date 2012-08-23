@@ -53,7 +53,6 @@ other stuff in order of desiredness:
   all files and replace string with int)
 - make better controls:
   - hold mouse button and mark multiple cells in one motion
-- automatic puzzle generation
 - the code is very messy with lots of duplication, but i've decided against
   refactoring
 - nurikabe: make fancier controls such as enclose finalized island, fill
@@ -193,6 +192,8 @@ other stuff in order of desiredness:
   - zahlenschlange [27] http://www.janko.at/Raetsel/Zahlenschlange/index.htm
     - make a path from upper left to lower right so that every number
       from 1 to MAX is passed exactly once
+  - balance http://battleships.free.fr/ and http://www2.stetson.edu/~efriedma/weight/
+    - place weights so that all thingy balances
   - ebony and ivory [130] http://www.janko.at/Raetsel/Ebony-Ivory/index.htm
     - similar to picross, except there's one numbered hint which indicates
       the longest sequence of consecutive black blocks

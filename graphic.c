@@ -43,7 +43,6 @@ int controlscheme_heyawake=0;
 int controlscheme_hitori=0;
 int controlscheme_picross=0;
 int controlscheme_slitherlink=0;
-int controlscheme_masyu=0;
 int controlscheme_mine=0;
 int controlscheme_kuromasu=0;
 
@@ -178,7 +177,6 @@ static void initinifile() {
     else if(!strcmp(t,"controlscheme_hitori")) controlscheme_hitori=strtol(u,0,10);
     else if(!strcmp(t,"controlscheme_picross")) controlscheme_picross=strtol(u,0,10);
     else if(!strcmp(t,"controlscheme_slitherlink")) controlscheme_slitherlink=strtol(u,0,10);
-    else if(!strcmp(t,"controlscheme_masyu")) controlscheme_masyu=strtol(u,0,10);
     else if(!strcmp(t,"controlscheme_mine")) controlscheme_mine=strtol(u,0,10);
     else if(!strcmp(t,"controlscheme_kuromasu")) controlscheme_kuromasu=strtol(u,0,10);
     /*  colour options */

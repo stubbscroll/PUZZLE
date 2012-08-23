@@ -3,25 +3,10 @@ v0.0 - 2011-07-18
 - first release (not announced), contains 5 puzzle types (nurikabe, akari,
   heyawake, hitori and picross).
 
-v1.0 - 2012-xx-xx
+v1.0 - 2012-08-23
 
 - first proper release. 6 puzzle types added (hashiwokakero, masyu,
   slitherlink, yajilin, minesweeper, kuramasu)
-- 5000-something puzzles
+- 5715 puzzles
 - menu screen
 - score tracking
-
--------- don't include the below notice for release versions ----------
-
-v1.5 will not be released until the following is in place:
-
-- nice resizing of fonts
-
-further version numbers will be the harmonic numbers H_2, H_3 etc. the number
-of digits after the decimal point will be the least possible such that only
-one harmonic number exists in the interval [v-0.5*10^-d, v+0.5*10^-d] where v is the
-version number and d is the number of digits after the decimal point in the
-version number. in addition, the version should be correctly rounded to the
-required number of digits after the decimal point. for instance v1 is illegal
-as both and 1.5 fits in [0.5, 1.5]. The first few legal version numbers are
-v1.0, v1.5, v1.8 and v2.1.

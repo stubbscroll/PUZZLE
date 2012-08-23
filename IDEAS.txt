@@ -1,4 +1,4 @@
-nurikabe: generation of puzzles
+nurikabe: generation of puzzles (ideas stolen from somewhere)
 
 for the solver: yes, recursive descent is the way to go, however, this particular puzzle that I posted doesn’t require any recursive (backtracking) calls, it can be solved by iterative methods (repeatedly applying a set of solving methods). In fact, all my puzzles can be solved iteratively, otherwise, if you use backtracking, that is considered guessing. Therefore, you need to work on your solving strategies and implement and apply more of them.
 
