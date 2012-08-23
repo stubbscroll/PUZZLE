@@ -27,6 +27,7 @@ int dirunix(dir_t *h) {
 #endif
 
 /* return 1 if ok, 0 if error */
+/* warning, windows requires * at the end of the path, while linux does not! */
 int findfirst(char *const s,dir_t *h) {
 #ifdef _WIN32
 	h->hfind=FindFirstFile(s,&h->f);
@@ -34,7 +35,6 @@ int findfirst(char *const s,dir_t *h) {
 	return dirwin(h);
 #else
 	h->d=opendir(s);
-	logprintf("val %d\n",h->d);
 	if(!h->d) return 0;
 	return dirunix(h);
 #endif

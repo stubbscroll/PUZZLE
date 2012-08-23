@@ -1,49 +1,85 @@
-Puzzle collection v0.0 by Ruben Spaans, released in July 2011.
+Puzzle collection v1.0 by Ruben Spaans, released in August 2012.
 Released under GPL v3.0.
 
 Web homes:
-http://www.stubbscroll.com/puzzle.html
+http://www.stubbscroll.com/puzzle.html (alias address)
 http://www.pvv.org/~spaans/puzzle.html
-http://www.pvv.ntnu.no/~spaans/puzzle.html
+http://www.pvv.ntnu.no/~spaans/puzzle.html (alias address)
 
-This is a collection of logic puzzle games. There are currently nine games
+This is a collection of logic puzzle games. There are currently eleven games
 implemented (Nurikabe, Akari (Light up), Heyawake, Hitori, Picross,
-Hashiwokakero, Masyu, Slitherlink and Yajilin), and the interface is rather
-unfinished. The program should run on all desktop platforms capable of
-running a gcc C compiler and the SDl library, but it is not yet tested on
-Mac systems.
-
-The puzzle collection also includes a program that downloads puzzles from
-the Nikoli site.
+Hashiwokakero, Masyu, Slitherlink, Yajilin, Minesweeper and Kuromaso)
+including a menu system with score tracking. The program should run on all
+desktop platforms capable of running a gcc C compiler and the SDl library, but
+it is not yet tested on Mac systems.
 
 Future plans include:
-- adding a menu system for selecting puzzles
-- rendering the numbers in a nice way
-- show more info on the screen (timer and possibly other info)
+- adding achievements
+- using resizable numbers and images for the puzzles
+- adding in-game instructions and help
 - adding more puzzle types
-- auto-generation of puzzle instances
-- refactoring the code: move out common code (hint system, undo, etc)
-- expanding the documentation
+- adding more puzzles
+- autogeneration of puzzles
 
 ==== How to build the program ================================================
 
 If you are using win32, you can run the supplied executable (puzzle.exe). If
 not, run make. If that doesn't work, check if the correct library names are
-used. win32 users who want to change stuff can recompile with make.bat
-(assuming you have mingw-gcc with SDL).
-
-Warning, the makefile is not tested.
+used. win32 users who want to change stuff can download the source package
+and recompile with make.bat (assuming that the user has mingw-gcc with
+SDL).
 
 ==== How to run the program ==================================================
 
-From the command line, navigate to the directory where the program resides.
-Run with 'puzzle puzzles\file' (in windows) or './puzzle puzzles/file' (in
-unix) where file is the file name of the puzzle you want to run. Supplied
-puzzles reside in the puzzles/ directory.
+Run the file "puzzle.exe" (windows) or "./puzzle" (non-windows). You will then
+enter the menu system.
 
-==== Controls that are common for all games ==================================
+It is also possible to bypass the menu and play individual puzzles with
+"puzzle filename"; scores will not be saved in this case. The puzzle files
+are placed in the puzzles/ directory by default.
 
-TODO hint, undo, escape, V (connectedness) bla bla
+==== Controls for the menu ===================================================
+
+Use the mouse to click on buttons, select puzzles and drag the scrollbar.
+Double-click a puzzle name or click "play" to play a puzzle. Alternatively,
+use these keyboard controls:
+
+up/down/pageup/pagedown/home/end - navigate in puzzle list
+ENTER/p                          - play the currently selected puzzle
+s                                - scan for new puzzles and add them to list
+ESC/q                            - quit
+
+==== In-game controls that are common for all games =========================
+
+ESC       - quit to menu (this will delete all progress for this session with
+            no confirmation prompt)
+h         - hint, the computer fills in one cell correctly (or warns you that
+            the current board is in an unsolvable state). This function will
+	    disable scoring for this puzzle until it is restarted.
+j         - superhint, the computer attemps to solve the entire puzzle (no
+            scoring, naturally). This will solve all but the hardest puzzles
+	    in full.
+v         - show connected components in different colours (not applicable for
+            all games)
+backspace - undo the last move
+
+left mouse button                 - fill in cell
+right mouse button                - fill in cell in another way
+middle mouse button               - erase cell
+click mouse button and drag mouse - create edge between two cells
+
+There are no keyboard controls for the games.
+
+Use the mouse to colour cell black or white, draw edges, place mines or lamps
+etc. For most games, cells start out as unfilled (grey), which is not the same
+as a white cell.
+
+The game will in some cases colour the empty cells:
+green  - cell is filled in correctly
+yellow - it is trivial to fill in the cell correctly
+red    - cell is filled in wrongly according to the game's rules
+white  - none of the above, or it cannot be easily determined, or the game
+         has chosen to not give this information
 
 ==== How to play - Nurikabe ==================================================
 
@@ -104,11 +140,18 @@ TODO
 
 TODO
 
-==== grab ====================================================================
+==== How to play - Kuromasu ==================================================
 
-To compile the grabber, you need the curl library:
+TODO
 
-http://curl.haxx.se/download.html
+==== How to play - Minesweeper ===============================================
 
-To run a 32-bit version of the program in 64-bit windows, you might need a
-32-bit copy of the libsasl.dll file in the program's current directory.
+TODO
+
+==== Credits =================================================================
+
+Programming by Ruben Spaans
+
+Puzzles by:
+TODO long list goes here
+
