@@ -1187,6 +1187,7 @@ static int followedge(int x1,int y1,int x2,int y2) {
     if(cd==0 && (m[cx][cy-1]>0 || m[cx][cy]>0)) return ret;
     if(cd==1 && (m[cx-1][cy]>0 || m[cx][cy]>0)) return ret;
     /*  extract wall id and or it */
+		/* TODO investigate whether wallid can be negative */
     if(cd==0 && m[cx][cy-1]==BLOCKED) ret|=1<<wallid[cx][cy-1];
     if(cd==0 && m[cx][cy]==BLOCKED) ret|=1<<wallid[cx][cy];
     if(cd==1 && m[cx-1][cy]==BLOCKED) ret|=1<<wallid[cx-1][cy];
@@ -1587,7 +1588,7 @@ static int hashcompare(int pos,int *coords,int n) {
 /*  given key, find its position in hash table */
 /*  it probes past entries occupied by other keys, and stops at
     either the right key or the first empty entry */
-int gethashpos(int *coords,int n) {
+static int gethashpos(int *coords,int n) {
   int pos=GETHASH(coords,n);
   while(1) {
     if(!HASHBIT(pos)) break;
@@ -1597,7 +1598,7 @@ int gethashpos(int *coords,int n) {
   return pos;
 }
 /*  put an element into the hash table */
-void puthash(int *coords,int n) {
+static void puthash(int *coords,int n) {
   int pos=gethashpos(coords,n),i;
   hash[pos>>3]|=1<<(pos&7);
   hashdata[pos][0]=n;
@@ -1606,7 +1607,7 @@ void puthash(int *coords,int n) {
   if((hashcount<<3)>MAXHASH) level5btrgiveup=1;
 }
 /*  clears the hash table */
-void inithashdata() {
+static void inithashdata() {
   memset(hash,0,sizeof(hash));
   hashcount=0;
 }

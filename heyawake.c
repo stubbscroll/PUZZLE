@@ -276,13 +276,15 @@ static void initbfs() {
   memset(visit,0,sizeof(visit));
 }
 
-/*  generic bfs!
-    type  0:  search for empty & unfilled
-    returns:  number of cells examined  */
+/* generic bfs!
+   type 0: search for empty & unfilled
+   type 1: search through empty only
+   returns: number of cells examined  */
 static int genericbfs(int sx,int sy,int type) {
   int tot=1,i,cx,cy,x2,y2;
   if(visit[sx][sy]) return 0;
   if(type==0 && m[sx][sy]>=BLOCKED) return 0;
+	if(type==1 && m[sx][sy]!=EMPTY) return 0;
   q[qe++]=sx; q[qe++]=sy;
   visit[sx][sy]=1;
   while(qs<qe) {
@@ -291,6 +293,7 @@ static int genericbfs(int sx,int sy,int type) {
       x2=cx+dx[i],y2=cy+dy[i];
       if(x2<0 || y2<0 || x2>=x || y2>=y || visit[x2][y2]) continue;
       if(type==0 && m[x2][y2]>=BLOCKED) continue;
+			if(type==1 && m[x2][y2]!=EMPTY) continue;
       tot++;
       q[qe++]=x2,q[qe++]=y2;
       visit[x2][y2]=1;
@@ -1052,9 +1055,9 @@ static void drawverify() {
   int i,j,col=0,k,qs2;
   if(forcefullredraw) drawgrid();
   if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
-  for(i=0;i<x;i++) for(j=0;j<y;j++) if(!visit[i][j] && m[i][j]<BLOCKED) {
+  for(i=0;i<x;i++) for(j=0;j<y;j++) if(!visit[i][j] && m[i][j]==EMPTY) {
     qs2=qs;
-    genericbfs(i,j,0);
+    genericbfs(i,j,1);
     for(k=qs2;k<qe;k+=2) updatecell(q[k],q[k+1],colarray[col]);
     col=(col+1)%COLSIZE;
   }

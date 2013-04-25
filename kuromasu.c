@@ -204,10 +204,12 @@ static void domove(int cellx,int celly,int val,int visible) {
 static uchar visit[MAXS][MAXS];
 static int qs,qe,q[MAXS*MAXS*2];
 
-/* bfs! type 0:search through unfilled,empty,number */
+/* bfs! type 0: search through unfilled,empty,number
+        type 1: search through empty, number */
 static void genericbfs(int sx,int sy,int type) {
 	int cx,cy,d,x2,y2;
 	if(type==0 && m[sx][sy]==BLOCKED) return;
+	else if(type==1 && (m[sx][sy]==UNFILLED || m[sx][sy]==BLOCKED)) return;
 	if(visit[sx][sy]) return;
 	visit[sx][sy]=1;
 	q[qe++]=sx; q[qe++]=sy;
@@ -217,6 +219,7 @@ static void genericbfs(int sx,int sy,int type) {
 			x2=cx+dx[d]; y2=cy+dy[d];
 			if(x2<0 || y2<0 || x2>=x || y2>=y || visit[x2][y2]) continue;
 			if(type==0 && m[x2][y2]==BLOCKED) continue;
+			else if(type==1 && (m[x2][y2]==BLOCKED || m[x2][y2]==UNFILLED)) continue;
 			visit[x2][y2]=1;
 			q[qe++]=x2; q[qe++]=y2;
 		}
@@ -687,9 +690,9 @@ static void drawverify() {
   int i,j,col=0,k,qs2;
   if(forcefullredraw) drawgrid();
   if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
-  for(i=0;i<x;i++) for(j=0;j<y;j++) if(!visit[i][j] && m[i][j]<BLOCKED) {
+  for(i=0;i<x;i++) for(j=0;j<y;j++) if(!visit[i][j] && m[i][j]!=BLOCKED && m[i][j]!=UNFILLED) {
     qs2=qs;
-    genericbfs(i,j,0);
+    genericbfs(i,j,1);
     for(k=qs2;k<qe;k+=2) updatecell(q[k],q[k+1],colarray[col]);
     col=(col+1)%COLSIZE;
   }

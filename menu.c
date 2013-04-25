@@ -12,7 +12,7 @@
 #define MAXDIFF 32
 
 /* minimum resolution for menu */
-#define MINRESX 800
+#define MINRESX 832
 #define MINRESY 300
 
 #define MAXSTRING 65536
@@ -479,7 +479,7 @@ static void placement() {
 	xx[6]=xx[7]-20;
 	xx[5]=xx[6]-5-sdl_font_width(font,"9999999");
 	xx[4]=xx[5]-5-sdl_font_width(font,"999.59.59:99");
-	xx[3]=xx[4]-5-sdl_font_width(font,"2999-12-22 22:22 ");
+	xx[3]=xx[4]-5-sdl_font_width(font,"0000-10-00 00:00 ");
 	xx[2]=xx[3]-5-sdl_font_width(font,"999x999");
 	w=sdl_font_width(font,TABLE_DIFF);
 	for(i=0;i<puzzlenum;i++) {
@@ -689,6 +689,7 @@ static void processmousemotion() {
 	int i,x=event_mousex,y=event_mousey,x1,y1;
 	int barrange,listrange,top,bottom,newypos,dy;
 	widget_t *w;
+	if(resx<MINRESX) return;
 	for(i=0;i<widgetnum;i++) {
 		w=widget+i;
 		if(x>=w->x1 && y>=w->y1 && x<=w->x2 && y<=w->y2) {
@@ -797,6 +798,7 @@ static void processmousedown() {
 	static Uint32 lasttick=0;
 	Uint32 tick;
 	widget_t *w;
+	if(resx<MINRESX) return;
 	if(mousebuttons[0]) for(i=0;i<widgetnum;i++) {
 		w=widget+i;
 		if(x>=w->x1 && y>=w->y1 && x<=w->x2 && y<=w->y2 && w->id>-1) {

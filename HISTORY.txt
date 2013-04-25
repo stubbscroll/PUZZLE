@@ -10,3 +10,7 @@ v1.0 - 2012-08-23
 - 5715 puzzles
 - menu screen
 - score tracking
+
+v1.5
+
+- showverify in heyawake, hitori and kuromasu ignores unfilled now

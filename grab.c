@@ -30,7 +30,7 @@ char *writeto;
 size_t webline(void *ptr,size_t size,size_t n,void *userdata) {
   int i;
   char *t=(char *)ptr;
-  for(i=0;t[i];i++) writeto[bptr++]=t[i];
+  for(i=0;i<n;i++) writeto[bptr++]=t[i];
   writeto[bptr]=0;
   return n;
 }

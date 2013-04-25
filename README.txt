@@ -60,6 +60,11 @@ ENTER/p                          - play the currently selected puzzle
 s                                - scan for new puzzles and add them to list
 ESC/q                            - quit
 
+Beware that the menu screen requires a minimum width (around 800 pixels). If
+the width is too small, the screen turns red and the message "Please resize
+window". This message can also appear after you finish a puzzle where the
+screen has been resized.
+
 ==== In-game controls that are common for all games =========================
 
 Use the mouse to colour cell black or white, draw edges, place mines or lamps
@@ -95,8 +100,9 @@ backspace - undo the last move
 
 ==== How to play - Nurikabe ==================================================
 
-For the full rules, please consult http://nikoli.com/en/puzzles/nurikabe/rule.html
-and http://en.wikipedia.org/wiki/Nurikabe .
+For the full rules, please consult:
+http://nikoli.com/en/puzzles/nurikabe/rule.html
+http://en.wikipedia.org/wiki/Nurikabe
 
 The purpose is to colour each unfilled cell either black or white. Each region
 of white cells sharing a border must contain exactly one number indicating the
@@ -268,6 +274,7 @@ A: This is an homage to the Engrish tradition of many Japanese puzzle games.
 ==== Credits =================================================================
 
 Programming by Ruben Spaans
+Font by Brian Raiter
 
 Puzzles by:
 

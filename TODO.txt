@@ -24,6 +24,7 @@ other stuff in order of desiredness:
 - for extremely time intensive solving heuristics: estimate the number
   of combinations needed to investigate for a given move and try moves
   in order of increasing work
+- kuromasu: remove excessive empty space below puzzle
 - menu: add keyboard repeat to arrow keys in table
 - add achievements! for instance:
   - complete at least one puzzle of each type without using hints

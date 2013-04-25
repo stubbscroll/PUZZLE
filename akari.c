@@ -80,7 +80,7 @@ static void loadpuzzle(char *path) {
       z++;
       break;
     case 2:
-      sscanf(s,"%d %d",&x,&y);
+      if(2!=sscanf(s,"%d %d",&x,&y)) error("expected x and y size");
       z++;
       break;
     case 3:
@@ -88,7 +88,7 @@ static void loadpuzzle(char *path) {
       ln++;
     }
   } else if(!gameinfo[0]) strcpy(gameinfo,s+2);
-  fclose(f);
+  if(fclose(f)) error("error reading file");
   startx=10,starty=(int)(font->height*2.5);
   mqs=mqe=0;
   for(i=0;i<x;i++) for(j=0;j<y;j++) {
