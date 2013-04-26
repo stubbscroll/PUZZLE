@@ -1181,13 +1181,13 @@ static void processmousedown() {
   if(event_mousebutton==SDL_BUTTON_RIGHT) new=1;
   else if(event_mousebutton==SDL_BUTTON_MIDDLE) new=0;
   if(new>-1 && m[cellx][celly][2]!=new) {
-    domove(cellx,celly,2,new,1);
     for(d=0;d<4;d++) {
       x2=cellx+ex[d],y2=celly+ey[d],e=ed[d];
       if(x2>=0 && x2<x && y2>=0 && y2<y && mn[x2][y2]<0 && m[x2][y2][2]<2 && m[x2][y2][e]) {
         domove(x2,y2,e,0,1);
       }
     }
+    domove(cellx,celly,2,new,1);
     updatetoscreen(1);
 		normalmove=1; numclicks++;
   }
