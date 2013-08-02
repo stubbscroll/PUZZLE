@@ -11,13 +11,17 @@ sdlfont.h        header file for my font library
 dir.c            dir routines
 dir.h            header file for dir routines
 akari.c	         code for akari puzzle
-heyawake.c
-hitori.c
-nurikabe.c
-picross.c
-slither.c
-kuromasu.c
-mine.c
+hashi.c          code for hashiwokakero puzzle
+heyawake.c       code for heyawake puzzle
+hitori.c         code for hitori puzzle
+kuromasu.c       code for kuromasu puzzle
+masyu.c          code for masyu puzzle
+mine.c           code for mine puzzle
+mortal.c         code for mortal coil puzzle
+nurikabe.c       code for nurikabe puzzle
+picross.c        code for picross puzzle
+slither.c        code for slither puzzle
+yajilin.c        code for yajilin puzzle
 
 grab.c           program which fetches puzzles from websites
 
@@ -37,6 +41,7 @@ puzzles\hit*.txt
 puzzles\kur*.txt
 puzzles\mas*.txt
 puzzles\min*.txt
+puzzles\mor*.txt
 puzzles\nur*.txt puzzle definition files for nurikabe
 puzzles\pic*.txt 
 puzzles\sli*.txt 

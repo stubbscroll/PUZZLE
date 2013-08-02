@@ -127,6 +127,7 @@ static int ispuzzle(char *s) {
 	if(strlen(s)>2 && !strncmp(s,"pic",3)) return 1;
 	if(strlen(s)>2 && !strncmp(s,"sli",3)) return 1;
 	if(strlen(s)>2 && !strncmp(s,"yaj",3)) return 1;
+	if(strlen(s)>2 && !strncmp(s,"mor",3)) return 1;
 	return 0;
 }
 

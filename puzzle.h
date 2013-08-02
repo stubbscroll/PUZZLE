@@ -168,6 +168,7 @@ void hashiwokakero(char *,int);
 void yajilin(char *,int);
 void mine(char *,int);
 void kuromasu(char *,int);
+void mortal(char *,int);
 
 /* launcher */
 void launch(char *,int);

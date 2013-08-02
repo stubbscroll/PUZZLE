@@ -265,11 +265,23 @@ Default controls:
 - right mouse button: mark a cell as empty
 - middle mouse button: erase cell
 
+==== How to play - Mortal coil ===============================================
+
+Instructions taken from hacker.org:
+Click to place your starting position. Subsequent clicks move until you hit
+something. Try to cover the whole board with your coil.
+
+URL to game: http://www.hacker.org/coil/
+
+Default control:
+- left mouse button to place coil (on empty board)
+- when coil exists: left mouse button or arrow keys to move in a direction
+
 ==== Frequently asked questions (F.A.Q.) =====================================
 
 Q: The message "You are winner!" that occurs when I complete a puzzle is not
    grammatically correct!
-A: This is an homage to the Engrish tradition of many Japanese puzzle games.
+A: This is an homage to the Engrish tradition of many Japanese games.
 
 ==== Credits =================================================================
 

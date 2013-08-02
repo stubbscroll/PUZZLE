@@ -23,6 +23,7 @@ char diffstrs[12][32]={
   "hard",       /*  7 */
   "very hard",  /*  8 */
   "extreme",    /*  schwer */
+	"near-impossible"
 };
 
 char *writeto;
@@ -1035,23 +1036,90 @@ nodiff:
   grabjanko(theurl,p3,num,puzzle);
 }
 
+#define MAX 2222
+char board[MAX][MAX];
+int x,y;
+
+int parsemortalcoil() {
+	char *p;
+	int i,j;
+	if(!(p=strstr(buffer,"=\"x="))) return 0;
+	x=strtol(p+4,0,10);
+	if(!(p=strstr(buffer,"&y="))) return 0;
+	y=strtol(p+3,0,10);
+	if(x>MAX || y>MAX) return 0;
+	if(!(p=strstr(buffer,"&board="))) return 0;
+	p+=7;
+	for(j=0;j<y;j++) for(i=0;i<x;i++) board[i][j]=p[i+j*x];
+	return 1;
+}
+
+void processhackercoil(char *name,char *pw) {
+	int lev,dif,i,j;
+	static char s[1000];
+	static char t[1000];
+	FILE *f;
+	num=0;
+	for(lev=0;;lev++) {
+		/* level exists? */
+		sprintf(s,"morH%04d.txt",lev);
+		if(fileexists(s)) continue;
+		sprintf(t,"http://www.hacker.org/coil/index.php?name=%s&password=%s&gotolevel=%d&go=Go+To+Level",name,pw,lev);
+		loadwebpage(t,buffer);
+		if(!parsemortalcoil()) break;
+		printf("grab mortal coil %d\n",lev);
+		f=fopen(s,"w");
+		if(!f) { printf("error creating file for mortal coil %d\n",lev); exit(0); }
+		fprintf(f,"%% mortal coil, hacker.org level %d\n",lev);
+		fprintf(f,"mortal coil\n");
+		if(lev<2) dif=0;
+		else if(lev<3) dif=1;
+		else if(lev<7) dif=2;
+		else if(lev<10) dif=3;
+		else if(lev<15) dif=4;
+		else if(lev<20) dif=5;
+		else if(lev<30) dif=6;
+		else if(lev<50) dif=7;
+		else if(lev<90) dif=8;
+		else if(lev<150) dif=9;
+		else dif=10;
+		fprintf(f,"%s\n",diffstrs[dif]);
+		fprintf(f,"%d %d\n",x,y);
+		for(j=0;j<y;j++) {
+			for(i=0;i<x;i++) fputc(board[i][j]=='.'?'.':'#',f);
+			fputc('\n',f);
+		}
+		if(fclose(f)) { printf("error writing mortal coil %d\n",lev); exit(0); }
+		num++;
+	}
+}
+
 int main(int argc,char**argv) {
-  puts("puzzle grabber v0.2\n");
+  puts("puzzle grabber v0.3\n");
   if(argc<2) {
     puts("usage: grab website");
     puts("or: grab website website2 (for janko.at, where website is the main");
+		puts("or: grab website username password (for hacker.org)");
     puts("page for puzzles, and website2 is the difficulty");
     exit(0);
   }
-  loadwebpage(argv[1],buffer);
-  strcpy(buf2,buffer);
-  if(strstr(buffer,"und Denksport")) {
-    if(argc>2) {
-      loadwebpage(argv[2],buf2);
-      processjanko(argv[1],argv[2]);
-    } else processjanko(argv[1],NULL);
-  } else if(strstr(buffer,"Sample problems")) processsample();
-  else processchamp();
+	if(strstr(argv[1],"hacker.org/coil")) {
+		if(argc<4) {
+			printf("need username and password\n");
+			return 0;
+		}
+		processhackercoil(argv[2],argv[3]);
+	} else {
+		loadwebpage(argv[1],buffer);
+		strcpy(buf2,buffer);
+		if(strstr(buffer,"und Denksport")) {
+			if(argc>2) {
+				loadwebpage(argv[2],buf2);
+				processjanko(argv[1],argv[2]);
+			} else processjanko(argv[1],NULL);
+		} else if(strstr(buffer,"Sample problems")) processsample();
+		else processchamp();
+	}
   printf("done! grabbed %d puzzles\n",num);
   return 0;
 }

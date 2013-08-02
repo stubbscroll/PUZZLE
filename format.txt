@@ -145,3 +145,12 @@ then, y lines containing x chars
 1-9 node numbered 1-9
 a-z node numbered 10-35
 A-Z node numbered 36-61
+
+MORTAL COIL
+
+first line: one string, puzzle name: mortal coil
+next line: one string, difficulty
+next line: two integers x y
+then, y lines containing x chars
+. blank
+# wall

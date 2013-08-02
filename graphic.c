@@ -683,4 +683,5 @@ void launch(char *s,int autosolve) {
   else if(t[0]=='y' && t[1]=='a' && t[2]=='j') yajilin(s,autosolve);
   else if(t[0]=='m' && t[1]=='i' && t[2]=='n') mine(s,autosolve);
   else if(t[0]=='k' && t[1]=='u' && t[2]=='r') kuromasu(s,autosolve);
+  else if(t[0]=='m' && t[1]=='o' && t[2]=='r') mortal(s,autosolve);
 }
