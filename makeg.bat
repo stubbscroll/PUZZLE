@@ -1,1 +1,1 @@
-gcc -O2 -Wall -ansi -pedantic -o grab.exe grab.c -lcurllib
+gcc -O2 -Wall -ansi -pedantic -o grab.exe grab.c -lcurl -lcurldll
