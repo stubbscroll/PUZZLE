@@ -1,7 +1,6 @@
 /* small re-entrant dir library by me, which is a wrapper for os-specific
    routines */
 #include "dir.h"
-#include "puzzle.h"
 
 #ifdef _WIN32
 int dirwin(dir_t *h) {

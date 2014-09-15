@@ -213,7 +213,7 @@ static int canmove(int dx,int dy) {
 }
 
 static void processkeydown(int key) {
-	int x2=0,y2=0,up=0;
+	int x2=0,y2=0,up=0,i,j;
 	if(pathlen) x2=pathx[pathlen-1],y2=pathy[pathlen-1];
   if(key==undokey) undo(1),usedundo=1;
   else if(key==hintkey || key==SDLK_j)  {
@@ -226,6 +226,15 @@ static void processkeydown(int key) {
 		if(canmove(-1,0)) domove(x2-1,y2),up=normalmove=1,numclicks++;
 	} else if(key==SDLK_RIGHT) {
 		if(canmove(1,0)) domove(x2+1,y2),up=normalmove=1,numclicks++;
+	} else if(key==SDLK_r) {
+		/* clear entire level */
+		pathlen=0;
+		for(i=0;i<x;i++) for(j=0;j<y;j++) {
+			touched[i][j]=1;
+			m[0][i][j]=m[1][i][j]=0;
+			if(mn[i][j]==FILLED) mn[i][j]=UNFILLED;
+		}
+		up=1;
 	}
   if(up) updatetoscreen(1);
 }
