@@ -58,12 +58,12 @@ level 5 (advanced)
   cause a contradiction, the cell must be filled in the other
   way.
 
-HASHIWOKAKERO (np-complete)
+HASHIWOKAKERO (NP-complete)
 
 level 1
 
 - if there is only one way to fill in the remaining edges near a node, do it.
-- if a node has n available edges and its number is 2n-1 or higher, it must
+- if a node has n available edges and its number is 2n-1 or lower, it must
   have at least one edge in each direction.
 
 level 2
@@ -351,14 +351,15 @@ level 4
 - if there is a cell where a wall on it would cause another
   island to not be able to grow sufficiently, that cell must
   be island.
-- find an enclosing with one numbered cell such that there
-  cells adjacent to the border, and all cells next to the
-  border are unfilled. also, if the numbered cell was a wall,
-  it must not split the enclosing into multiple regions.
-  find the boundary between unfilled/empty and walls.
+- find an enclosing with one numbered cell such that there cells adjacent to
+  the border, and all cells next to the border are unfilled. also, if we
+  pretend that the numbered cell is a wall, it must not split the enclosing
+  into multiple regions. find the boundary between unfilled/empty and walls.
   generate two sets: all id's of walls adjacent to the left
   boundary, and all id's of walls adjacent to the right
-  boundary. if the intersection of the two id sets is empty,
+  boundary (that is, from the numbered cell, follow wall left
+  and right in seperate passes and mark sets).
+  if the intersection of the two id sets is empty,
   then all the border cells should be wall!
 - match unnumbered islands! first off, give each number its
   unique id. from each island, do a bfs (which is allowed

@@ -616,68 +616,68 @@ static int level1hint() {
   return 0;
 }
 
-/*  if there is an unfilled cell which will either:
-    - join two islands each containing a numbered cell
-    - join two islands, where one has a numbered cell
-      and the combination of them exceeds the number
-    fill the cell with blocked */
+/* if there is an unfilled cell which will either:
+   - join two islands each containing a numbered cell
+   - join two islands, where one has a numbered cell
+     and the combination of them exceeds the number
+   fill the cell with blocked */
 static int level2neighbourtodifferentregions() {
-  int i,j,k,res,x2,y2,l;
-  int nearid[4],nn;
-  if(!markallislandswithid()) return 0;
-  for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]==UNFILLED) {
-    for(res=1,nn=0,k=0;k<4;k++) {
-      x2=i+dx[k],y2=j+dy[k];
-      if(x2>=0 && y2>=0 && x2<x && y2<y && m[x2][y2]>=EMPTY) {
-        for(l=0;l<nn;l++) if(nearid[l]==islandmap[x2][y2]) goto neste;
-        res+=islandsize[nearid[nn++]=islandmap[x2][y2]];
-      }
-    neste:;
-    }
-    if(nn<2) continue;
-    /*  try to find either: two numbered islands or one numbered exceeding */
-    for(k=0;k<nn-1;k++) for(l=k+1;l<nn;l++) if(islandnum[nearid[k]] || islandnum[nearid[l]]) {
-      x2=islandnum[nearid[k]]>islandnum[nearid[l]]?islandnum[nearid[k]]:islandnum[nearid[l]];
-      if((islandnum[nearid[k]] && islandnum[nearid[l]]) || (res>x2)) {
-        cleanupbfs();
-        addmovetoqueue(i,j,BLOCKED);
-        return 1;
-      }
-    }
-  }
-  cleanupbfs();
-  return 0;
+	int i,j,k,res,x2,y2,l;
+	int nearid[4],nn;
+	if(!markallislandswithid()) return 0;
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]==UNFILLED) {
+		for(res=1,nn=0,k=0;k<4;k++) {
+			x2=i+dx[k],y2=j+dy[k];
+			if(x2>=0 && y2>=0 && x2<x && y2<y && m[x2][y2]>=EMPTY) {
+				for(l=0;l<nn;l++) if(nearid[l]==islandmap[x2][y2]) goto neste;
+				res+=islandsize[nearid[nn++]=islandmap[x2][y2]];
+			}
+		neste:;
+		}
+		if(nn<2) continue;
+		/* try to find either: two numbered islands or one numbered exceeding */
+		for(k=0;k<nn-1;k++) for(l=k+1;l<nn;l++) if(islandnum[nearid[k]] || islandnum[nearid[l]]) {
+			x2=islandnum[nearid[k]]>islandnum[nearid[l]]?islandnum[nearid[k]]:islandnum[nearid[l]];
+			if((islandnum[nearid[k]] && islandnum[nearid[l]]) || (res>x2)) {
+				cleanupbfs();
+				addmovetoqueue(i,j,BLOCKED);
+				return 1;
+			}
+		}
+	}
+	cleanupbfs();
+	return 0;
 }
 
-/*  level 2 (easy): find a region of blocked such that it has only one unfilled
-    neighbour and there are other blocked somewhere on the board */
+/* level 2 (easy): find a region of blocked such that it has only one unfilled
+   neighbour and there are other blocked somewhere on the board */
 static int level2growblocked() {
-  int i,j,k,l,tot,num,qs2,x2,y2,bx,by;
-  for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]==BLOCKED && !visit[i][j]) {
-    qs2=qs;
-    genericbfs(i,j,1,&tot,&num,&dummy);
-    if(tot==x*y-totalnum) goto done;
-    for(bx=by=-1,k=qs2;k<qe;k+=2) for(l=0;l<4;l++) {
-      x2=q[k]+dx[l],y2=q[k+1]+dy[l];
-      if(x2>=0 && y2>=0 && x2<x && y2<y && m[x2][y2]==UNFILLED) {
-        if(bx>-1 && (bx!=x2 || by!=y2)) goto next;  /*  found 2 unfilled neighbours, skip this region */
-        else if(bx==-1) bx=x2,by=y2;
-      }
-    }
-    if(bx>-1) {
-      cleanupbfs();
-      addmovetoqueue(bx,by,BLOCKED);
-      return 1;
-    }
-  next:;
-  }
+	int i,j,k,l,tot,num,qs2,x2,y2,bx,by;
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]==BLOCKED && !visit[i][j]) {
+		qs2=qs;
+		genericbfs(i,j,1,&tot,&num,&dummy);
+		if(tot==x*y-totalnum) goto done;
+		for(bx=by=-1,k=qs2;k<qe;k+=2) for(l=0;l<4;l++) {
+			x2=q[k]+dx[l],y2=q[k+1]+dy[l];
+			if(x2>=0 && y2>=0 && x2<x && y2<y && m[x2][y2]==UNFILLED) {
+				if(bx>-1 && (bx!=x2 || by!=y2)) goto next;  /* found 2 unfilled neighbours, skip this region */
+				else if(bx==-1) bx=x2,by=y2;
+			}
+		}
+		if(bx>-1) {
+			cleanupbfs();
+			addmovetoqueue(bx,by,BLOCKED);
+			return 1;
+		}
+	next:;
+	}
 done:
-  cleanupbfs();
-  return 0;
+	cleanupbfs();
+	return 0;
 }
 
-/*  level 2 (easy): find a region of island such that is has only one unfilled
-    neighbour and such that the island hasn't reached its size */
+/* level 2 (easy): find a region of island such that is has only one unfilled
+   neighbour and such that the island hasn't reached its size */
 static int level2growisland() {
   int i,j,k,l,tot,num,qs2,x2,y2,bx,by;
   for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]>=EMPTY && !visit[i][j]) {
@@ -948,13 +948,13 @@ static int dominateoutsideblank(int *checkx,int *checky,int px,int py,int num) {
     enclosure */
 static int level3dominatingconnection() {
   int i,j,k,l,z,islands,num,tot,idno=0,qs2,px,py,qx,qy,maxsize,winner=-1;
-  /*  connections! for i, all elements in conn[i][j] are connected */
+  /* connections! for i, all elements in conn[i][j] are connected */
   static int conn[MAXCHECK][4];
-  static int conno[MAXCHECK]; /*  number of connections */
-  /*  coordinates of blanks */
+  static int conno[MAXCHECK]; /* number of connections */
+  /* coordinates of blanks */
   static int checkx[MAXCHECK],checky[MAXCHECK];
   int blanks; /*  number of blanks */
-  /*  generate connection map for blocked */
+  /* generate connection map for blocked */
   for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]==BLOCKED && !visit[i][j]) {
     qs2=qs;
     genericbfs(i,j,1,&tot,&num,&islands);
@@ -1117,17 +1117,17 @@ static int level4illegalgrow() {
   return 0;
 }
 
-/*  find a cell such that if wall is placed, we will block a numbered island's
-    growth. then, this cell must be island. */
-/*  (this is a partial substitute for island intersection (without combining
-    with unnumbered islands), except that this one runs in polynomial time) */
+/* find a cell such that if wall is placed, we will block a numbered island's
+   growth. then, this cell must be island. */
+/* (this is a partial substitute for island intersection (without combining
+   with unnumbered islands), except that this one runs in polynomial time) */
 static int level4advancedarticulationisland() {
   int i,j,k,l,tot,num,d,e,x2,y2,cx,cy,x3,y3,id;
   if(!markallislandswithid()) return 0;
   for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]==UNFILLED) {
-    /*  assume it's blocked */
+    /* assume it's blocked */
     m[i][j]=BLOCKED;
-    /*  manhattan distance heuristic: don't grow island if it's too far away from our change */
+    /* manhattan distance heuristic: don't grow island if it's too far away from our change */
     for(k=0;k<x;k++) for(l=0;l<y;l++) if(m[k][l]>0 && manhattandist(i,j,k,l)<m[k][l]) {
       id=islandmap[k][l];
       genericbfs(k,l,0,&tot,&num,&dummy);
@@ -1150,7 +1150,7 @@ static int level4advancedarticulationisland() {
         illegal:;
         }
       }
-      /*  can't grow, this cell needs to be blank */
+      /* can't grow, this cell needs to be blank */
       m[i][j]=UNFILLED;
       cleanupbfs();
       addmovetoqueue(i,j,EMPTY);
@@ -1167,177 +1167,189 @@ static int dd2[2][6]={{ 1, 0,1, 1, 0, 1},{ 1, 0,0, 0,1,0}};
 static int dx2[2][6]={{ 0,-1,0, 1, 1, 1},{ 0,-1,0,-1,0,0}};
 static int dy2[2][6]={{-1, 0,0,-1, 0, 0},{-1, 0,0, 1,1,1}};
 
-/*  return bitmask containing adjacent region id's */
-/*  follow edge such that the next edge is adjacent to two cells:
-    - one visited (unfilled/empty)
-    - one unvisited (blocked)
-    (border edge is not allowed) */
-/*  x1,y1: coordinate of unfilled cell, x2,y2: wall */
-/*  routine will not visit the numbered cell */
+/* return bitmask containing adjacent region id's */
+/* follow edge such that the next edge is adjacent to two cells:
+   - one visited (unfilled/empty)
+   - one unvisited (blocked)
+   (border edge is not allowed) */
+/* x1,y1: coordinate of unfilled cell, x2,y2: wall */
+/* routine will not visit the numbered cell */
 static int followedge(int x1,int y1,int x2,int y2) {
-  int pd=-1,px=-1,py=-1;  /*  previous cell */
-  int cd=0,cx=0,cy=0; /*  current cell */
-  int nd,nx,ny; /*  next */
-  int ret=0;    /*  resulting bitmask */
-  int d,haswall,hasisland;
-  if(x1==x2) cd=0,cx=x1,cy=y1<y2?y2:y1;
-  if(y1==y2) cd=1,cx=x1<x2?x2:x1,cy=y1;
-  while(1) {
-    /*  check if we are next to the numbered tile */
-    if(cd==0 && (m[cx][cy-1]>0 || m[cx][cy]>0)) return ret;
-    if(cd==1 && (m[cx-1][cy]>0 || m[cx][cy]>0)) return ret;
-    /*  extract wall id and or it */
+	int pd=-1,px=-1,py=-1;  /* previous cell */
+	int cd=0,cx=0,cy=0;     /* current cell */
+	int nd,nx,ny;           /* next */
+	int ret=0;              /* resulting bitmask */
+	int d,haswall,hasisland;
+	if(x1==x2) cd=0,cx=x1,cy=y1<y2?y2:y1;
+	if(y1==y2) cd=1,cx=x1<x2?x2:x1,cy=y1;
+	while(1) {
+		/* check if we are next to the numbered tile */
+		if(cd==0 && (m[cx][cy-1]>0 || m[cx][cy]>0)) return ret;
+		if(cd==1 && (m[cx-1][cy]>0 || m[cx][cy]>0)) return ret;
+		/* extract wall id and or it */
 		/* TODO investigate whether wallid can be negative */
-    if(cd==0 && m[cx][cy-1]==BLOCKED) ret|=1<<wallid[cx][cy-1];
-    if(cd==0 && m[cx][cy]==BLOCKED) ret|=1<<wallid[cx][cy];
-    if(cd==1 && m[cx-1][cy]==BLOCKED) ret|=1<<wallid[cx-1][cy];
-    if(cd==1 && m[cx][cy]==BLOCKED) ret|=1<<wallid[cx][cy];
-    /*  find next edge */
-    for(d=0;d<6;d++) {
-      nd=dd2[cd][d];
-      nx=cx+dx2[cd][d];
-      ny=cy+dy2[cd][d];
-      if(nd==pd && nx==px && ny==py) continue;
-      if(nd==0 && (ny==0 || ny==y)) continue;
-      if(nd==1 && (nx==0 || nx==x)) continue;
-      /*  check if there is one wall (unvisited) and one unfilled/empty (visited) */
-      haswall=hasisland=0;
-      if(nd==0 && (visit[nx][ny-1] || visit[nx][ny])) hasisland=1;
-      if(nd==1 && (visit[nx-1][ny] || visit[nx][ny])) hasisland=1;
-      if(nd==0 && (!visit[nx][ny-1] || !visit[nx][ny])) haswall=1;
-      if(nd==1 && (!visit[nx-1][ny] || !visit[nx][ny])) haswall=1;
-      if(haswall && hasisland) break;
-    }
-    if(d<6) {
-      pd=cd; px=cx; py=cy;
-      cd=nd; cx=nx; cy=ny;
-      continue;
-    }
-    error("edge following went astray\n");
-  }
+		if(cd==0 && m[cx][cy-1]==BLOCKED) ret|=1<<wallid[cx][cy-1];
+		if(cd==0 && m[cx][cy]==BLOCKED) ret|=1<<wallid[cx][cy];
+		if(cd==1 && m[cx-1][cy]==BLOCKED) ret|=1<<wallid[cx-1][cy];
+		if(cd==1 && m[cx][cy]==BLOCKED) ret|=1<<wallid[cx][cy];
+		/* find next edge */
+		for(d=0;d<6;d++) {
+			nd=dd2[cd][d];
+			nx=cx+dx2[cd][d];
+			ny=cy+dy2[cd][d];
+			if(nd==pd && nx==px && ny==py) continue;
+			if(nd==0 && (ny==0 || ny==y)) continue;
+			if(nd==1 && (nx==0 || nx==x)) continue;
+			/* check if there is one wall (unvisited) and one unfilled/empty (visited) */
+			haswall=hasisland=0;
+			if(nd==0 && (visit[nx][ny-1] || visit[nx][ny])) hasisland=1;
+			if(nd==1 && (visit[nx-1][ny] || visit[nx][ny])) hasisland=1;
+			if(nd==0 && (!visit[nx][ny-1] || !visit[nx][ny])) haswall=1;
+			if(nd==1 && (!visit[nx-1][ny] || !visit[nx][ny])) haswall=1;
+			if(haswall && hasisland) break;
+		}
+		if(d<6) {
+			pd=cd; px=cx; py=cy;
+			cd=nd; cx=nx; cy=ny;
+			continue;
+		}
+		error("edge following went astray\n");
+	}
 }
 
 static int level4connectborder() {
-  int i,j,num,dummy,okborder,qs2,k,l,regions,cx,cy,x2,y2,d,mask[2],wallnear,qe2;
-  /*  first, find a numbered cell not adjacent to the border */
-  /*  do not cleanupbfs */
-  for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]>0 && i && j && i<x-1 && j<y-1) {
-    /*  check if the numbered cell is next to a wall. if no, reject */
-    if(m[i-1][j]!=BLOCKED && m[i+1][j]!=BLOCKED && m[i][j-1]!=BLOCKED && m[i][j+1]!=BLOCKED) continue;
-    /*  check if the region contains only one numbered cell */
-    genericbfs(i,j,2,&dummy,&num,&dummy);
-    if(num<1) { cleanupbfs(); continue; }
-    /*  check if the region is next to a border, and that all border cells are
-        unfilled */
-    /*  also check that at most 2 pairs of border cells unfilled/wall */
-    for(wallnear=okborder=k=0;k<qe;k+=2) {
-      if(!q[k] || !q[k+1] || q[k]==x-1 || q[k+1]==y-1) {
-        if(m[q[k]][q[k+1]]==EMPTY) { okborder=0; goto failed; }
-        okborder=1;
-        for(d=0;d<4;d++) {
-          x2=q[k]+dx[d]; y2=q[k+1]+dy[d];
-          if(x2 && y2 && x2<x-1 && y2<y-1) continue;
-          if(m[x2][y2]!=BLOCKED) continue;
-          wallnear++;
-        }
-      }
-    }
-  failed:
-    if(!okborder || wallnear!=2) { cleanupbfs(); continue; }
-    /*  now, check that the region cannot be split int two (or more) by
-        pretending that the numbered cell is a wall */
-    qs2=qe2=qe;
-    for(d=0;d<4;d++) {
-      x2=i+dx[d]; y2=j+dy[d];
-      if(m[x2][y2]!=BLOCKED) {
-        /*  do bfs among empty and unfilled, only within cells having
-            visit[][]==1 */
-        q[qe2++]=x2; q[qe2++]=y2;
-        while(qs2<qe2) {
-          cx=q[qs2++]; cy=q[qs2++];
-          for(d=0;d<4;d++) {
-            x2=cx+dx[d]; y2=cy+dy[d];
-            if(x2<0 || y2<0 || x2>=x || y2>=y || visit[x2][y2]!=1) continue;
-            if(m[x2][y2]!=UNFILLED && m[x2][y2]!=EMPTY) continue;
-            visit[x2][y2]=2;
-            q[qe2++]=x2; q[qe2++]=y2;
-          }
-        }
-        break;
-      }
-    }
-    for(d=0;d<4;d++) {
-      x2=i+dx[d]; y2=j+dy[d];
-      if(m[x2][y2]!=BLOCKED && visit[x2][y2]==1) break;
-    }
-    if(d<4) { cleanupbfs(); continue; }
-    qs2=qe;
-    /*  visit all remaining wall/unfilled and assign each region a unique id */
-    for(k=0;k<x;k++) for(l=0;l<y;l++) wallid[k][l]=-1;
-    for(regions=k=0;k<x;k++) for(l=0;l<y;l++) if(!visit[k][l] && m[k][l]==BLOCKED) {
-      if(regions==31) {
-        /*  too many regions, so ignore */
-        cleanupbfs();
-        goto failed2;
-      }
-      /*  manual bfs here */
-      q[qe++]=k; q[qe++]=l;
-      visit[k][l]=1;
-      wallid[k][l]=regions;
-      while(qs<qe) {
-        cx=q[qs++]; cy=q[qs++];
-        for(d=0;d<4;d++) {
-          x2=cx+dx[d]; y2=cy+dy[d];
-          if(x2<0 || y2<0 || x2>=x || y2>=y || visit[x2][y2] || (m[x2][y2]!=UNFILLED && m[x2][y2]!=BLOCKED)) continue;
-          q[qe++]=x2; q[qe++]=y2;
-          visit[x2][y2]=1;
-          wallid[x2][y2]=regions;
-        }
-      }
-      regions++;
-    }
-    /*  unvisit region */
-    for(k=qs2;k<qe;k+=2) visit[q[k]][q[k+1]]=0;
-    qs=qe=qs2;
-    /*  traverse edges and collect adjacent wall id's */
-    k=mask[0]=mask[1]=0;
-    /*  find cell near border */
-    for(l=0;l<qe;l+=2) if(!q[l] || !q[l+1] || q[l]==x-1 || q[l+1]==y-1) {
-      /*  check if it is adjacent to wall */
-      for(d=0;d<4;d++) {
-        x2=q[l]+dx[d]; y2=q[l+1]+dy[d];
-        if(x2<0 || y2<0 || x2>=x || y2>=y) continue;
-        if(m[x2][y2]==BLOCKED && (!x2 || !y2 || x2==x-1 || y2==y-1)) {
-          if(k==2) {
-            /*  more than two unfilled near border. ignore this region */
-            cleanupbfs();
-            goto failed2;
-          }
-          mask[k++]=followedge(q[l],q[l+1],x2,y2);
-          break;
-        }
-      }
-    }
-    /*  check if there are no id's in common */
-    if(!(mask[0]&mask[1])) {
-      /*  fill in all border cells */
-      for(i=0;i<qe;i+=2) if(!q[i] || !q[i+1] || q[i]==x-1 || q[i+1]==y-1) {
-        if(m[q[i]][q[i+1]]!=UNFILLED) error("at island with size %d, tried to put wall fill in the border cell %d %d, but it wasn't unfilled\n",i,j,num,q[i],q[i+1]);
-        addmovetoqueue(q[i],q[i+1],BLOCKED);
-      }
-      cleanupbfs();
-      return 1;
-    }
-  failed2:
-    cleanupbfs();
-  }
-  return 0;
+	int i,j,k,l,num,dummy,okborder,qs2,regions,cx,cy,x2,y2,d,mask[2],wallnear,qe2;
+	/* first, find a numbered cell not adjacent to the border */
+	/* do not cleanupbfs */
+	for(i=1;i<x-1;i++) for(j=1;j<y-1;j++) if(m[i][j]>0) {
+		/* check if the numbered cell is next to a wall. if no, reject */
+		if(m[i-1][j]!=BLOCKED && m[i+1][j]!=BLOCKED && m[i][j-1]!=BLOCKED && m[i][j+1]!=BLOCKED) continue;
+		/* check if the region contains only one numbered cell */
+		genericbfs(i,j,2,&dummy,&num,&dummy);
+		if(num<1) { cleanupbfs(); continue; }
+		/* check if the region is next to a border, and that all border cells are
+		   unfilled */
+		/* also check that at most 2 pairs of border cells unfilled/wall */
+		for(wallnear=okborder=k=0;k<qe;k+=2) {
+			if(!q[k] || !q[k+1] || q[k]==x-1 || q[k+1]==y-1) {
+				if(m[q[k]][q[k+1]]==EMPTY) { okborder=0; goto failed; }
+				okborder=1;
+				for(d=0;d<4;d++) {
+					x2=q[k]+dx[d]; y2=q[k+1]+dy[d];
+					if(x2 && y2 && x2<x-1 && y2<y-1) continue;
+					if(m[x2][y2]!=BLOCKED) continue;
+					wallnear++;
+				}
+			}
+		}
+	failed:
+		if(!okborder || wallnear!=2) { cleanupbfs(); continue; }
+		/* abort if region contains isolated wall, as it can mess up border following routine */
+		for(dummy=0,k=1;k<x-1;k++) for(l=1;l<y-1;l++) if(m[k][l]==BLOCKED && m[k-1][l]!=BLOCKED && m[k+1][l]!=BLOCKED && m[k][l-1]!=BLOCKED && m[k][l+1]!=BLOCKED) {
+			for(dummy=0,d=0;d<qe;d+=2) {
+				if(q[d]==k-1 && q[d+1]==l) dummy++;
+				if(q[d]==k+1 && q[d+1]==l) dummy++;
+				if(q[d]==k && q[d+1]==l-1) dummy++;
+				if(q[d]==k && q[d+1]==l+1) dummy++;
+			}
+			if(dummy==4) goto reject;
+		}
+	reject:
+		if(dummy==4) { cleanupbfs(); continue; }
+		/* now, check that the region cannot be split int two (or more) by
+		   pretending that the numbered cell is a wall */
+		qs2=qe2=qe;
+		for(d=0;d<4;d++) {
+			x2=i+dx[d]; y2=j+dy[d];
+			if(m[x2][y2]!=BLOCKED) {
+				/* do bfs among empty and unfilled, only within cells having
+				   visit[][]==1 */
+				q[qe2++]=x2; q[qe2++]=y2;
+				while(qs2<qe2) {
+					cx=q[qs2++]; cy=q[qs2++];
+					for(d=0;d<4;d++) {
+						x2=cx+dx[d]; y2=cy+dy[d];
+						if(x2<0 || y2<0 || x2>=x || y2>=y || visit[x2][y2]!=1) continue;
+						if(m[x2][y2]!=UNFILLED && m[x2][y2]!=EMPTY) continue;
+						visit[x2][y2]=2;
+						q[qe2++]=x2; q[qe2++]=y2;
+					}
+				}
+				break;
+			}
+		}
+		for(d=0;d<4;d++) {
+			x2=i+dx[d]; y2=j+dy[d];
+			if(m[x2][y2]!=BLOCKED && visit[x2][y2]==1) break;
+		}
+		if(d<4) { cleanupbfs(); continue; }
+		qs2=qe;
+		/* visit all remaining wall/unfilled and assign each region a unique id */
+		for(k=0;k<x;k++) for(l=0;l<y;l++) wallid[k][l]=-1;
+		for(regions=k=0;k<x;k++) for(l=0;l<y;l++) if(!visit[k][l] && m[k][l]==BLOCKED) {
+			if(regions==31) {
+				/* too many regions, so ignore */
+				cleanupbfs();
+				goto failed2;
+			}
+			/* manual bfs here */
+			q[qe++]=k; q[qe++]=l;
+			visit[k][l]=1;
+			wallid[k][l]=regions;
+			while(qs<qe) {
+				cx=q[qs++]; cy=q[qs++];
+				for(d=0;d<4;d++) {
+					x2=cx+dx[d]; y2=cy+dy[d];
+					if(x2<0 || y2<0 || x2>=x || y2>=y || visit[x2][y2] || (m[x2][y2]!=UNFILLED && m[x2][y2]!=BLOCKED)) continue;
+					q[qe++]=x2; q[qe++]=y2;
+					visit[x2][y2]=1;
+					wallid[x2][y2]=regions;
+				}
+			}
+			regions++;
+		}
+		/* unvisit region */
+		for(k=qs2;k<qe;k+=2) visit[q[k]][q[k+1]]=0;
+		qs=qe=qs2;
+		/* traverse edges and collect adjacent wall id's */
+		k=mask[0]=mask[1]=0;
+		/* find cell near border */
+		for(l=0;l<qe;l+=2) if(!q[l] || !q[l+1] || q[l]==x-1 || q[l+1]==y-1) {
+			/* check if it is adjacent to wall */
+			for(d=0;d<4;d++) {
+				x2=q[l]+dx[d]; y2=q[l+1]+dy[d];
+				if(x2<0 || y2<0 || x2>=x || y2>=y) continue;
+				if(m[x2][y2]==BLOCKED && (!x2 || !y2 || x2==x-1 || y2==y-1)) {
+					if(k==2) {
+						/* more than two unfilled near border. ignore this region */
+						cleanupbfs();
+						goto failed2;
+					}
+					mask[k++]=followedge(q[l],q[l+1],x2,y2);
+					break;
+				}
+			}
+		}
+		/* check if there are no id's in common */
+		if(!(mask[0]&mask[1])) {
+			/* fill in all border cells */
+			for(i=0;i<qe;i+=2) if(!q[i] || !q[i+1] || q[i]==x-1 || q[i+1]==y-1) {
+				if(m[q[i]][q[i+1]]!=UNFILLED) error("at island with size %d, tried to put wall fill in the border cell %d %d, but it wasn't unfilled\n",i,j,num,q[i],q[i+1]);
+				addmovetoqueue(q[i],q[i+1],BLOCKED);
+			}
+			cleanupbfs();
+			return 1;
+		}
+	failed2:
+		cleanupbfs();
+	}
+	return 0;
 }
 
 static int level4islandmatchseparate() {
-  /*  bitmask for storing bitmasks: islandmask[id][] stores which islands
-      id can be reached by. for id with numbered cells, the mask only contains
-      its own id */
+  /* bitmask for storing bitmasks: islandmask[id][] stores which islands
+     id can be reached by. for id with numbered cells, the mask only contains
+     its own id */
   static unsigned int islandmask[MAXISLAND][(MAXISLAND+31)>>5];
   static int compmask[(MAXISLAND+31)>>5];
   /*  number of times an unnumbered cell has been reached by a numbered island */
@@ -1555,13 +1567,13 @@ static int level5contradiction(int lev) {
   return 0;
 }
 
-/*  start of level5tryallislands! hash stuff */
+/* start of level5tryallislands! hash stuff */
 
-/*  max size of island to attempt */
+/* max size of island to attempt */
 #define LEVEL5MAXSIZE 13
-/*  max number of elements in hash table. must be high enough to
-    accomodate all islands of size LEVELMAXSIZE plus a good safety margin */
-/*  now the solver suddenly requires a decent amount of RAM */
+/* max number of elements in hash table. must be high enough to
+   accomodate all islands of size LEVELMAXSIZE plus a good safety margin */
+/* now the solver suddenly requires a decent amount of RAM */
 #define MAXHASH 5100007
 static char hash[(MAXHASH+7)/8];  /*  bit i set if element i is taken */
 static int hashdata[MAXHASH][LEVEL5MAXSIZE+1];
@@ -1569,16 +1581,16 @@ static int hashcount;
 static int level5btrgiveup;
 #define HASHMAGIC 257
 #define HASHSHIFTLEFT 8
-/*  WARNING, select HASHMAGIC and MAXHASH such that its product plus the coordinate
-    value never overflows */
+/* WARNING, select HASHMAGIC and MAXHASH such that its product plus the coordinate
+   value never overflows */
 static int GETHASH(int *coords,int n) {
-  int i,v=0;
-  for(i=0;i<n;i++) v=(v*HASHMAGIC+coords[i])%MAXHASH;
-  return v;
+		int i,v=0;
+		for(i=0;i<n;i++) v=(v*HASHMAGIC+coords[i])%MAXHASH;
+		return v;
 }
-/*  return taken bit: 0: not set, >0: set */
+/* return taken bit: 0: not set, >0: set */
 #define HASHBIT(pos) (hash[pos>>3]&(1<<(pos&7)))
-/*  return 1 if key is equal to element in position pos */
+/* return 1 if key is equal to element in position pos */
 static int hashcompare(int pos,int *coords,int n) {
   int i;
   if(hashdata[pos][0]!=n) return 0;
@@ -1759,50 +1771,50 @@ static int level5tryallislands() {
 #undef NOINTERSECT
 
 static int level5hint() {
-  if(level5contradiction(3)) return 1;
-  if(level5contradiction(4)) return 1;
-  if(level5tryallislands()) return 1;
-  return 0;
+	if(level5contradiction(3)) return 1;
+	if(level5contradiction(4)) return 1;
+	if(level5tryallislands()) return 1;
+	return 0;
 }
 
 static int hint() {
 	usedhint=1;
-  if(verifyboard()<0) return -1;
-  if(level1hint()) return 1;
-  if(level2hint()) return 1;
-  if(level3hint()) return 1;
-  if(level4hint()) return 1;
-  if(level5hint()) return 1;
-  return 0;
+	if(verifyboard()<0) return -1;
+	if(level1hint()) return 1;
+	if(level2hint()) return 1;
+	if(level3hint()) return 1;
+	if(level4hint()) return 1;
+	if(level5hint()) return 1;
+	return 0;
 }
 
 static Uint32 colarray[]={
-  0x000055, 0x0000AA, 0x0000FF, 0x006D00, 0x0092AA, 0x920000, 0x496DAA
+	0x000055, 0x0000AA, 0x0000FF, 0x006D00, 0x0092AA, 0x920000, 0x496DAA
 };
 #define COLSIZE 7
 
 static int forcefullredraw;
 
 static void drawverify() {
-  int colour=0,qs2,tot,num,k,i,j;
-  if(forcefullredraw) drawgrid();
-  if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
-  for(i=0;i<x;i++) for(j=0;j<y;j++) if(!visit[i][j] && m[i][j]==BLOCKED) {
-    qs2=qs;
-    genericbfs(i,j,1,&tot,&num,&dummy);
-    for(k=qs2;k<qe;k+=2) drawsolidcell32(q[k],q[k+1],colarray[colour%COLSIZE]);
-    colour++;
-  }
-  /*  display 2x2 blocked */
-  for(i=0;i<x-1;i++) for(j=0;j<y-1;j++) if(m[i][j]==BLOCKED && m[i+1][j]==BLOCKED && m[i][j+1]==BLOCKED && m[i+1][j+1]==BLOCKED) {
-    drawsolidcell32(i,j,DARKRED32);
-    drawsolidcell32(i,j+1,DARKRED32);
-    drawsolidcell32(i+1,j,DARKRED32);
-    drawsolidcell32(i+1,j+1,DARKRED32);
-  }
-  if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-  SDL_UpdateRect(screen,0,0,resx,resy);
-  cleanupbfs();
+	int colour=0,qs2,tot,num,k,i,j;
+	if(forcefullredraw) drawgrid();
+	if(SDL_MUSTLOCK(screen)) SDL_LockSurface(screen);
+	for(i=0;i<x;i++) for(j=0;j<y;j++) if(!visit[i][j] && m[i][j]==BLOCKED) {
+		qs2=qs;
+		genericbfs(i,j,1,&tot,&num,&dummy);
+		for(k=qs2;k<qe;k+=2) drawsolidcell32(q[k],q[k+1],colarray[colour%COLSIZE]);
+		colour++;
+	}
+	/*  display 2x2 blocked */
+	for(i=0;i<x-1;i++) for(j=0;j<y-1;j++) if(m[i][j]==BLOCKED && m[i+1][j]==BLOCKED && m[i][j+1]==BLOCKED && m[i+1][j+1]==BLOCKED) {
+		drawsolidcell32(i,j,DARKRED32);
+		drawsolidcell32(i,j+1,DARKRED32);
+		drawsolidcell32(i+1,j,DARKRED32);
+		drawsolidcell32(i+1,j+1,DARKRED32);
+	}
+	if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
+	SDL_UpdateRect(screen,0,0,resx,resy);
+	cleanupbfs();
 }
 
 static void showverify() {
