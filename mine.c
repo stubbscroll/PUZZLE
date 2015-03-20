@@ -200,7 +200,8 @@ static void domove(int cellx,int celly,int val,int visible) {
 /* trivial overestimate: return sum of unsatisfied numbers */
 /* overestimate doesn't care about unfilled cells not adjacent to
    numbers! */
-/* keep this code in case the better overestimate is incorrect */
+/* keep this routine in case the better overestimate is incorrect */
+/*
 static int trivialoverestimate() {
 	int est=0,i,j,unfilled,empty,mine;
 	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]>-1) {
@@ -209,9 +210,11 @@ static int trivialoverestimate() {
 	}
 	return est;
 }
+*/
 
 /* trivial underestimate: return max of unsatisfied numbers */
-/* keep this code in case the better underestimate is incorrect */
+/* keep this routine in case the better underestimate is incorrect */
+/*
 static int trivialunderestimate() {
 	int maks=0,i,j,unfilled,empty,mine;
 	for(i=0;i<x;i++) for(j=0;j<y;j++) if(m[i][j]>-1) {
@@ -220,6 +223,7 @@ static int trivialunderestimate() {
 	}
 	return maks;
 }
+*/
 
 /* overestimate: find the sum of all unsatisfied numbered cells,
    then find the number of numbered neighbours of each unfilled cell.

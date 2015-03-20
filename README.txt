@@ -287,6 +287,7 @@ A: This is an homage to the Engrish tradition of many Japanese games.
 
 Programming by Ruben Spaans
 Font by Brian Raiter
+        unknown (CyrillicHelvet_Medium from ufonts.com)
 
 Puzzles by:
 

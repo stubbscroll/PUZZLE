@@ -190,8 +190,8 @@ static void updateedge(int u,int v,Uint32 col) {
   if(isdown) drawrectangle32(startx+u*width+x1,starty+v*height+y1,startx+u*width+x2-1,starty+(v+1)*height-1,col);
 }
 
-/*  draw number and arrow */
-/*  TODO draw nice arrows with scaled arrowhead */
+/* draw number and arrow */
+/* TODO draw nice arrows with scaled arrowhead */
 static void drawarrownumber(int u,int v,int num,int dir,Uint32 col,Uint32 bk) {
   char s[16]={0,0};
   sprintf(s,"%d",num);

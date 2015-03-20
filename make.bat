@@ -1,1 +1,1 @@
-gcc -O3 -Wall -std=c99 -pedantic -o puzzle.exe puzzle.c graphic.c dir.c menu.c mortal.c kuromasu.c nurikabe.c akari.c heyawake.c hitori.c picross.c slither.c masyu.c hashi.c yajilin.c mine.c sdlfont.c -lmingw32 -lsdlmain -lsdl -lsdl_mixer -Wl,--subsystem,windows
+gcc -O3 -Wall -std=c99 -pedantic -o puzzle.exe puzzle.c graphic.c dir.c menu.c mortal.c kuromasu.c nurikabe.c akari.c heyawake.c hitori.c picross.c slither.c masyu.c hashi.c yajilin.c mine.c sdlfont.c -lmingw32 -lsdlmain -lsdl -lfreetype -Wl,--subsystem,windows

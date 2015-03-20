@@ -975,38 +975,38 @@ static void level5combinationprocess(int regno) {
   return;
 }
 
-/*  i don't remember why i ended up using level3btr instead. it looks inferior,
-    since it plots cells directly instead of using domove. */
+/* i don't remember why i ended up using level3btr instead. it looks inferior,
+   since it plots cells directly instead of using domove. */
 static void level5btr(int regno,int at,int left,void (*callback)(int)) {
-  int cx=regx[regs[regno]+at],cy=regy[regs[regno]+at],count,i,val;
-  if(at==REGSIZE(regno)) {
-    if(!left) (*callback)(regno);
-    return;
-  }
-  if(left>REGSIZE(regno)-at) return;
-  if(m[cx][cy]!=UNFILLED) { level5btr(regno,at+1,left,callback); return; }
-  /*  blocked */
-  if(left && !hasadjacentblocked(cx,cy)) {
-    domove(cx,cy,BLOCKED);
-    if(!surrounded1x1(cx-1,cy) && !surrounded1x1(cx+1,cy) && !surrounded1x1(cx,cy-1) && !surrounded1x1(cx,cy+1))
-      level5btr(regno,at+1,left-1,callback);
-    undo(0);
-  }
-  for(count=i=0;i<4;i++) {
-    val=readcell(cx+dx[i],cy+dy[i]);
-    if(val==OUTOFBOUNDS || val==BLOCKED) count++;
-  }
-  if(count<4) {
-    domove(cx,cy,EMPTY);
-    level5btr(regno,at+1,left,callback);
-    undo(0);
-  }
+	int cx=regx[regs[regno]+at],cy=regy[regs[regno]+at],count,i,val;
+	if(at==REGSIZE(regno)) {
+		if(!left) (*callback)(regno);
+		return;
+	}
+	if(left>REGSIZE(regno)-at) return;
+	if(m[cx][cy]!=UNFILLED) { level5btr(regno,at+1,left,callback); return; }
+	/* blocked */
+	if(left && !hasadjacentblocked(cx,cy)) {
+		domove(cx,cy,BLOCKED);
+		if(!surrounded1x1(cx-1,cy) && !surrounded1x1(cx+1,cy) && !surrounded1x1(cx,cy-1) && !surrounded1x1(cx,cy+1))
+			level5btr(regno,at+1,left-1,callback);
+		undo(0);
+	}
+	for(count=i=0;i<4;i++) {
+		val=readcell(cx+dx[i],cy+dy[i]);
+		if(val==OUTOFBOUNDS || val==BLOCKED) count++;
+	}
+	if(count<4) {
+		domove(cx,cy,EMPTY);
+		level5btr(regno,at+1,left,callback);
+		undo(0);
+	}
 }
 
 static int level5combination(int comb) {
   int i,n,c,ok=0,l,k;
   for(i=0;i<regn;i++) if(regnum[i]>-1) {
-    /*  don't search region if it is complete */
+    /* don't search region if it is complete */
     n=REGSIZE(i)-regblock[i]-regempty[i];
     if(n<1) continue;
     if(n>=MAXP) continue;

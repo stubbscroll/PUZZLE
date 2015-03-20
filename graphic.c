@@ -4,6 +4,8 @@
 #include <stdarg.h>
 #include <string.h>
 #include <sys/time.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include "puzzle.h"
 #include "sdlfont.h"
 
@@ -56,6 +58,10 @@ static int videoflags;
 
 SDL_Surface *screen;
 sdl_font *font;
+
+FT_Library library;                   /* TTF font stuff */
+FT_Face face;
+int fontsize;                         /* size of current ttf font, or 0 if set char size failed */
 
 int width,height;                     /* size of cell (including line) */
 int startx,starty;                    /* top left of grid area */
@@ -241,9 +247,15 @@ void initgr() {
 	memset(keys,0,sizeof(keys));
 	memset(mousebuttons,0,sizeof(mousebuttons));
 	if(!(font=sdl_font_load("font.bmp"))) error("error loading font.");
+	if(FT_Init_FreeType(&library)) error("error initializing ttf font.");
+	if(FT_New_Face(library,"CyrillicHelvet_Medium.ttf",0,&face)) error("error loading ttf font.");
+//	if(FT_New_Face(library,"c:/windows/fonts/arial.ttf",0,&face)) error("error loading ttf font.");
+	fontsize=0;
 }
 
 void shutdowngr() {
+	FT_Done_Face(face);
+	FT_Done_FreeType(library);
 	sdl_font_free(font);
 	SDL_Quit();
 }
@@ -307,12 +319,47 @@ void drawcross(int u,int v,Uint32 bk,Uint32 col) {
 	}
 }
 
+void drawglyph(FT_Bitmap *bitmap,int x,int y, int minx,int miny,int maxx,int maxy,Uint32 col,Uint32 b) {
+	int i,j;
+	for(i=0;i<bitmap->width;i++) for(j=0;j<bitmap->rows;j++) {
+		if(i+x<minx || i+x>maxx || j+y<miny || j+y>maxy) continue;
+		drawpixel32(i+x,j+y,bitmap->buffer[i+j*bitmap->width]?col:b);
+	}
+}
+
+void drawtransparentglyph(FT_Bitmap *bitmap,int x,int y, int minx,int miny,int maxx,int maxy,Uint32 col) {
+	int i,j;
+	for(i=0;i<bitmap->width;i++) for(j=0;j<bitmap->rows;j++) {
+		if(i+x<minx || i+x>maxx || j+y<miny || j+y>maxy) continue;
+		if(bitmap->buffer[i+j*bitmap->width]) drawpixel32(i+x,j+y,col);
+	}
+}
+
 /* draw a number in cell x,y with custom border */
 void drawnumbercell32w(int u,int v,int num,Uint32 col,Uint32 col2,Uint32 b,int left,int up,int right,int down) {
+	int i,atx,aty,w;
+	char s[100];
 	drawrectangle32(startx+u*width+left,starty+v*height+up,
 	                startx+(u+1)*width-1-right,starty+(v+1)*height-1-down,b);
-	sdl_font_printf(screen,font,startx+u*width+left+1,starty+v*height+up+1,col,
-	                col2,"%d",num);
+	if(!fontsize)
+		sdl_font_printf(screen,font,startx+u*width+left+1,starty+v*height+up+1,col,
+		                col2,"%d",num);
+	else {
+		sprintf(s,"%d",num);
+		for(aty=w=i=0;s[i];i++) {
+			if(FT_Load_Char(face,s[i],FT_LOAD_RENDER)) error("couldn't find glyph.");
+			if(!i) aty=starty+v*height+up+(height-face->glyph->bitmap.rows)/2;
+			w+=face->glyph->advance.x/64;
+		}
+		atx=startx+left+u*width+(width-w)/2;
+		if(atx<startx+left+u*width+1) atx=startx+left+u*width+1;
+		for(i=0;s[i];i++) {
+			if(FT_Load_Char(face,s[i],FT_LOAD_RENDER)) error("couldn't find glyph.");
+			drawglyph(&face->glyph->bitmap,atx,aty,startx+u*width+left+1,
+			          starty+v*height+up+1,startx+(u+1)*width-2-right,starty+(v+1)*height-2-down,col,b);
+			atx+=face->glyph->advance.x/64;
+		}
+	}
 }
 
 /* draw a number in cell x,y */
@@ -373,6 +420,14 @@ void updatescale(int resx,int resy,int x,int y,int thick) {
 	height=(resy-thick-1)/y;
 	if((int)(width/aspectratio)<height) height=(int)(width/aspectratio);
 	if((int)(width/aspectratio)>height) width=(int)(height*aspectratio);
+	fontsize=height;
+	if(fontsize>width/1.6) fontsize=width/1.6;
+//	fontsize-=2;
+	if(fontsize<5) fontsize=5;
+	if(FT_Set_Char_Size(face,0,fontsize*64,100,100)) {
+		logprintf("failed to set font size, falling back to old font.\n");
+		fontsize=0;
+	}
 }
 
 /* return cell coordinates underneath mouse coordinates */

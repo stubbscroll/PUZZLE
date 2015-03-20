@@ -15,4 +15,5 @@ v1.5 (in progress)
 
 - showverify in heyawake, hitori and kuromasu ignores unfilled now
 - 1 puzzle type added (mortal coil)
+- resizable fonts in all puzzles except hashiwokakero and yajilin
 - ? puzzles
