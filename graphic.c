@@ -348,11 +348,12 @@ void drawnumbercell32w(int u,int v,int num,Uint32 col,Uint32 col2,Uint32 b,int l
 		sprintf(s,"%d",num);
 		for(aty=w=i=0;s[i];i++) {
 			if(FT_Load_Char(face,s[i],FT_LOAD_RENDER)) error("couldn't find glyph.");
-			if(!i) aty=starty+v*height+up+(height-face->glyph->bitmap.rows)/2;
+			if(!i) aty=starty+v*height+up+(height-face->glyph->bitmap.rows)/2-2;
 			w+=face->glyph->advance.x/64;
 		}
-		atx=startx+left+u*width+(width-w)/2;
+		atx=startx+left+u*width+(width-w)/2-2;
 		if(atx<startx+left+u*width+1) atx=startx+left+u*width+1;
+		if(aty<starty+up+v*height+1) aty=starty+up+v*height+1;
 		for(i=0;s[i];i++) {
 			if(FT_Load_Char(face,s[i],FT_LOAD_RENDER)) error("couldn't find glyph.");
 			drawglyph(&face->glyph->bitmap,atx,aty,startx+u*width+left+1,
