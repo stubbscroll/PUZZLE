@@ -123,6 +123,7 @@ static int ispuzzle(char *s) {
 	if(strlen(s)>2 && !strncmp(s,"kur",3)) return 1;
 	if(strlen(s)>2 && !strncmp(s,"mas",3)) return 1;
 	if(strlen(s)>2 && !strncmp(s,"min",3)) return 1;
+	if(strlen(s)>2 && !strncmp(s,"num",3)) return 1;
 	if(strlen(s)>2 && !strncmp(s,"nur",3)) return 1;
 	if(strlen(s)>2 && !strncmp(s,"pic",3)) return 1;
 	if(strlen(s)>2 && !strncmp(s,"sli",3)) return 1;

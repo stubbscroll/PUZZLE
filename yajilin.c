@@ -868,7 +868,8 @@ static void level4tryallbtr(int x1,int y1,int d,int cx,int cy,int x2,int y2,int 
 static int level4tryallintervals() {
 	static int i=0,j=0;
 	int z=x*y,rem,x1,y1,x2,y2,xy=x>y?x:y,ok=0,k;
-	if(i>=x) i=0; if(j>=y) j=0;
+	if(i>=x) i=0;
+	if(j>=y) j=0;
 	while(z--) {
 		/* only continue if non-fulfilled arrow */
 		if(mn[i][j]<0 || st[i][j]) goto next;
@@ -911,7 +912,8 @@ static int level4tryallintervals() {
 static int level4findonlyokedge() {
 	static int i=0,j=0;
 	int z=x*y,d,okcount,okdir,x2,y2,e,added;
-	if(i>=x) i=0; if(j>=y) j=0;
+	if(i>=x) i=0;
+	if(j>=y) j=0;
 	while(z--) {
 		if(degree(i,j)!=1) goto next;
 		for(okdir=-1,okcount=d=0;d<4;d++) if(legaledge(i,j,d)==1) {
@@ -997,7 +999,8 @@ static void level5tryallbtr(int x1,int y1,int d,int cx,int cy,int x2,int y2,int 
 static int level5tryallintervals() {
 	static int i=0,j=0;
 	int z=x*y,rem,x1,y1,x2,y2,k,l,ok=0,o;
-	if(i>=x) i=0; if(j>=y) j=0;
+	if(i>=x) i=0;
+	if(j>=y) j=0;
 	while(z--) {
 		if(mn[i][j]<0 || st[i][j]) goto next;
 		rem=ptrnum[i][j];
@@ -1038,7 +1041,8 @@ static void updateresult() {
 static int level5tryallblank() {
 	static int i=0,j=0;
 	int z=x*y,k,l,o,oldsp=getstackpos(),ok=0,can[4],r;
-	if(i>=x) i=0; if(j>=y) j=0;
+	if(i>=x) i=0;
+	if(j>=y) j=0;
 	while(z--) {
 		if(mn[i][j]>-1 || !isempty(i,j) || degree(i,j)) goto next;
 		/* init */
@@ -1077,7 +1081,8 @@ static int level5tryallblank() {
 static int level5tryallloose() {
 	static int i=0,j=0;
 	int z=x*y,k,l,o,oldsp=getstackpos(),ok=0,r;
-	if(i>=x) i=0; if(j>=y) j=0;
+	if(i>=x) i=0;
+	if(j>=y) j=0;
 	while(z--) {
 		if(mn[i][j]>-1 || !isempty(i,j) || degree(i,j)!=1) goto next;
 		/* init */

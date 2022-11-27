@@ -235,6 +235,9 @@ static void processkeydown(int key) {
 			if(mn[i][j]==FILLED) mn[i][j]=UNFILLED;
 		}
 		up=1;
+		/* also set clicks and time to 0, because not doing so is stupid */
+		resetscore();
+		displayscore(x,y);
 	}
   if(up) updatetoscreen(1);
 }

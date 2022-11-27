@@ -76,9 +76,9 @@ int supported(char *s) {
 	if(!strcmp(s,"mas")) return 1;
 	if(!strcmp(s,"shi")) return 1;
 	if(!strcmp(s,"has")) return 1;
-	if(!strcmp(s,"num")) return 1;
 	if(!strcmp(s,"yaj")) return 1;
 	if(!strcmp(s,"rip")) return 1;
+	if(!strcmp(s,"num")) return 1;
 	return 0;
 }
 
@@ -289,12 +289,12 @@ void parsenumberlink(FILE *f,int x,int y) {
 	char t[100];
 	int i,j,k;
 	for(j=0;j<y;j++) {
-		EAT
 		for(i=0;i<x;i++) {
 			GRAB EAT
 			fprintf(f,"%c",convtall0(strtol(t,NULL,10)));
 		}
 		fprintf(f,"\n");
+		EAT
 	}
 }
 
@@ -525,6 +525,7 @@ int supportedjanko(char *s) {
 	if(!strcmp(s,"yaj")) return 1;
 	if(!strcmp(s,"min")) return 1;
 	if(!strcmp(s,"kur")) return 1;
+	if(!strcmp(s,"num")) return 1;
 	return 0;
 }
 
@@ -543,7 +544,10 @@ void find3(char *s,char *t) {
 	} else if(!strcmp(s,"yajilin")) strcpy(t,"yaj");
 	else if(!strcmp(s,"minesweeper")) strcpy(t,"min");
 	else if(!strcmp(s,"kuromasu")) strcpy(t,"kur");
-	else printf("[%s] not found\n",s);
+	else if(!strcmp(s,"arukone")) {
+		strcpy(t,"num");
+		strcpy(s,"numberlink");
+	} else printf("[%s] not found\n",s);
 }
 
 void sleepms(int ms) {
@@ -597,41 +601,47 @@ char *yajcode(int val) {
 	return s;
 }
 
+/* find start of next token */
+char *findnexttoken(char *p) {
+	while(*p && isspace(*p)) p++;
+	return p;
+}
+
 void parsejankonur(FILE *f,char *p3,int x,int y) {
+	const char *findproblem="problem";
 	char find[256],*p=buffer;
 	int i,j;
-	for(i=1;i<=y;i++) {
-		sprintf(find,"name=\"p%d\" value=\"",i);
-		p=strstr(p,find);
-		if(!p) { printf("error parsing nurikabe %s\n",find); exit(1); }
-		p+=strlen(find);
+	p=strstr(p,"<script id=");
+	if(!p) { printf("error parsing nurikabe %s\n",find); exit(1); }
+	p=strstr(p,findproblem);
+	if(!p) { printf("error parsing nurikabe %s\n",find); exit(1); }
+	p+=strlen(findproblem);
+	for(i=0;i<y;i++) {
 		for(j=0;j<x;j++) {
-			if(*p=='-') fprintf(f,"."),p+=2;
-			else {
-				fprintf(f,"%s",numcode(parsenum(p)));
-				p=afternum(p)+1;
-			}
+			p=findnexttoken(p);
+			fprintf(f,"%s",numcode(parsenum(p)));
+			while(isdigit(*p) || *p=='-') p++;
 		}
 		fprintf(f,"\n");
 	}
 }
 
 void parsejankoaka(FILE *f,char *p3,int x,int y) {
+	const char *findproblem="problem";
 	char find[256],*p=buffer;
 	int i,j;
-	for(i=1;i<=y;i++) {
-		sprintf(find,"name=\"p%d\" value=\"",i);
-		p=strstr(p,find);
-		if(!p) { printf("error parsing akari %s\n",find); exit(1); }
-		p+=strlen(find);
+	p=strstr(p,"<script id=");
+	if(!p) { printf("error parsing nurikabe %s\n",find); exit(1); }
+	p=strstr(p,findproblem);
+	if(!p) { printf("error parsing nurikabe %s\n",find); exit(1); }
+	p+=strlen(findproblem);
+	for(i=0;i<y;i++) {
 		for(j=0;j<x;j++) {
-			if(*p=='-') fprintf(f,"."),p+=2;
-			else if(*p=='x') fprintf(f,"#"),p+=2;
-			else if(*p=='ß') fprintf(f,"0"),p+=2;
-			else {
-				fprintf(f,"%c",*p);
-				p+=2;
-			}
+			p=findnexttoken(p);
+			if(*p=='x') fprintf(f,"#");
+			else if(*p=='-') fprintf(f,".");
+			else fprintf(f,"%c",*p);
+			p++;
 		}
 		fprintf(f,"\n");
 	}
@@ -713,16 +723,19 @@ void parsejankomin(FILE *f,char *p3,int x,int y) {
 }
 
 void parsejankohas(FILE *f,char *p3,int x,int y) {
+	const char *findproblem="problem";
 	char find[256],*p=buffer;
 	int i,j;
-	for(i=1;i<=y;i++) {
-		sprintf(find,"name=\"p%d\" value=\"",i);
-		p=strstr(p,find);
-		if(!p) { printf("error parsing hashiwokakero %s\n",find); exit(1); }
-		p+=strlen(find);
+	p=strstr(p,"<script id=");
+	if(!p) { printf("error parsing hashiwokakero %s\n",find); exit(1); }
+	p=strstr(p,findproblem);
+	if(!p) { printf("error parsing hashiwokakero %s\n",find); exit(1); }
+	p+=strlen(findproblem);
+	for(i=0;i<y;i++) {
 		for(j=0;j<x;j++) {
-			if(*p=='-') fprintf(f,"."),p+=2;
-			else fprintf(f,"%c",*p),p+=2;
+			p=findnexttoken(p);
+			fprintf(f,"%s",numcode(parsenum(p)));
+			while(isdigit(*p) || *p=='-') p++;
 		}
 		fprintf(f,"\n");
 	}
@@ -830,27 +843,30 @@ char *heycode(int val) {
 }
 
 void parsejankohey(FILE *f,char *p3,int x,int y) {
-	char find[256],*p=buffer,*res,*q;
+	const char *findproblem="problem";
+	const char *findareas="areas";
+	char find[256],*p=buffer,*res;
 	static char g[256][256];
 	static char reg[256][256][16];
 	char build[256];
 	int i,j,k;
+	p=strstr(p,"<script id=");
+	if(!p) { printf("error parsing heyawake %s\n",find); exit(1); }
+	p=strstr(p,findareas);
+	if(!p) { printf("error parsing heyawake %s\n",find); exit(1); }
+	p+=strlen(findareas);
 	for(i=0;i<=x*2;i++) for(j=0;j<=y*2;j++) g[j][i]='.';
 	for(i=0;i<=y*2;i++) g[i][x*2+1]=0;
 	for(i=0;i<=y*2;i++) g[i][0]=g[i][x*2]='|';
 	for(i=0;i<=x*2;i++) g[0][i]=g[y*2][i]='-';
 	g[0][0]=g[0][x*2]=g[y*2][0]=g[y*2][x*2]='+';
 	for(j=0;j<y;j++) {
-		sprintf(find,"name=\"a%d\" value=\"",j+1);
-		p=strstr(p,find);
-		if(!p) { printf("error parsing heyawake %s\n",find); exit(1); }
-		p+=strlen(find);
 		for(i=0;i<x;i++) {
+			p=findnexttoken(p);
 			k=0;
-			while(*p!=' ' && *p!='"') build[k++]=*(p++);
+			while(*p!=' ' && *p!=13 && *p!=10) build[k++]=*(p++);
 			build[k]=0;
 			strcpy(reg[j][i],build);
-			while(*p==' ') p++;
 		}
 	}
 	/* generate grid lines */
@@ -877,28 +893,45 @@ void parsejankohey(FILE *f,char *p3,int x,int y) {
 		}
 	}
 	p=buffer;
+	p=strstr(p,"<script id=");
+	if(!p) { printf("error parsing heyawake %s\n",find); exit(1); }
+	p=strstr(p,findproblem);
+	if(!p) { printf("error parsing heyawake %s\n",find); exit(1); }
+	p+=strlen(findproblem);
 	for(j=0;j<y;j++) {
-		sprintf(find,"name=\"p%d\" value=\"",j+1);
-		q=strstr(p,find);
-		if(!q) {
-			sprintf(find,"name=\"s%d\" value=\"",j+1);
-			q=strstr(p,find);
-			if(!q) { printf("error parsing heyawake %s\n",find); exit(1); }
-		}
-		p=q;
-		p+=strlen(find);
 		for(i=0;i<x;i++) {
-			if(*p=='-') p+=2;
-			else if(*p=='x') p+=2;
+			p=findnexttoken(p);
+			if(*p=='-') p++;
+			else if(*p=='x') p++;
 			else {
 				res=heycode(parsenum(p));
 				g[j*2+1][i*2+1]=res[0];
 				if(res[0]=='{') printf("warning, edit in %s later\n",res);
 				p=afternum(p)+1;
-			} 
+			}
 		}
 	}
 	for(i=0;i<=y*2;i++) fprintf(f,"%s\n",g[i]);
+}
+
+/* arukone (numberlink) */
+void parsejankonum(FILE *f,char *p3,int x,int y) {
+	const char *findproblem="problem";
+	char find[256],*p=buffer;
+	int i,j;
+	p=strstr(p,"<script id=");
+	if(!p) { printf("error parsing numberlink %s\n",find); exit(1); }
+	p=strstr(p,findproblem);
+	if(!p) { printf("error parsing numberlink %s\n",find); exit(1); }
+	p+=strlen(findproblem);
+	for(i=0;i<y;i++) {
+		for(j=0;j<x;j++) {
+			p=findnexttoken(p);
+			fprintf(f,"%s",numcode(parsenum(p)));
+			while(isdigit(*p) || *p=='-') p++;
+		}
+		fprintf(f,"\n");
+	}
 }
 
 void parsejankopuzzle(FILE *f,char *p3,int x,int y) {
@@ -913,16 +946,17 @@ void parsejankopuzzle(FILE *f,char *p3,int x,int y) {
 	else if(!strcmp(p3,"yaj")) parsejankoyaj(f,p3,x,y);
 	else if(!strcmp(p3,"min")) parsejankomin(f,p3,x,y);
 	else if(!strcmp(p3,"kur")) parsejankokur(f,p3,x,y);
+	else if(!strcmp(p3,"num")) parsejankonum(f,p3,x,y);
 	else return;
 	num++;
 }
 
 void grabjanko(char *theurl,char *p3,int tot,char *puzzle) {
 	char filename[32],paste[64],author[256],*p,diffstr[128];
-	const char *findauthor="author\" value=\"";
-	const char *findxsize="cols\" value=\"";
-	const char *findysize="rows\" value=\"";
-	const char *findsize="size\" value=\"";
+	const char *findauthor="author ";
+	const char *findxsize="cols ";
+	const char *findysize="rows ";
+	const char *findsize="size ";
 	static char url[STR];
 	int grabnum,i,x,y;
 	FILE *f;
@@ -934,7 +968,7 @@ void grabjanko(char *theurl,char *p3,int tot,char *puzzle) {
 		sprintf(paste,"%03d.a.htm",grabnum);
 		strcat(url,paste);
 		loadwebpage(url,buffer);
-		if(!strstr(buffer,"<data id=\"data\"")) { printf("error loading %s %d [%s]\n",p3,grabnum,url); continue; }
+		if(!strstr(buffer,"<script id=\"data\"")) { printf("error loading %s %d [%s]\n",p3,grabnum,url); continue; }
 		f=fopen(filename,"w");
 		if(!f) continue;
 		/* find author */
@@ -942,7 +976,7 @@ void grabjanko(char *theurl,char *p3,int tot,char *puzzle) {
 		if(!p) strcpy(author,"{unknown}");
 		else {
 			p+=strlen(findauthor);
-			for(i=0;p[i] && p[i]!='"';i++) author[i]=p[i];
+			for(i=0;p[i] && p[i]!='"' && p[i]!=13 && p[i]!=10;i++) author[i]=p[i];
 			author[i]=0;
 		}
 		/* find x,y size */
@@ -957,7 +991,7 @@ void grabjanko(char *theurl,char *p3,int tot,char *puzzle) {
 		p+=strlen(findxsize);
 		x=parsenum(p);
 		p=strstr(buffer,findysize);
-		if(!p) { printf("error, couldn't find size\n"); fclose(f); remove(filename); continue; }
+		if(!p) { printf("error, couldn't find ysize\n"); fclose(f); remove(filename); continue; }
 		p+=strlen(findysize);
 		y=parsenum(p);
 		if(x>100 || y>100) {

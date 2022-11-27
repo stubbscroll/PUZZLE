@@ -391,7 +391,8 @@ static int level2hint() {
 static int level3contradiction() {
 	static int i=0,j=0;
 	int z=x*y,r;
-	if(i>=x) i=0; if(j>=y) j=0;
+	if(i>=x) i=0;
+	if(j>=y) j=0;
 	while(z--) {
 		if(m[i][j]!=UNFILLED) goto next;
 		domove(i,j,BLOCKED,0);
@@ -429,7 +430,8 @@ static int level4tryall() {
 	static int i=0,j=0,try[4][MAXS],tryn[4],has3[MAXS];
 	int z=x*y,len[4],max[4],min[4],k,l,x2,y2,oldsp=getstackpos(),w;
 	int can[4],r,ok=0;
-	if(i>=x) i=0; if(j>=y) j=0;
+	if(i>=x) i=0;
+	if(j>=y) j=0;
 	while(z--) {
 		if(m[i][j]<0) goto next;
 		/* must be at least 2 unfinished directions */
@@ -543,7 +545,8 @@ static int level5tryall() {
 	static int i=0,j=0,try[4][MAXS],tryn[4],has3[MAXS];
 	int z=x*y,len[4],max[4],min[4],k,l,x2,y2,oldsp=getstackpos(),w;
 	int can[4],ok=0;
-	if(i>=x) i=0; if(j>=y) j=0;
+	if(i>=x) i=0;
+	if(j>=y) j=0;
 	while(z--) {
 		if(m[i][j]<0) goto next;
 		/* must be at least 2 unfinished directions */

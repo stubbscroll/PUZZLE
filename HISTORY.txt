@@ -11,9 +11,9 @@ v1.0 - 2012-08-23
 - menu screen
 - score tracking
 
-v1.5 (in progress)
+v1.5 - in progress last change on 2022-11-27)
 
 - showverify in heyawake, hitori and kuromasu ignores unfilled now
-- 1 puzzle type added (mortal coil)
+- 2 puzzle types added (mortal coil, numberlink)
 - resizable fonts in all puzzles except hashiwokakero and yajilin
 - ? puzzles

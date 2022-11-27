@@ -169,6 +169,7 @@ void yajilin(char *,int);
 void mine(char *,int);
 void kuromasu(char *,int);
 void mortal(char *,int);
+void numberlink(char *,int);
 
 /* launcher */
 void launch(char *,int);

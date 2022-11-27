@@ -1,17 +1,17 @@
-Puzzle collection v1.0 by Ruben Spaans, released in August 2012.
-Released under GPL v3.0.
+Puzzle collection v1.0 by stubbscroll, released in August 2012.
+Program released under GNU general public license v3.
 
 Web homes (all pages are identical):
 http://www.stubbscroll.com/puzzle.html
 http://www.pvv.org/~spaans/puzzle.html
 http://www.pvv.ntnu.no/~spaans/puzzle.html
 
-This is a collection of logic puzzle games. There are currently eleven games
+This is a collection of logic puzzle games. There are currently thirteen games
 implemented (Nurikabe, Akari (Light up), Heyawake, Hitori, Picross (Nonogram),
-Hashiwokakero, Masyu, Slitherlink, Yajilin, Minesweeper and Kuromaso),
-including a menu system with score tracking. The program should run on all
-desktop platforms capable of running a gcc C compiler and the SDl library.
-It is not yet tested on Mac systems.
+Hashiwokakero, Masyu, Slitherlink, Yajilin, Minesweeper, Kuromaso, Mortal Coil
+and Numberlink), including a menu system with score tracking. The program
+should run on all desktop platforms capable of running a gcc C compiler and
+the SDl library. It is not yet tested on Mac systems.
 
 Future plans include (in no specific order):
 - resizable numbers and images for the puzzles
@@ -277,16 +277,15 @@ Default control:
 - left mouse button to place coil (on empty board)
 - when coil exists: left mouse button or arrow keys to move in a direction
 
-==== Frequently asked questions (F.A.Q.) =====================================
+==== How to play - Numberlink ================================================
 
-Q: The message "You are winner!" that occurs when I complete a puzzle is not
-   grammatically correct!
-A: This is an homage to the Engrish tradition of many Japanese games.
+Draw lines between similar numbers
+TODO
 
 ==== Credits =================================================================
 
 Programming by Ruben Spaans
-Font by Brian Raiter
+Font by Brian Raiter (from Tile World)
         unknown (CyrillicHelvet_Medium from ufonts.com)
 
 Puzzles by:
@@ -351,4 +350,4 @@ ooya
 
 I have tried to only use puzzles released under a free licence. If you find
 any puzzles that I don't have permission to use, please send a mail to
-spaans@pvv.org and inform me, and I'll remove it.
+spaans at pvv.org and inform me, and I'll remove it.

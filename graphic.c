@@ -202,8 +202,8 @@ static void initinifile() {
 		else if(!strcmp(t,"puzzlepath")) {
 			maks=strlen(u);
 			if(maks>MAXPATH-1) maks=MAXPATH-1;
-			strncpy(puzzlepath,u,maks);
-			puzzlepath[maks]=0;
+			u[maks]=0;
+			strcpy(puzzlepath,u);
 		}
 	}
 	fclose(f);
@@ -737,4 +737,5 @@ void launch(char *s,int autosolve) {
 	else if(t[0]=='m' && t[1]=='i' && t[2]=='n') mine(s,autosolve);
 	else if(t[0]=='k' && t[1]=='u' && t[2]=='r') kuromasu(s,autosolve);
 	else if(t[0]=='m' && t[1]=='o' && t[2]=='r') mortal(s,autosolve);
+	else if(t[0]=='n' && t[1]=='u' && t[2]=='m') numberlink(s,autosolve);
 }

@@ -426,7 +426,8 @@ static int level2tryallinterference() {
 	int z=x*y,unfilled,empty,mine,need,d,minemask,emptymask,u2,e2,m2;
 	int ex[8],ey[8],e,x2,y2,k,l,curm,cure,mask;
 	static int i=0,j=0;
-	if(i>=x) i=0; if(j>=y) j=0;
+	if(i>=x) i=0;
+	if(j>=y) j=0;
 	while(z--) {
 		if(m[i][j]<0) goto next;
 		count(i,j,&unfilled,&empty,&mine);
@@ -515,7 +516,8 @@ static int level5tryallways() {
 	static int i=0,j=0;
 	int z=x*y,k,l,unfilled,empty,mine,e,d,ex[8],ey[8],x2,y2,mask,need;
 	int oldsp=getstackpos(),ok=0;
-	if(i>=x) i=0; if(j>=y) j=0;
+	if(i>=x) i=0;
+	if(j>=y) j=0;
 	while(z--) {
 		if(m[i][j]<0) goto next;
 		count(i,j,&unfilled,&empty,&mine);

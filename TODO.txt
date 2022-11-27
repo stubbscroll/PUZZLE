@@ -5,17 +5,13 @@ planned stuff for v1.0:
 - add instructions and credits in readme
 
 planned stuff for v1.5:
+- in heyawake, make blue brighter, it's hard to distinguish from black (and
+  check the result both with and without f.lux!)
 - in-game instructions
 - in-game credits
 - resizable numbers for display in puzzles
-  - make a collection of non-horizontal line segments and circle arcs.
-    try to describe each letter with as few segments as possible. stupid
-    algorithm for rendering: for each pixel, loop through each segment
-    and count the number of segments to the left of the current pixel.
-    if there's an odd number of segments, the pixel is font, otherwise it's
-    background. warning, runtime is x*y*lines.
-    arrows for yajilin are also needed, as well as symbols for future games.
-    or maybe read in knuth-metafont and pick up ideas
+  - not yet done for hashiwokakero (easy to add) and yajilin (not easy to add).
+    yajilin also needs better-looking arrows
 - kuromasu: centered number in circle
 - yajilin: nice resizable arrows
 - some more games (see long list below)

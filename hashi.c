@@ -225,8 +225,10 @@ static void updatecell(int u,int v,int col,Uint32 ourfilled,Uint32 ouredge) {
   int y1=(height-edgethick)/2,y2=(height-2*edgethick2-2)/2,y3=(height-3)/2;
   double ww=width-3<width*0.8?width-3:width*0.8,w=width<height?width*.48:height*.48;
   char s[2]={0,0};
-  if(x1<1) x1=1; if(y1<1) y1=1;
-  if(x2<1) x2=1; if(y2<1) y2=1;
+  if(x1<1) x1=1;
+	if(y1<1) y1=1;
+  if(x2<1) x2=1;
+	if(y2<1) y2=1;
   if(ww<0) ww=w*0.7; else ww*=.5;
   if(mn[u][v]) {
     /*  numbered cell */
@@ -548,7 +550,8 @@ static int dogreedy(int lev) {
 static int level5brutemin(int lev) {
   static int i=0,j=0;
   int z=x*y,a[4],k,a1,a2,a3,a0,num,r,l,v,ok=0,oldsp=getstackpos();
-	if(i>=x) i=0; if(j>=y) j=0;
+	if(i>=x) i=0;
+	if(j>=y) j=0;
   while(z--) {
     if(!mn[i][j] || mn[i][j]==numedges(i,j)) goto increase;
     num=numedges(i,j);
